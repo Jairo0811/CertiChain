@@ -96,15 +96,16 @@ Esta continuidad docente muestra una evolución formativa desde fundamentos de d
 
 ### 🏫 Cruce institucional ITLA → UNAPEC
 
-CertiChain también documenta un cruce institucional entre **ITLA** y **UNAPEC**. Tres integrantes del equipo académico original cuentan con trayectoria previa en ITLA y posteriormente convergieron en este proyecto en UNAPEC.
+CertiChain también documenta un cruce institucional entre **ITLA** y **UNAPEC**. Cuatro integrantes del equipo académico original cuentan con trayectoria previa en ITLA y posteriormente convergieron en este proyecto en UNAPEC.
 
 | Integrante | Matrícula UNAPEC | Matrícula ITLA | Relación documentada |
 |---|---|---|---|
 | **Francis Jairo Matías Rosario** | **A00115261** | **2015-2984** | ITLA → UNAPEC |
+| **Enmanuel Alberto Arias de Jesus** | **A00117358** | **2019-7415** | ITLA → UNAPEC; coincidencia posterior en CertiChain |
 | **Jenrry Monegro Rosario** | **A00116621** | **2019-8690** | ITLA → UNAPEC; coincidencia posterior en CertiChain |
 | **Pieranyela José Carrasco Rodríguez** | **A00116415** | **2019-8767** | ITLA → UNAPEC; coincidencia posterior en CertiChain |
 
-Este cruce se documenta como **trayectoria institucional compartida**, no como continuidad por asignaturas cursadas conjuntamente en ITLA. Con la información disponible no se establece que Francis Jairo Matías Rosario haya coincidido en una misma materia de ITLA con Jenrry Monegro Rosario o Pieranyela José Carrasco Rodríguez.
+Este cruce se documenta como **trayectoria institucional compartida**, no como continuidad por asignaturas cursadas conjuntamente en ITLA. Con la información disponible no se establece que Francis Jairo Matías Rosario haya coincidido en una misma materia de ITLA con Enmanuel Alberto Arias de Jesus, Jenrry Monegro Rosario o Pieranyela José Carrasco Rodríguez.
 
 La convergencia académica confirmada entre estos integrantes ocurre en **CertiChain (ISO-915, Septiembre - Diciembre 2025)** en UNAPEC.
 
