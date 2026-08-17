@@ -1,7 +1,10 @@
 import { ethers } from "hardhat";
 
 async function main() {
-  const [deployer] = await ethers.getSigners();
+  const signers = await ethers.getSigners();
+  const deployer = signers[0];
+  if (!deployer) throw new Error("No deployer signer is available");
+
   const Registry = await ethers.getContractFactory("CertificateRegistry");
   const registry = await Registry.deploy(deployer.address);
   await registry.waitForDeployment();
