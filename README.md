@@ -8,8 +8,6 @@
   <img src="https://img.shields.io/badge/Blockchain-Ethereum%20%2F%20Polygon-7C3AED?style=for-the-badge&logo=ethereum&logoColor=white" alt="Ethereum / Polygon">
 </p>
 
-<h1 align="center">🎓⛓️ CertiChain</h1>
-
 <p align="center"><strong>Sistema de Certificados Académicos con Blockchain</strong></p>
 
 <p align="center">
