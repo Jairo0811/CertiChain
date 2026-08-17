@@ -1,0 +1,6 @@
+{
+  "name": "@certichain/blockchain",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CertiChain smart contracts and blockchain tooling"
+}
