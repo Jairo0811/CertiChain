@@ -56,7 +56,7 @@ CertiChain forma parte de una línea de proyectos académicos desarrollados en U
 | Orden | Asignatura | Proyecto | Período | Profesor |
 |---:|---|---|---|---|
 | 1 | Bases de Datos 1 (**INF-164**) | [**NutriFlow**](https://github.com/Jairo0811/NutriFlow) | Mayo - Agosto 2024 | **Ing. Pedro José Ramirez Rodriguez** |
-| 2 | Fundamentos de Seguridad de Software (**ISO-915**) | **CertiChain** | 2024-2025 | **Ing. Pedro José Ramirez Rodriguez** |
+| 2 | Fundamentos de Seguridad de Software (**ISO-915**) | **CertiChain** | Septiembre - Diciembre 2025 | **Ing. Pedro José Ramirez Rodriguez** |
 | 3 | Desarrollo de Software con Tecnología Propietaria 2 (**ISO-710**) | [**Digital Sanctuary**](https://github.com/Jairo0811/DigitalSanctuary) | Mayo - Agosto 2026 | **Ing. Pedro José Ramirez Rodriguez** |
 
 Esta continuidad es **académica y docente**: los proyectos son independientes, pertenecen a asignaturas diferentes y documentan distintas etapas de formación en desarrollo de software.
