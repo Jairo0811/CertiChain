@@ -7,6 +7,7 @@ import { z } from "zod";
 import { certificateRegistry } from "./blockchain.js";
 import { config } from "./config.js";
 import { AuthUser, CertificateRecord } from "./domain.js";
+import { maskPersonName, rateLimit, requestSecurity } from "./security.js";
 import { store } from "./store.js";
 
 declare global {
@@ -78,9 +79,14 @@ async function audit(actor: string, action: Parameters<typeof store.appendAudit>
 export function createApp() {
   const app = express();
   app.disable("x-powered-by");
-  app.use(helmet());
-  app.use(cors({ origin: config.CORS_ORIGIN }));
-  app.use(express.json({ limit: "256kb" }));
+  app.set("trust proxy", 1);
+  app.use(helmet({ crossOriginResourcePolicy: { policy: "same-site" } }));
+  app.use(requestSecurity);
+  app.use(cors({ origin: config.CORS_ORIGIN, methods: ["GET", "POST"], allowedHeaders: ["Content-Type", "Authorization", "X-Request-Id"] }));
+  app.use(express.json({ limit: "128kb", strict: true }));
+  app.use("/api", rateLimit({ windowMs: 60_000, max: 120 }));
+  app.use("/api/auth", rateLimit({ windowMs: 15 * 60_000, max: 20 }));
+  app.use("/api/verify", rateLimit({ windowMs: 60_000, max: 40 }));
 
   app.get("/health", (_req, res) => {
     res.json({ status: "ok", blockchainConfigured: certificateRegistry.configured });
@@ -180,7 +186,7 @@ export function createApp() {
       certificate: {
         id: certificate.id,
         blockchainId: certificate.blockchainId,
-        studentName: certificate.studentName,
+        studentName: maskPersonName(certificate.studentName),
         title: certificate.title,
         institution: certificate.institution,
         issuedAt: certificate.issuedAt,
