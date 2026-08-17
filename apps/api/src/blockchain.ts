@@ -49,14 +49,15 @@ class EthersCertificateRegistryClient implements CertificateRegistryClient {
   }
 
   async issue(studentWallet: string, documentHash: string, metadataURI: string): Promise<BlockchainIssueResult> {
-    if (!this.contract) throw new Error("Blockchain integration is not configured");
-
-    const tx = await this.contract.issueCertificate(studentWallet, documentHash, metadataURI);
+    const contract = this.requireContract();
+    const issueCertificate = contract.getFunction("issueCertificate");
+    const tx = await issueCertificate(studentWallet, documentHash, metadataURI);
     const receipt = await tx.wait();
+
     const parsed = receipt?.logs
       .map((log: unknown) => {
         try {
-          return this.contract!.interface.parseLog(log as never);
+          return contract.interface.parseLog(log as never);
         } catch {
           return null;
         }
@@ -70,25 +71,32 @@ class EthersCertificateRegistryClient implements CertificateRegistryClient {
   }
 
   async revoke(certificateId: string): Promise<string> {
-    if (!this.contract) throw new Error("Blockchain integration is not configured");
-    const tx = await this.contract.revokeCertificate(certificateId);
+    const contract = this.requireContract();
+    const revokeCertificate = contract.getFunction("revokeCertificate");
+    const tx = await revokeCertificate(certificateId);
     await tx.wait();
     return tx.hash;
   }
 
   async verify(certificateId: string, documentHash: string): Promise<BlockchainVerificationResult> {
-    if (!this.contract) throw new Error("Blockchain integration is not configured");
-    const result = await this.contract.verifyCertificate(certificateId, documentHash);
+    const contract = this.requireContract();
+    const verifyCertificate = contract.getFunction("verifyCertificate");
+    const result = await verifyCertificate.staticCall(certificateId, documentHash);
 
     return {
-      exists: result.exists,
-      active: result.active,
-      hashMatches: result.hashMatches,
-      issuer: result.issuer,
-      student: result.student,
+      exists: Boolean(result.exists),
+      active: Boolean(result.active),
+      hashMatches: Boolean(result.hashMatches),
+      issuer: String(result.issuer),
+      student: String(result.student),
       issuedAt: Number(result.issuedAt),
       revokedAt: Number(result.revokedAt),
     };
+  }
+
+  private requireContract(): Contract {
+    if (!this.contract) throw new Error("Blockchain integration is not configured");
+    return this.contract;
   }
 }
 
