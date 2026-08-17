@@ -2,8 +2,8 @@ import "@nomicfoundation/hardhat-toolbox";
 import "dotenv/config";
 import { HardhatUserConfig } from "hardhat/config";
 
-const sepoliaUrl = process.env.SEPOLIA_RPC_URL ?? "";
 const deployerKey = process.env.BLOCKCHAIN_PRIVATE_KEY ?? "";
+const accounts = deployerKey ? [deployerKey] : [];
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -17,8 +17,19 @@ const config: HardhatUserConfig = {
   },
   networks: {
     sepolia: {
-      url: sepoliaUrl,
-      accounts: deployerKey ? [deployerKey] : [],
+      url: process.env.SEPOLIA_RPC_URL ?? "",
+      accounts,
+      chainId: 11155111,
+    },
+    amoy: {
+      url: process.env.POLYGON_AMOY_RPC_URL ?? "",
+      accounts,
+      chainId: 80002,
+    },
+    polygon: {
+      url: process.env.POLYGON_RPC_URL ?? "",
+      accounts,
+      chainId: 137,
     },
   },
 };
