@@ -2,9 +2,9 @@
   <img src="https://img.shields.io/badge/UNAPEC-ISO--915-003B70?style=for-the-badge" alt="UNAPEC ISO-915">
 </p>
 
-
 <p align="center">
   <img src="https://img.shields.io/badge/Estado-En%20desarrollo-F59E0B?style=for-the-badge" alt="Estado: En desarrollo">
+  <img src="https://img.shields.io/badge/Fase%20actual-0%20%7C%20Fundaci%C3%B3n-2563EB?style=for-the-badge" alt="Fase actual: 0 - Fundación">
   <img src="https://img.shields.io/badge/Blockchain-Ethereum%20%2F%20Polygon-7C3AED?style=for-the-badge&logo=ethereum&logoColor=white" alt="Ethereum / Polygon">
 </p>
 
@@ -28,6 +28,20 @@ El concepto original fue diseñado como una **aplicación móvil**, acompañado 
 
 > Este repositorio representa la evolución del proyecto académico original hacia una implementación profesional, modular, segura, mantenible y preparada para crecer.
 
+### 📍 Estado verificable del repositorio
+
+Actualmente el repositorio se encuentra en la **Fase 0 — Fundación, documentación y arquitectura**.
+
+A fecha del estado documentado en `main`:
+
+- el repositorio contiene la especificación y visión técnica centralizada en este `README.md`;
+- todavía **no existe código fuente ejecutable** de la aplicación móvil, portal web, API o smart contracts;
+- todavía **no existe pipeline CI/CD**, configuración Docker, despliegue ni release funcional;
+- la estructura, stack y componentes descritos más adelante representan la **arquitectura objetivo**, no una implementación ya disponible;
+- las instrucciones de instalación y ejecución se incorporarán cuando la Fase 1 inicialice el workspace y exista un primer componente ejecutable.
+
+Esta separación evita presentar como implementadas funcionalidades que todavía forman parte del roadmap.
+
 ---
 
 ## 🎓 Información académica
@@ -37,7 +51,7 @@ El concepto original fue diseñado como una **aplicación móvil**, acompañado 
 | 📖 Asignatura | **Fundamentos de Seguridad de Software (ISO-915)** |
 | 👨‍🏫 Profesor | **Ing. Pedro José Ramirez Rodriguez** |
 | 🏫 Institución | **Universidad APEC (UNAPEC)** |
-| 📅 Período académico | **2024-2025** |
+| 📅 Período académico | **Septiembre - Diciembre 2025** |
 | 🧩 Tipo de proyecto | **Proyecto final / Aplicación móvil con Blockchain** |
 
 ### 👥 Equipo académico original
@@ -63,7 +77,7 @@ CertiChain forma parte de una línea de proyectos académicos desarrollados en U
 | 2 | Fundamentos de Seguridad de Software (**ISO-915**) | **CertiChain** | Septiembre - Diciembre 2025 | **Ing. Pedro José Ramirez Rodriguez** |
 | 3 | Desarrollo de Software con Tecnología Propietaria 2 (**ISO-710**) | [**Digital Sanctuary**](https://github.com/Jairo0811/DigitalSanctuary) | Mayo - Agosto 2026 | **Ing. Pedro José Ramirez Rodriguez** |
 
-Esta continuidad es **académica y docente**: los proyectos son independientes, pertenecen a asignaturas diferentes y documentan distintas etapas de formación en desarrollo de software.
+Esta continuidad es **académica y docente**: los proyectos son independientes, pertenecen a asignaturas diferentes y documentan distintas etapas de formación en desarrollo de software. No existe una dependencia técnica ni una relación de secuela entre las aplicaciones.
 
 ---
 
@@ -84,7 +98,7 @@ Los sistemas tradicionales de certificación académica presentan varios riesgos
 
 CertiChain plantea una infraestructura donde cada certificado dispone de una representación verificable criptográficamente.
 
-El sistema permite:
+El sistema permitirá:
 
 - registrar certificados emitidos por instituciones autorizadas;
 - generar un **hash único** del documento;
@@ -94,6 +108,8 @@ El sistema permite:
 - revocar credenciales cuando corresponda;
 - permitir al estudiante consultar y compartir sus certificados;
 - mantener evidencia auditable de emisión y validación.
+
+> Estas capacidades forman parte del alcance funcional objetivo y se habilitarán progresivamente según el roadmap.
 
 ---
 
@@ -282,7 +298,9 @@ En la evolución profesional, estas operaciones serán modeladas con:
 
 ---
 
-## 🧱 Stack tecnológico
+## 🧱 Stack tecnológico objetivo
+
+> El siguiente stack representa la dirección técnica prevista para la evolución profesional de CertiChain. En la Fase 0 todavía no constituye evidencia de componentes implementados dentro del repositorio.
 
 ### 📱 Aplicación móvil
 
@@ -429,6 +447,8 @@ Preferentemente:
 
 ## 📦 Estructura objetivo del repositorio
 
+> Esta estructura es el destino arquitectónico previsto y **todavía no representa el árbol actual del repositorio**.
+
 ```text
 CertiChain/
 ├── apps/
@@ -467,15 +487,30 @@ CertiChain/
 
 | Fase | Alcance | Estado |
 |---|---|:---:|
-| 0 | Fundación, documentación, arquitectura y estándares | 🚧 |
-| 1 | Smart Contracts y dominio de certificados | ⏳ |
-| 2 | Backend, autenticación, instituciones y RBAC | ⏳ |
-| 3 | Emisión, revocación, hashing y almacenamiento | ⏳ |
-| 4 | App móvil del estudiante | ⏳ |
-| 5 | Portal institucional y verificador QR | ⏳ |
-| 6 | Seguridad avanzada, auditoría y hardening | ⏳ |
-| 7 | Testing integral, CI/CD, Docker y observabilidad | ⏳ |
-| 8 | Piloto, despliegue y preparación de release | ⏳ |
+| 0 | Fundación, documentación, arquitectura y estándares | 🚧 En curso |
+| 1 | Smart Contracts y dominio de certificados | ⏳ Pendiente |
+| 2 | Backend, autenticación, instituciones y RBAC | ⏳ Pendiente |
+| 3 | Emisión, revocación, hashing y almacenamiento | ⏳ Pendiente |
+| 4 | App móvil del estudiante | ⏳ Pendiente |
+| 5 | Portal institucional y verificador QR | ⏳ Pendiente |
+| 6 | Seguridad avanzada, auditoría y hardening | ⏳ Pendiente |
+| 7 | Testing integral, CI/CD, Docker y observabilidad | ⏳ Pendiente |
+| 8 | Piloto, despliegue y preparación de release | ⏳ Pendiente |
+
+### Próximo hito técnico
+
+Para cerrar la **Fase 0** e iniciar la **Fase 1**, el siguiente incremento debería:
+
+1. inicializar el workspace/monorepo y sus convenciones de desarrollo;
+2. crear el proyecto Hardhat con TypeScript;
+3. definir el modelo mínimo de certificado e institución emisora;
+4. implementar el primer smart contract con emisión, consulta y revocación;
+5. incorporar pruebas unitarias del contrato;
+6. agregar `.env.example`, `.gitignore`, licencia y documentación de configuración;
+7. activar un workflow de GitHub Actions que compile y pruebe los contratos;
+8. documentar cómo instalar dependencias y ejecutar las pruebas localmente.
+
+Al completarse ese incremento, el repositorio dejará de ser exclusivamente documental y dispondrá de un primer componente ejecutable y verificable.
 
 ### Relación con el plan académico original
 
@@ -487,6 +522,21 @@ El proyecto académico planteaba cuatro etapas generales:
 4. **Expansión**.
 
 El roadmap actual descompone esas etapas en entregables de ingeniería más pequeños y verificables sin cambiar el propósito original del proyecto.
+
+---
+
+## 🧪 Ejecución local
+
+La ejecución local **todavía no aplica en la Fase 0**, ya que el repositorio no contiene componentes ejecutables ni dependencias de aplicación.
+
+Cuando se complete la inicialización técnica de la Fase 1, esta sección deberá incluir como mínimo:
+
+- versiones requeridas de Node.js y gestor de paquetes;
+- instalación de dependencias;
+- variables de entorno necesarias;
+- compilación y pruebas de smart contracts;
+- ejecución de nodos/redes locales cuando corresponda;
+- comandos para levantar API, web y aplicación móvil conforme esos componentes sean incorporados.
 
 ---
 
@@ -507,9 +557,24 @@ Una funcionalidad se considerará completada cuando:
 
 ## 🚀 Estado actual
 
-**CertiChain se encuentra en reconstrucción y evolución profesional.**
+**CertiChain se encuentra en reconstrucción y evolución profesional, actualmente en Fase 0.**
 
-La documentación académica y el diseño conceptual constituyen el punto de partida. Las funcionalidades descritas en este README representan tanto el alcance original como la arquitectura objetivo y **no deben interpretarse todavía como funcionalidades implementadas** hasta que sus respectivas fases sean completadas.
+| Área | Estado actual |
+|---|---|
+| Documentación conceptual | ✅ Disponible |
+| Información académica | ✅ Disponible |
+| Arquitectura objetivo | ✅ Definida a alto nivel |
+| Smart contracts | ⏳ Pendiente |
+| Backend / REST API | ⏳ Pendiente |
+| Aplicación móvil | ⏳ Pendiente |
+| Portal web / verificador | ⏳ Pendiente |
+| Persistencia | ⏳ Pendiente de decisión e implementación |
+| Testing automatizado | ⏳ Pendiente |
+| CI/CD | ⏳ Pendiente |
+| Docker / despliegue | ⏳ Pendiente |
+| Release funcional | ⏳ Pendiente |
+
+La documentación académica y el diseño conceptual constituyen el punto de partida. Las funcionalidades descritas en este README representan tanto el alcance original como la arquitectura objetivo y **no deben interpretarse como funcionalidades implementadas** hasta que sus respectivas fases sean completadas.
 
 ---
 
