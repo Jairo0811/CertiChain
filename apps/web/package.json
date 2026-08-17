@@ -1,0 +1,6 @@
+{
+  "name": "@certichain/web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CertiChain institutional and verification web application"
+}

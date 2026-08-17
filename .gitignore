@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Build outputs
+dist/
+build/
+coverage/
+.expo/
+.next/
+.vite/
+
+# Blockchain
+blockchain/cache/
+blockchain/artifacts/
+blockchain/typechain-types/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Secrets / keys
+*.pem
+*.key
+*.keystore
+*.jks
+wallets/
+secrets/
+
+# Test / temp
+.tmp/
+tmp/

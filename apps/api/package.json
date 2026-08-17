@@ -1,0 +1,6 @@
+{
+  "name": "@certichain/api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CertiChain application API"
+}
