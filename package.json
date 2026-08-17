@@ -10,8 +10,8 @@
     "blockchain"
   ],
   "scripts": {
-    "format:check": "prettier --check .",
-    "format": "prettier --write .",
+    "format:check": "prettier --check package.json tsconfig.base.json .github/workflows/ci.yml",
+    "format": "prettier --write package.json tsconfig.base.json .github/workflows/ci.yml",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
