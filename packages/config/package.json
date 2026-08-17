@@ -1,0 +1,6 @@
+{
+  "name": "@certichain/config",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Shared CertiChain tooling configuration"
+}
