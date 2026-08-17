@@ -1,0 +1,32 @@
+name: Apply academic continuity patch
+
+on:
+  push:
+    branches:
+      - docs/academic-continuity
+    paths:
+      - .github/workflows/academic-continuity-apply.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: docs/academic-continuity
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Patch README
+        run: python .github/scripts/patch-academic-continuity.py
+      - name: Commit README
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git diff --cached --quiet && exit 0
+          git commit -m "docs: expand academic and institutional continuity"
+          git push
