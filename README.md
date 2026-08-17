@@ -61,7 +61,7 @@ Esta separación evita presentar como implementadas funcionalidades que todavía
 | **Francis Jairo Matías Rosario** | **A00115261** |
 | **Pieranyela José Carrasco Rodríguez** | **A00116415** |
 | **Jenrry Monegro Rosario** | **A00116621** |
-| **Enmanuel Arias** | **A00117358** |
+| **Enmanuel Alberto Arias de Jesus** | **A00117358** |
 
 > El orden anterior se presenta por matrícula para mantener una convención uniforme dentro de la colección de proyectos académicos.
 
