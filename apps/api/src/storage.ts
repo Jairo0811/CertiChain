@@ -70,10 +70,15 @@ async function uploadToIpfs(encrypted: Buffer, filename: string, originalMimeTyp
   endpoint.searchParams.set("pin", "true");
   endpoint.searchParams.set("cid-version", "1");
 
+  const encryptedArrayBuffer = encrypted.buffer.slice(
+    encrypted.byteOffset,
+    encrypted.byteOffset + encrypted.byteLength,
+  ) as ArrayBuffer;
+
   const form = new FormData();
   form.append(
     "file",
-    new Blob([encrypted], { type: "application/octet-stream" }),
+    new Blob([encryptedArrayBuffer], { type: "application/octet-stream" }),
     filename,
   );
   form.append("originalContentType", originalMimeType);
