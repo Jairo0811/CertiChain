@@ -1,48 +1,50 @@
 <p align="center">
-  <img src="docs/images/certichain-logo.jpeg" alt="Logo de BarberTurn" width="720" />
+  <img src="docs/images/certichain-logo.jpeg" alt="Logo de CertiChain" width="720" />
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/UNAPEC-ISO--915-003B70?style=for-the-badge" alt="UNAPEC ISO-915">
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Estado-En%20desarrollo-F59E0B?style=for-the-badge" alt="Estado: En desarrollo">
-  <img src="https://img.shields.io/badge/Fase%20actual-0%20%7C%20Fundaci%C3%B3n-2563EB?style=for-the-badge" alt="Fase actual: 0 - Fundación">
+  <img src="https://img.shields.io/badge/Versi%C3%B3n-1.0.0-22C55E?style=for-the-badge" alt="Versión 1.0.0">
+  <img src="https://img.shields.io/badge/Estado-Staging%20Ready-2563EB?style=for-the-badge" alt="Estado: Staging Ready">
   <img src="https://img.shields.io/badge/Blockchain-Ethereum%20%2F%20Polygon-7C3AED?style=for-the-badge&logo=ethereum&logoColor=white" alt="Ethereum / Polygon">
 </p>
 
 <p align="center"><strong>Sistema de Certificados Académicos con Blockchain</strong></p>
 
-<p align="center">
-  Verificación inmutable, transparente y portable de credenciales académicas.
-</p>
+<p align="center">Verificación inmutable, transparente y portable de credenciales académicas.</p>
 
 ---
 
 ## 📌 Descripción
 
-**CertiChain** es un proyecto académico de la **Universidad APEC (UNAPEC)** concebido para combatir la falsificación de certificados académicos y reducir la fricción asociada a la verificación tradicional de credenciales.
+**CertiChain** es una plataforma para emitir, proteger, administrar, compartir y verificar certificados académicos utilizando evidencia criptográfica y blockchain. Nació como proyecto final de **Fundamentos de Seguridad de Software (ISO-915)** en la Universidad APEC y evolucionó hacia una implementación profesional con portal institucional, aplicación móvil, API, smart contracts, persistencia SQL, almacenamiento cifrado e infraestructura Docker.
 
-La propuesta utiliza **blockchain** para registrar evidencia criptográfica de los certificados emitidos, permitiendo que estudiantes, instituciones, empresas y otros verificadores validen su autenticidad mediante un **código QR** o un **identificador único**.
+La arquitectura sigue un enfoque **off-chain first**: los datos personales y documentos completos permanecen fuera de una blockchain pública, mientras la cadena conserva únicamente la evidencia necesaria para demostrar autenticidad, integridad, emisor y estado.
 
-El concepto original fue diseñado como una **aplicación móvil**, acompañado de smart contracts, almacenamiento distribuido y mecanismos de verificación de integridad.
+## ✅ Estado actual
 
-> Este repositorio representa la evolución del proyecto académico original hacia una implementación profesional, modular, segura, mantenible y preparada para crecer.
+El desarrollo planificado de las **Fases 0–8 está implementado**. La base de código está preparada para staging y para un release `v1.0.0` una vez se conecten los servicios externos reales.
 
-### 📍 Estado verificable del repositorio
+| Área | Estado |
+|---|:---:|
+| Smart contracts | ✅ |
+| Backend / REST API | ✅ |
+| Portal institucional | ✅ |
+| Verificador público | ✅ |
+| Aplicación móvil | ✅ |
+| QR / cámara / wallet local | ✅ |
+| PostgreSQL | ✅ |
+| Cifrado AES-256-GCM | ✅ |
+| Adaptador IPFS | ✅ |
+| Docker / Docker Compose | ✅ |
+| CI / CodeQL | ✅ |
+| Métricas / readiness / logging | ✅ |
+| Backup / restore | ✅ |
+| Deploy automatizado del contrato | ✅ Preparado |
+| Polygon/IPFS/DB administrados reales | ⏳ Requiere infraestructura externa |
+| Auditoría independiente del smart contract | ⏳ Pre-mainnet |
 
-Actualmente el repositorio se encuentra en la **Fase 0 — Fundación, documentación y arquitectura**.
-
-A fecha del estado documentado en `main`:
-
-- el repositorio contiene la especificación y visión técnica centralizada en este `README.md`;
-- todavía **no existe código fuente ejecutable** de la aplicación móvil, portal web, API o smart contracts;
-- todavía **no existe pipeline CI/CD**, configuración Docker, despliegue ni release funcional;
-- la estructura, stack y componentes descritos más adelante representan la **arquitectura objetivo**, no una implementación ya disponible;
-- las instrucciones de instalación y ejecución se incorporarán cuando la Fase 1 inicialice el workspace y exista un primer componente ejecutable.
-
-Esta separación evita presentar como implementadas funcionalidades que todavía forman parte del roadmap.
+> `main` no contiene claves privadas, tokens de infraestructura ni credenciales de producción. El go-live real requiere secretos externos y aprobaciones operativas.
 
 ---
 
@@ -54,7 +56,7 @@ Esta separación evita presentar como implementadas funcionalidades que todavía
 | 👨‍🏫 Profesor | **Ing. Pedro José Ramirez Rodriguez** |
 | 🏫 Institución | **Universidad APEC (UNAPEC)** |
 | 📅 Período académico | **Septiembre - Diciembre 2025** |
-| 🧩 Tipo de proyecto | **Proyecto final / Aplicación móvil con Blockchain** |
+| 🧩 Tipo | **Proyecto final / Aplicación móvil con Blockchain** |
 
 ### 👥 Equipo académico original
 
@@ -65,226 +67,57 @@ Esta separación evita presentar como implementadas funcionalidades que todavía
 | **Jenrry Monegro Rosario** | **A00116621** |
 | **Enmanuel Alberto Arias de Jesus** | **A00117358** |
 
-> El orden anterior se presenta por matrícula para mantener una convención uniforme dentro de la colección de proyectos académicos.
+CertiChain forma parte de la evolución académica y técnica de proyectos preservados y modernizados posteriormente con prácticas de ingeniería de software.
 
 ---
 
-## 🧭 Continuidad académica
+## ✨ Funcionalidades
 
-La continuidad académica de CertiChain se documenta mediante relaciones verificables entre **estudiantes**, **profesores** y la **trayectoria institucional ITLA → UNAPEC**. Estas relaciones son formativas y cronológicas; no implican dependencia técnica ni una relación de secuela entre las aplicaciones.
+### Portal institucional
 
-### 👥 Continuidad por estudiante
+- autenticación administrativa;
+- dashboard con métricas, actividad reciente y estados;
+- emisión de certificados;
+- listado, búsqueda, filtrado y paginación;
+- detalle y revocación de credenciales;
+- verificación pública por ID + SHA-256;
+- diseño responsive alineado con el sistema visual de CertiChain.
 
-CertiChain comparte dos integrantes con [**CineGest**](https://github.com/Jairo0811/CineGest), desarrollado posteriormente en UNAPEC durante el período **Enero - Abril 2026**.
+### Aplicación móvil
 
-| Estudiante | Matrícula | Proyecto de origen | Continuidad posterior |
-|---|---|---|---|
-| **Pieranyela José Carrasco Rodríguez** | **A00116415** | **CertiChain** — ISO-915 — Septiembre - Diciembre 2025 | **CineGest** — ISO-610 — Enero - Abril 2026 |
-| **Jenrry Monegro Rosario** | **A00116621** | **CertiChain** — ISO-915 — Septiembre - Diciembre 2025 | **CineGest** — ISO-610 — Enero - Abril 2026 |
+- wallet local de credenciales verificadas;
+- navegación Inicio / Escanear / Historial / Perfil;
+- generación y lectura de QR;
+- escáner real mediante cámara;
+- detalle de credenciales;
+- copia y compartición de identificadores;
+- historial protegido mediante `expo-secure-store`.
 
-Esta coincidencia evidencia continuidad por compañeros de equipo en dos proyectos académicos consecutivos de Ingeniería de Software en UNAPEC.
+### Backend
 
-### 👨‍🏫 Continuidad por profesor
+- Node.js + Express + TypeScript;
+- JWT y RBAC;
+- emisión, revocación, verificación y auditoría;
+- validación mediante Zod;
+- rate limiting y headers defensivos;
+- PostgreSQL en entornos con `DATABASE_URL`;
+- fallback JSON únicamente para desarrollo/test;
+- `POST /api/documents` para cifrar y almacenar certificados;
+- `/health`, `/ready` y `/metrics`.
 
-CertiChain forma parte de una secuencia de tres asignaturas impartidas por el **Ing. Pedro José Ramirez Rodriguez** dentro de la colección académica documentada.
+### Blockchain
 
-| Orden | Asignatura | Proyecto | Período | Profesor |
-|---:|---|---|---|---|
-| 1 | Bases de Datos 1 (**INF-164**) | [**NutriFlow**](https://github.com/Jairo0811/NutriFlow) | Mayo - Agosto 2024 | **Ing. Pedro José Ramirez Rodriguez** |
-| 2 | Fundamentos de Seguridad de Software (**ISO-915**) | **CertiChain** | Septiembre - Diciembre 2025 | **Ing. Pedro José Ramirez Rodriguez** |
-| 3 | Desarrollo de Software con Tecnología Propietaria 2 (**ISO-710**) | [**Digital Sanctuary**](https://github.com/Jairo0811/DigitalSanctuary) | Mayo - Agosto 2026 | **Ing. Pedro José Ramirez Rodriguez** |
-
-Esta continuidad docente muestra una evolución formativa desde fundamentos de datos, pasando por seguridad de software, hasta desarrollo con tecnología propietaria. Cada repositorio conserva un dominio, alcance y arquitectura independientes.
-
-### 🏫 Cruce institucional ITLA → UNAPEC
-
-CertiChain también documenta un cruce institucional entre **ITLA** y **UNAPEC**. Cuatro integrantes del equipo académico original cuentan con trayectoria previa en ITLA y posteriormente convergieron en este proyecto en UNAPEC.
-
-| Integrante | Matrícula UNAPEC | Matrícula ITLA | Relación documentada |
-|---|---|---|---|
-| **Francis Jairo Matías Rosario** | **A00115261** | **2015-2984** | ITLA → UNAPEC |
-| **Enmanuel Alberto Arias de Jesus** | **A00117358** | **2019-7415** | ITLA → UNAPEC; coincidencia posterior en CertiChain |
-| **Jenrry Monegro Rosario** | **A00116621** | **2019-8690** | ITLA → UNAPEC; coincidencia posterior en CertiChain |
-| **Pieranyela José Carrasco Rodríguez** | **A00116415** | **2019-8767** | ITLA → UNAPEC; coincidencia posterior en CertiChain |
-
-Este cruce se documenta como **trayectoria institucional compartida**, no como continuidad por asignaturas cursadas conjuntamente en ITLA. Con la información disponible no se establece que Francis Jairo Matías Rosario haya coincidido en una misma materia de ITLA con Enmanuel Alberto Arias de Jesus, Jenrry Monegro Rosario o Pieranyela José Carrasco Rodríguez.
-
-La convergencia académica confirmada entre estos integrantes ocurre en **CertiChain (ISO-915, Septiembre - Diciembre 2025)** en UNAPEC.
-
----
-
-## 🔴 Problema
-
-Los sistemas tradicionales de certificación académica presentan varios riesgos y limitaciones:
-
-- falsificación o alteración de certificados;
-- procesos de verificación lentos y burocráticos;
-- dependencia de la disponibilidad de la institución emisora;
-- pérdida, deterioro o destrucción de documentos físicos;
-- dificultad para compartir credenciales de forma inmediata;
-- poca trazabilidad sobre emisión, vigencia y revocación.
+- `CertificateRegistry.sol`;
+- instituciones/emisores autorizados;
+- emisión y revocación;
+- consulta y verificación de hashes;
+- eventos para trazabilidad;
+- Hardhat + OpenZeppelin;
+- redes Sepolia, Polygon Amoy y Polygon PoS.
 
 ---
 
-## ✅ Solución propuesta
-
-CertiChain plantea una infraestructura donde cada certificado dispone de una representación verificable criptográficamente.
-
-El sistema permitirá:
-
-- registrar certificados emitidos por instituciones autorizadas;
-- generar un **hash único** del documento;
-- comprobar su integridad sin exponer innecesariamente información sensible;
-- verificar certificados mediante **QR** o identificador;
-- consultar su estado actual;
-- revocar credenciales cuando corresponda;
-- permitir al estudiante consultar y compartir sus certificados;
-- mantener evidencia auditable de emisión y validación.
-
-> Estas capacidades forman parte del alcance funcional objetivo y se habilitarán progresivamente según el roadmap.
-
----
-
-## 🎯 Objetivos
-
-### Objetivo general
-
-Construir una plataforma segura para la emisión, administración y verificación de certificados académicos utilizando blockchain como mecanismo de integridad y trazabilidad.
-
-### Objetivos específicos
-
-- Reducir el riesgo de falsificación de credenciales.
-- Permitir verificaciones prácticamente instantáneas.
-- Facilitar la portabilidad de certificados académicos.
-- Proteger los datos personales mediante una estrategia **off-chain first**.
-- Mantener trazabilidad de emisión, revocación y verificación.
-- Proporcionar APIs para futuras integraciones institucionales.
-- Diseñar una arquitectura escalable y mantenible.
-
----
-
-## 👤 Actores del sistema
-
-### 🎓 Estudiante
-
-- consulta sus certificados;
-- visualiza el estado de cada credencial;
-- genera o muestra códigos QR;
-- comparte enlaces o identificadores de verificación;
-- descarga representaciones digitales cuando estén disponibles.
-
-### 🏫 Institución emisora
-
-- administra usuarios autorizados;
-- registra certificados;
-- consulta certificados emitidos;
-- revoca certificados cuando corresponde;
-- supervisa actividad y auditoría.
-
-### 🔍 Verificador
-
-- escanea un QR;
-- introduce un identificador manualmente;
-- consulta la evidencia registrada;
-- valida integridad, emisor y estado de la credencial.
-
-### 🛡️ Administrador
-
-- administra instituciones autorizadas;
-- controla permisos y configuración global;
-- consulta auditoría;
-- supervisa integridad operativa de la plataforma.
-
----
-
-## 🔄 Flujo de emisión
-
-```text
-Institución autorizada
-        │
-        ▼
-Generación / carga del certificado
-        │
-        ▼
-Cálculo SHA-256
-        │
-        ├──────────────► Documento cifrado / almacenamiento off-chain
-        │
-        ▼
-Smart Contract
-        │
-        ▼
-Registro de evidencia criptográfica
-        │
-        ▼
-Identificador + QR
-        │
-        ▼
-Certificado disponible para el estudiante
-```
-
-La blockchain no debe utilizarse como repositorio de datos personales sensibles. La implementación profesional priorizará almacenar **hashes, identificadores técnicos, emisor, estado y referencias verificables**, manteniendo los documentos y datos privados fuera de la cadena.
-
----
-
-## 🔍 Flujo de verificación
-
-```text
-QR / ID del certificado
-        │
-        ▼
-Resolver identificador
-        │
-        ▼
-Consultar Smart Contract
-        │
-        ├── ¿Existe?
-        ├── ¿Emisor autorizado?
-        ├── ¿Activo o revocado?
-        └── Hash registrado
-                │
-                ▼
-       Comparación de integridad
-                │
-                ▼
-      Resultado de verificación
-```
-
-Validaciones principales:
-
-- existencia del certificado;
-- integridad del documento;
-- institución emisora;
-- estado activo o revocado;
-- fecha de emisión;
-- asociación con el titular mediante identificadores protegidos.
-
----
-
-## 💻 Smart Contract
-
-El alcance original contempla operaciones equivalentes a:
-
-```solidity
-issueCertificate(studentAddress, hash, metadata)
-verifyCertificate(certificateId)
-revokeCertificate(certificateId)
-getCertificatesByStudent(studentAddress)
-```
-
-En la evolución profesional, estas operaciones serán modeladas con:
-
-- control de acceso basado en roles;
-- eventos blockchain para auditoría;
-- pausabilidad de emergencia cuando aplique;
-- validaciones explícitas;
-- pruebas unitarias del contrato;
-- protección contra usos no autorizados;
-- minimización de datos almacenados on-chain.
-
----
-
-## 🏗️ Arquitectura objetivo
+## 🏗️ Arquitectura
 
 ```text
 ┌─────────────────────────────────────────────────────────────┐
@@ -302,311 +135,240 @@ En la evolución profesional, estas operaciones serán modeladas con:
                            │
              ┌─────────────┼─────────────┐
              ▼             ▼             ▼
-        Application      Storage      Blockchain
-          Database       / IPFS       Gateway
-             │             │             │
-             │             │             ▼
-             │             │        Smart Contracts
-             │             │        Solidity
-             │             │             │
-             └─────────────┴─────────────┘
-                           │
-                           ▼
-                    Audit / Security
+        PostgreSQL     Encrypted       Blockchain
+                       Storage/IPFS     Gateway
+                           │             │
+                           │             ▼
+                           │        CertificateRegistry
+                           │        Solidity / Polygon
+                           └─────────────┬─────────────
+                                         ▼
+                                  Audit / Metrics
 ```
-
-### Principios arquitectónicos
-
-- separación de responsabilidades;
-- arquitectura modular;
-- SOLID, DRY y KISS;
-- dominio independiente de infraestructura;
-- servicios externos detrás de abstracciones;
-- validación de entrada en todas las fronteras;
-- mínimo privilegio;
-- secretos fuera del código fuente;
-- auditoría estructurada;
-- contratos e integraciones testeables.
-
----
-
-## 🧱 Stack tecnológico objetivo
-
-> El siguiente stack representa la dirección técnica prevista para la evolución profesional de CertiChain. En la Fase 0 todavía no constituye evidencia de componentes implementados dentro del repositorio.
-
-### 📱 Aplicación móvil
-
-<p>
-  <img src="https://skillicons.dev/icons?i=react,ts" alt="React y TypeScript" />
-  <img src="https://img.shields.io/badge/React%20Native-20232A?style=flat-square&logo=react&logoColor=61DAFB" alt="React Native" />
-  <img src="https://img.shields.io/badge/Expo-000020?style=flat-square&logo=expo&logoColor=white" alt="Expo" />
-</p>
-
-- React Native
-- Expo
-- TypeScript
-- Ethers.js
-- cámara / QR
-- Secure Storage para secretos locales
-
-### 🖥️ Portal web
-
-<p>
-  <img src="https://skillicons.dev/icons?i=react,ts,vite" alt="React TypeScript Vite" />
-</p>
-
-- React
-- TypeScript
-- Vite
-- portal institucional
-- verificador público
-
-### ⚙️ Backend
-
-<p>
-  <img src="https://skillicons.dev/icons?i=nodejs,express,ts" alt="Node.js Express TypeScript" />
-</p>
-
-- Node.js
-- Express.js
-- TypeScript
-- REST API
-- OpenAPI / Swagger
-- validación estructurada
-- autenticación y autorización RBAC
-
-### ⛓️ Blockchain
-
-<p>
-  <img src="https://skillicons.dev/icons?i=solidity" alt="Solidity" />
-  <img src="https://img.shields.io/badge/Ethereum-3C3C3D?style=flat-square&logo=ethereum&logoColor=white" alt="Ethereum" />
-  <img src="https://img.shields.io/badge/Polygon-8247E5?style=flat-square&logo=polygon&logoColor=white" alt="Polygon" />
-  <img src="https://img.shields.io/badge/OpenZeppelin-4E5EE4?style=flat-square&logo=openzeppelin&logoColor=white" alt="OpenZeppelin" />
-</p>
-
-- Solidity
-- Ethereum / Polygon
-- Hardhat
-- OpenZeppelin Contracts
-- Sepolia Testnet para desarrollo inicial
-- Ethers.js para integración
-
-### 🗄️ Persistencia y documentos
-
-<p>
-  <img src="https://skillicons.dev/icons?i=postgres,firebase" alt="PostgreSQL y Firebase" />
-  <img src="https://img.shields.io/badge/IPFS-65C2CB?style=flat-square&logo=ipfs&logoColor=white" alt="IPFS" />
-</p>
-
-- base de datos relacional para información operativa;
-- IPFS como opción para almacenamiento direccionado por contenido;
-- Firebase presente en el planteamiento académico original y evaluado según necesidades reales de la evolución;
-- cifrado de información sensible antes de almacenamiento externo.
-
-> La selección definitiva de persistencia se cerrará durante la fase de arquitectura. No se almacenarán datos personales sensibles directamente en una blockchain pública.
-
-### 🔐 Seguridad
-
-<p>
-  <img src="https://img.shields.io/badge/SHA--256-Hashing-111827?style=flat-square" alt="SHA-256" />
-  <img src="https://img.shields.io/badge/AES--256-Encryption-2563EB?style=flat-square" alt="AES-256" />
-  <img src="https://img.shields.io/badge/RBAC-Authorization-7C3AED?style=flat-square" alt="RBAC" />
-</p>
-
-- SHA-256
-- cifrado AES-256 cuando corresponda
-- RBAC
-- gestión segura de secretos
-- rate limiting
-- validación y sanitización
-- registros de auditoría
-- principio de mínimo privilegio
-
-### 🧪 Testing y DevOps
-
-<p>
-  <img src="https://skillicons.dev/icons?i=jest,git,github,githubactions,docker" alt="Jest Git GitHub GitHub Actions Docker" />
-</p>
-
-- Jest
-- Mocha / Chai para contratos cuando corresponda
-- Hardhat Test
-- pruebas de integración
-- GitHub Actions
-- Docker / Docker Compose
-- análisis estático y quality gates
-
----
-
-## 🔐 Modelo de seguridad
-
-CertiChain trata la seguridad como requisito transversal y no como una característica añadida al final.
 
 ### Datos on-chain
 
-Preferentemente:
-
-- hash del certificado;
-- identificador técnico;
-- identificador de institución emisora;
-- timestamp;
+- identificador criptográfico;
+- hash del documento;
+- emisor;
 - estado;
-- referencia criptográfica o de contenido cuando sea necesaria.
+- timestamps;
+- referencia no sensible.
 
 ### Datos off-chain
 
 - nombre del estudiante;
-- documento de identidad;
-- expediente académico;
+- documentos académicos;
 - PDF completo;
-- información institucional privada;
-- metadatos sensibles.
-
-### Controles previstos
-
-- autenticación segura;
-- autorización RBAC;
-- cifrado en tránsito mediante TLS;
-- cifrado en reposo donde aplique;
-- gestión segura de wallets y claves;
-- secretos mediante variables de entorno / secret managers;
-- auditoría de acciones críticas;
-- revocación de certificados;
-- protección contra replay y operaciones duplicadas;
-- validación de contratos inteligentes.
+- información privada institucional;
+- secretos y claves.
 
 ---
 
-## 📦 Estructura objetivo del repositorio
+## 🧱 Stack tecnológico
 
-> Esta estructura es el destino arquitectónico previsto y **todavía no representa el árbol actual del repositorio**.
+| Capa | Tecnologías |
+|---|---|
+| Mobile | React Native, Expo, TypeScript, Expo Camera, Secure Store |
+| Web | React, TypeScript, Vite |
+| API | Node.js, Express, TypeScript, Zod, JWT |
+| Persistencia | PostgreSQL; JSON solo como fallback local/test |
+| Blockchain | Solidity, Hardhat, OpenZeppelin, Ethers.js |
+| Redes | Sepolia, Polygon Amoy, Polygon PoS |
+| Storage | AES-256-GCM + IPFS |
+| Testing | Vitest, Supertest, Hardhat Test |
+| DevOps | Docker, Docker Compose, GitHub Actions, GHCR |
+| Seguridad | CodeQL, RBAC, SHA-256, rate limiting, auditoría |
+| Observabilidad | Prometheus metrics, readiness, structured logs |
 
-```text
-CertiChain/
-├── apps/
-│   ├── mobile/              # React Native + Expo
-│   ├── web/                 # Portal institucional y verificador
-│   └── api/                 # Node.js + TypeScript
-│
-├── blockchain/
-│   ├── contracts/           # Solidity
-│   ├── scripts/
-│   ├── test/
-│   └── hardhat.config.ts
-│
-├── packages/
-│   ├── config/
-│   ├── shared/
-│   └── types/
-│
-├── docs/
-│   ├── architecture/
-│   ├── security/
-│   └── academic/
-│
-├── .github/
-│   └── workflows/
-│
-├── docker/
-├── .gitignore
-├── LICENSE
-└── README.md
+---
+
+## 🚀 Ejecución local con Docker
+
+### Requisitos
+
+- Docker Desktop / Docker Engine;
+- Docker Compose;
+- Git.
+
+### 1. Configuración
+
+```bash
+cp .env.example .env
 ```
 
+Para una prueba local, cambia al menos:
+
+```env
+JWT_SECRET=replace-this-with-a-long-local-secret
+ADMIN_PASSWORD=CertiChain2026!Local
+CORS_ORIGIN=http://localhost:8080
+VITE_API_URL=http://localhost:4000
+```
+
+### 2. Levantar el stack
+
+```bash
+docker compose up -d --build
+```
+
+Se levantan:
+
+- PostgreSQL;
+- API: `http://localhost:4000`;
+- Web: `http://localhost:8080`.
+
+### 3. Verificación
+
+```bash
+curl http://localhost:4000/health
+curl http://localhost:4000/ready
+```
+
+El healthcheck de Docker utiliza `/ready`, por lo que el portal web espera a que la persistencia esté disponible.
+
+### Desarrollo sin blockchain
+
+Blockchain puede permanecer sin configurar durante pruebas locales. En ese modo, los certificados se almacenan off-chain con estado `pending`. Para staging/producción, la configuración de blockchain es obligatoria.
+
 ---
 
-## 🗺️ Roadmap de evolución
+## 🔐 Documentos cifrados e IPFS
+
+La API calcula **SHA-256 sobre el documento original** y posteriormente lo cifra con **AES-256-GCM**. Solo el contenido cifrado se escribe en storage/IPFS.
+
+En desarrollo:
+
+```env
+STORAGE_DRIVER=local
+```
+
+En producción:
+
+```env
+STORAGE_DRIVER=ipfs
+DOCUMENT_ENCRYPTION_KEY=<64 caracteres hexadecimales>
+IPFS_API_URL=https://...
+IPFS_API_TOKEN=...
+```
+
+`NODE_ENV=production` no inicia si falta la llave de cifrado o si el storage no es IPFS.
+
+---
+
+## 🗄️ PostgreSQL y recuperación
+
+Con `DATABASE_URL`, la API utiliza PostgreSQL y crea las tablas/índices requeridos de manera idempotente.
+
+Scripts operativos:
+
+```bash
+scripts/backup-postgres.sh
+ALLOW_RESTORE=YES scripts/restore-postgres.sh backups/certichain-<timestamp>.dump
+```
+
+Los backups generan checksum SHA-256 y el restore requiere confirmación explícita mediante `ALLOW_RESTORE=YES`.
+
+---
+
+## ⛓️ Despliegue de smart contracts
+
+El workflow **Deploy CertificateRegistry** se ejecuta manualmente desde GitHub Actions y permite seleccionar:
+
+- `sepolia`;
+- `amoy`;
+- `polygon`.
+
+Los RPC y `BLOCKCHAIN_PRIVATE_KEY` deben estar configurados como secretos del environment correspondiente. Nunca se almacenan en el repositorio.
+
+---
+
+## 📊 Observabilidad
+
+Endpoints:
+
+```text
+GET /health
+GET /ready
+GET /metrics
+```
+
+En producción, `/metrics` exige `METRICS_TOKEN`. Las solicitudes generan logs JSON con request ID, método, ruta, estado y duración.
+
+---
+
+## 🧪 Quality gates
+
+Cada cambio debe superar:
+
+```text
+format
+lint
+type-check
+tests
+build
+CodeQL
+```
+
+Los tests de API incluyen el ciclo:
+
+```text
+autenticación → emisión → listado → revocación → verificación
+```
+
+Los smart contracts cuentan con pruebas de permisos, emisión, revocación e integridad.
+
+---
+
+## 🗺️ Roadmap
 
 | Fase | Alcance | Estado |
 |---|---|:---:|
-| 0 | Fundación, documentación, arquitectura y estándares | 🚧 En curso |
-| 1 | Smart Contracts y dominio de certificados | ⏳ Pendiente |
-| 2 | Backend, autenticación, instituciones y RBAC | ⏳ Pendiente |
-| 3 | Emisión, revocación, hashing y almacenamiento | ⏳ Pendiente |
-| 4 | App móvil del estudiante | ⏳ Pendiente |
-| 5 | Portal institucional y verificador QR | ⏳ Pendiente |
-| 6 | Seguridad avanzada, auditoría y hardening | ⏳ Pendiente |
-| 7 | Testing integral, CI/CD, Docker y observabilidad | ⏳ Pendiente |
-| 8 | Piloto, despliegue y preparación de release | ⏳ Pendiente |
+| 0 | Fundación, documentación y arquitectura | ✅ |
+| 1 | Blockchain Core | ✅ |
+| 2 | Backend API | ✅ |
+| 3 | Portal institucional | ✅ |
+| 4 | Aplicación móvil | ✅ |
+| 5 | Verificación pública | ✅ |
+| 6 | Seguridad, privacidad y storage | ✅ |
+| 7 | Testing, DevOps y despliegue | ✅ |
+| 8 | Producción y expansión | ✅ Base implementada |
 
-### Próximo hito técnico
+### Operaciones de go-live
 
-Para cerrar la **Fase 0** e iniciar la **Fase 1**, el siguiente incremento debería:
+El código está preparado, pero los siguientes pasos dependen de servicios/credenciales externos:
 
-1. inicializar el workspace/monorepo y sus convenciones de desarrollo;
-2. crear el proyecto Hardhat con TypeScript;
-3. definir el modelo mínimo de certificado e institución emisora;
-4. implementar el primer smart contract con emisión, consulta y revocación;
-5. incorporar pruebas unitarias del contrato;
-6. agregar `.env.example`, `.gitignore`, licencia y documentación de configuración;
-7. activar un workflow de GitHub Actions que compile y pruebe los contratos;
-8. documentar cómo instalar dependencias y ejecutar las pruebas localmente.
+- PostgreSQL administrado;
+- proveedor IPFS;
+- RPC de Polygon;
+- wallet de despliegue;
+- dominio HTTPS + CDN/WAF;
+- plataforma de observabilidad;
+- auditoría independiente del smart contract;
+- pruebas E2E sobre staging real;
+- creación final del tag `v1.0.0`.
 
-Al completarse ese incremento, el repositorio dejará de ser exclusivamente documental y dispondrá de un primer componente ejecutable y verificable.
-
-### Relación con el plan académico original
-
-El proyecto académico planteaba cuatro etapas generales:
-
-1. **MVP**;
-2. **Piloto**;
-3. **Escalamiento**;
-4. **Expansión**.
-
-El roadmap actual descompone esas etapas en entregables de ingeniería más pequeños y verificables sin cambiar el propósito original del proyecto.
+Consulta [`docs/production-readiness.md`](docs/production-readiness.md) para el checklist detallado.
 
 ---
 
-## 🧪 Ejecución local
+## 🔒 Seguridad
 
-La ejecución local **todavía no aplica en la Fase 0**, ya que el repositorio no contiene componentes ejecutables ni dependencias de aplicación.
+- ningún secreto debe almacenarse en Git;
+- producción exige configuración fuerte y completa;
+- PII permanece off-chain;
+- documentos se cifran antes de storage/IPFS;
+- wallets de despliegue deben utilizar mínimo privilegio y fondos limitados;
+- secretos de staging y producción nunca se reutilizan;
+- antes de Polygon Mainnet se requiere revisión independiente del smart contract.
 
-Cuando se complete la inicialización técnica de la Fase 1, esta sección deberá incluir como mínimo:
-
-- versiones requeridas de Node.js y gestor de paquetes;
-- instalación de dependencias;
-- variables de entorno necesarias;
-- compilación y pruebas de smart contracts;
-- ejecución de nodos/redes locales cuando corresponda;
-- comandos para levantar API, web y aplicación móvil conforme esos componentes sean incorporados.
-
----
-
-## ✅ Definición de terminado
-
-Una funcionalidad se considerará completada cuando:
-
-- implemente el comportamiento requerido;
-- cuente con validaciones y manejo de errores;
-- tenga pruebas automatizadas relevantes;
-- no introduzca secretos en el repositorio;
-- respete la arquitectura establecida;
-- pase CI;
-- mantenga documentación suficiente;
-- haya sido revisada antes de fusionarse a `main`.
+Consulta [`SECURITY.md`](SECURITY.md) para el proceso de reporte de vulnerabilidades.
 
 ---
 
-## 🚀 Estado actual
+## 📄 Licencia
 
-**CertiChain se encuentra en reconstrucción y evolución profesional, actualmente en Fase 0.**
-
-| Área | Estado actual |
-|---|---|
-| Documentación conceptual | ✅ Disponible |
-| Información académica | ✅ Disponible |
-| Arquitectura objetivo | ✅ Definida a alto nivel |
-| Smart contracts | ⏳ Pendiente |
-| Backend / REST API | ⏳ Pendiente |
-| Aplicación móvil | ⏳ Pendiente |
-| Portal web / verificador | ⏳ Pendiente |
-| Persistencia | ⏳ Pendiente de decisión e implementación |
-| Testing automatizado | ⏳ Pendiente |
-| CI/CD | ⏳ Pendiente |
-| Docker / despliegue | ⏳ Pendiente |
-| Release funcional | ⏳ Pendiente |
-
-La documentación académica y el diseño conceptual constituyen el punto de partida. Las funcionalidades descritas en este README representan tanto el alcance original como la arquitectura objetivo y **no deben interpretarse como funcionalidades implementadas** hasta que sus respectivas fases sean completadas.
+MIT. Consulta [`LICENSE`](LICENSE).
 
 ---
 
@@ -617,10 +379,6 @@ Matrícula: **A00115261**
 Ingeniería de Software  
 Universidad APEC (UNAPEC)
 
-CertiChain forma parte de una colección de proyectos académicos preservados y evolucionados posteriormente con prácticas modernas de ingeniería de software.
-
 ---
 
-<p align="center">
-  <strong>CertiChain — Verify once. Trust anywhere.</strong>
-</p>
+<p align="center"><strong>CertiChain — Verify once. Trust anywhere.</strong></p>

@@ -7,7 +7,9 @@ import { z } from "zod";
 import { certificateRegistry } from "./blockchain.js";
 import { config } from "./config.js";
 import { AuthUser, CertificateRecord } from "./domain.js";
+import { observability, renderPrometheusMetrics } from "./observability.js";
 import { maskPersonName, rateLimit, requestSecurity } from "./security.js";
+import { storageService } from "./storage.js";
 import { store } from "./store.js";
 
 declare global {
@@ -65,7 +67,12 @@ function authorize(...roles: AuthUser["role"][]) {
   };
 }
 
-async function audit(actor: string, action: Parameters<typeof store.appendAudit>[0]["action"], entityId?: string, metadata?: Record<string, unknown>) {
+async function audit(
+  actor: string,
+  action: Parameters<typeof store.appendAudit>[0]["action"],
+  entityId?: string,
+  metadata?: Record<string, unknown>,
+) {
   await store.appendAudit({
     id: randomUUID(),
     actor,
@@ -82,14 +89,43 @@ export function createApp() {
   app.set("trust proxy", 1);
   app.use(helmet({ crossOriginResourcePolicy: { policy: "same-site" } }));
   app.use(requestSecurity);
-  app.use(cors({ origin: config.CORS_ORIGIN, methods: ["GET", "POST"], allowedHeaders: ["Content-Type", "Authorization", "X-Request-Id"] }));
+  app.use(observability);
+  app.use(cors({ origin: config.CORS_ORIGIN, methods: ["GET", "POST"], allowedHeaders: ["Content-Type", "Authorization", "X-Request-Id", "X-File-Name"] }));
   app.use(express.json({ limit: "128kb", strict: true }));
   app.use("/api", rateLimit({ windowMs: 60_000, max: 120 }));
   app.use("/api/auth", rateLimit({ windowMs: 15 * 60_000, max: 20 }));
   app.use("/api/verify", rateLimit({ windowMs: 60_000, max: 40 }));
 
   app.get("/health", (_req, res) => {
-    res.json({ status: "ok", blockchainConfigured: certificateRegistry.configured });
+    res.json({
+      status: "ok",
+      persistence: store.kind,
+      storage: storageService.driver,
+      blockchainConfigured: certificateRegistry.configured,
+    });
+  });
+
+  app.get("/ready", async (_req, res) => {
+    try {
+      const persistenceReady = await store.healthcheck();
+      const ready = persistenceReady && storageService.configured;
+      return res.status(ready ? 200 : 503).json({
+        status: ready ? "ready" : "not_ready",
+        persistenceReady,
+        storageReady: storageService.configured,
+        blockchainConfigured: certificateRegistry.configured,
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(503).json({ status: "not_ready", persistenceReady: false });
+    }
+  });
+
+  app.get("/metrics", (req, res) => {
+    if (config.METRICS_TOKEN && req.headers.authorization !== `Bearer ${config.METRICS_TOKEN}`) {
+      return res.status(401).json({ error: "Metrics authentication required" });
+    }
+    return res.type("text/plain; version=0.0.4").send(renderPrometheusMetrics());
   });
 
   app.post("/api/auth/login", async (req, res) => {
@@ -104,6 +140,28 @@ export function createApp() {
     await audit(user.email, "login");
     return res.json({ token: createToken(user), user });
   });
+
+  app.post(
+    "/api/documents",
+    authenticate,
+    authorize("admin", "issuer"),
+    express.raw({ type: ["application/pdf", "application/octet-stream"], limit: "10mb" }),
+    async (req, res) => {
+      if (!Buffer.isBuffer(req.body) || req.body.length === 0) {
+        return res.status(400).json({ error: "A PDF or binary certificate document is required" });
+      }
+
+      const filename = req.header("x-file-name") ?? "certificate.pdf";
+      const contentType = req.header("content-type") ?? "application/octet-stream";
+      const stored = await storageService.saveDocument(req.body, filename, contentType);
+      await audit(req.user!.email, "document.upload", undefined, {
+        documentHash: stored.documentHash,
+        metadataURI: stored.metadataURI,
+        encryption: stored.encryption,
+      });
+      return res.status(201).json(stored);
+    },
+  );
 
   app.get("/api/certificates", authenticate, async (_req, res) => {
     res.json({ items: await store.listCertificates() });

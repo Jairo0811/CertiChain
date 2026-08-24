@@ -27,7 +27,7 @@ export interface CertificateRecord {
 export interface AuditEvent {
   id: string;
   actor: string;
-  action: "login" | "certificate.issue" | "certificate.revoke" | "certificate.verify";
+  action: "login" | "document.upload" | "certificate.issue" | "certificate.revoke" | "certificate.verify";
   entityId?: string;
   timestamp: string;
   metadata?: Record<string, unknown>;
