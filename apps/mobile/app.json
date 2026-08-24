@@ -6,6 +6,15 @@
     "orientation": "portrait",
     "scheme": "certichain",
     "userInterfaceStyle": "dark",
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Permite a CertiChain usar la cámara para escanear códigos QR de certificados.",
+          "recordAudioAndroid": false
+        }
+      ]
+    ],
     "android": {
       "package": "com.jairomatias.certichain"
     },
