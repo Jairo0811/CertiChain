@@ -1,0 +1,13 @@
+services:
+  api:
+    environment:
+      NODE_ENV: production
+      CORS_ORIGIN: ${CORS_ORIGIN:?CORS_ORIGIN is required in production}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required in production}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:?ADMIN_EMAIL is required in production}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ADMIN_PASSWORD is required in production}
+
+  web:
+    build:
+      args:
+        VITE_API_URL: ${VITE_API_URL:?VITE_API_URL is required in production}
