@@ -56,6 +56,45 @@ describe("CertiChain API", () => {
     expect(response.body.encryption).toBe("AES-256-GCM");
   });
 
+  it("executes the authenticated issue-list-revoke-verify lifecycle", async () => {
+    const app = createApp();
+    const token = await loginToken();
+    const documentHash = `0x${"ab".repeat(32)}`;
+
+    const issued = await request(app)
+      .post("/api/certificates")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        studentName: "CertiChain Test Student",
+        studentWallet: `0x${"12".repeat(20)}`,
+        title: "Credential Lifecycle Test",
+        institution: "CertiChain Test Academy",
+        issuedAt: "2026-08-24",
+        documentHash,
+        metadataURI: "local-encrypted://lifecycle-test.enc",
+      });
+
+    expect(issued.status).toBe(201);
+    expect(issued.body.status).toBe("pending");
+
+    const listed = await request(app)
+      .get("/api/certificates")
+      .set("Authorization", `Bearer ${token}`);
+    expect(listed.status).toBe(200);
+    expect(listed.body.items.some((item: { id: string }) => item.id === issued.body.id)).toBe(true);
+
+    const revoked = await request(app)
+      .post(`/api/certificates/${issued.body.id}/revoke`)
+      .set("Authorization", `Bearer ${token}`);
+    expect(revoked.status).toBe(200);
+    expect(revoked.body.status).toBe("revoked");
+
+    const verified = await request(app).get(`/api/verify/${issued.body.id}?hash=${documentHash}`);
+    expect(verified.status).toBe(200);
+    expect(verified.body.valid).toBe(false);
+    expect(verified.body.certificate.status).toBe("revoked");
+  });
+
   it("exposes Prometheus metrics", async () => {
     const response = await request(createApp()).get("/metrics");
 
