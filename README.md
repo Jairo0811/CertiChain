@@ -1,4 +1,8 @@
 <p align="center">
+  <img src="docs/images/certichain-logo.jpeg" alt="Logo de BarberTurn" width="720" />
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/badge/UNAPEC-ISO--915-003B70?style=for-the-badge" alt="UNAPEC ISO-915">
 </p>
 
