@@ -1,0 +1,43 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Validate and publish release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Quality gates
+        run: npm run ci
+
+      - name: Build workspaces
+        run: npm run build
+
+      - name: Build Docker images
+        run: docker compose build
+        env:
+          JWT_SECRET: release-build-only-secret-value
+          ADMIN_PASSWORD: ReleaseBuildOnly123!
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${GITHUB_REF_NAME}" --generate-notes --title "CertiChain ${GITHUB_REF_NAME}"
