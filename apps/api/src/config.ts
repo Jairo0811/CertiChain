@@ -68,15 +68,24 @@ const schema = z
       ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["CORS_ORIGIN"], message: "Production CORS origin cannot use localhost" });
     }
 
-    if (!value.DATABASE_URL) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["DATABASE_URL"], message: "Production requires PostgreSQL persistence" });
+    const requiredProductionValues: Array<[keyof typeof value, unknown, string]> = [
+      ["DATABASE_URL", value.DATABASE_URL, "Production requires PostgreSQL persistence"],
+      ["DOCUMENT_ENCRYPTION_KEY", value.DOCUMENT_ENCRYPTION_KEY, "Production requires a dedicated AES-256 document encryption key"],
+      ["BLOCKCHAIN_RPC_URL", value.BLOCKCHAIN_RPC_URL, "Production requires a blockchain RPC endpoint"],
+      ["CERTIFICATE_REGISTRY_ADDRESS", value.CERTIFICATE_REGISTRY_ADDRESS, "Production requires a deployed CertificateRegistry address"],
+      ["BLOCKCHAIN_PRIVATE_KEY", value.BLOCKCHAIN_PRIVATE_KEY, "Production requires a dedicated issuer signer key"],
+      ["METRICS_TOKEN", value.METRICS_TOKEN, "Production requires protected metrics access"],
+    ];
+
+    for (const [path, currentValue, message] of requiredProductionValues) {
+      if (!currentValue) ctx.addIssue({ code: z.ZodIssueCode.custom, path: [path], message });
     }
 
-    if (!value.DOCUMENT_ENCRYPTION_KEY) {
+    if (value.STORAGE_DRIVER !== "ipfs") {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        path: ["DOCUMENT_ENCRYPTION_KEY"],
-        message: "Production requires a dedicated AES-256 document encryption key",
+        path: ["STORAGE_DRIVER"],
+        message: "Production requires STORAGE_DRIVER=ipfs",
       });
     }
   });
