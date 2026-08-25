@@ -67,6 +67,45 @@ El desarrollo planificado de las **Fases 0–8 está implementado**. La base de 
 | **Jenrry Monegro Rosario** | **A00116621** |
 | **Enmanuel Alberto Arias de Jesus** | **A00117358** |
 
+## 🧭 Continuidad académica
+
+CertiChain ocupa un punto intermedio dentro de varias relaciones académicas verificables de la trayectoria en UNAPEC. Estas relaciones se documentan por separado para distinguir la recurrencia de estudiantes, la continuidad docente y el cruce institucional ITLA → UNAPEC.
+
+### 👥 Continuidad por estudiantes
+
+**Pieranyela José Carrasco Rodríguez (A00116415)** y **Jenrry Monegro Rosario (A00116621)** participaron junto a Francis Jairo Matías Rosario en **CertiChain (ISO-915)** durante **Septiembre - Diciembre de 2025** y volvieron a coincidir en [**CineGest**](https://github.com/Jairo0811/CineGest), correspondiente a **Desarrollo de Software con Tecnología Open Source I (ISO-610)** durante **Enero - Abril de 2026**.
+
+| Orden | Asignatura | Proyecto | Período |
+|---:|---|---|---|
+| 1 | Fundamentos de Seguridad de Software (ISO-915) | **CertiChain** | Septiembre - Diciembre 2025 |
+| 2 | Desarrollo de Software con Tecnología Open Source I (ISO-610) | [**CineGest**](https://github.com/Jairo0811/CineGest) | Enero - Abril 2026 |
+
+La recurrencia queda respaldada por el mismo **nombre completo y matrícula** en los equipos académicos de ambos proyectos.
+
+### 👨‍🏫 Continuidad por profesor
+
+El profesor **Ing. Pedro José Ramirez Rodriguez** aparece en una secuencia formativa de tres proyectos independientes: [**NutriFlow**](https://github.com/Jairo0811/NutriFlow), CertiChain y [**Digital Sanctuary**](https://github.com/Jairo0811/DigitalSanctuary).
+
+| Orden | Asignatura | Proyecto | Período |
+|---:|---|---|---|
+| 1 | Bases de Datos 1 (INF-164) | [**NutriFlow**](https://github.com/Jairo0811/NutriFlow) | Mayo - Agosto 2024 |
+| 2 | Fundamentos de Seguridad de Software (ISO-915) | **CertiChain** | Septiembre - Diciembre 2025 |
+| 3 | Desarrollo de Software con Tecnología Propietaria 2 (ISO-710) | [**Digital Sanctuary**](https://github.com/Jairo0811/DigitalSanctuary) | Mayo - Agosto 2026 |
+
+La secuencia es **formativa y cronológica**: comienza con fundamentos de datos y modelado, continúa con seguridad de software y blockchain, y posteriormente llega al desarrollo de una aplicación Android nativa. Los proyectos no constituyen versiones ni dependencias técnicas entre sí.
+
+### 🏫 Cruce institucional ITLA → UNAPEC
+
+Dentro del equipo de CertiChain existen trayectorias previas documentadas en el **Instituto Tecnológico de Las Américas (ITLA)** antes de coincidir en UNAPEC:
+
+| Integrante | Matrícula UNAPEC | Matrícula ITLA |
+|---|---|---|
+| Francis Jairo Matías Rosario | A00115261 | 2015-2984 |
+| Pieranyela José Carrasco Rodríguez | A00116415 | 2019-8767 |
+| Jenrry Monegro Rosario | A00116621 | 2019-8690 |
+
+El cruce institucional documenta la trayectoria educativa previa de estos integrantes. No implica que hayan cursado juntos una misma asignatura en ITLA. No se incluye una matrícula ITLA para **Enmanuel Alberto Arias de Jesus** porque no existe una referencia verificada dentro de la documentación disponible.
+
 CertiChain forma parte de la evolución académica y técnica de proyectos preservados y modernizados posteriormente con prácticas de ingeniería de software.
 
 ---
