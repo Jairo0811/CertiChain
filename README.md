@@ -103,8 +103,9 @@ Dentro del equipo de CertiChain existen trayectorias previas documentadas en el 
 | Francis Jairo Matías Rosario | A00115261 | 2015-2984 |
 | Pieranyela José Carrasco Rodríguez | A00116415 | 2019-8767 |
 | Jenrry Monegro Rosario | A00116621 | 2019-8690 |
+| Enmanuel Alberto Arias de Jesus | A00117358 | 2019-7415 |
 
-El cruce institucional documenta la trayectoria educativa previa de estos integrantes. No implica que hayan cursado juntos una misma asignatura en ITLA. No se incluye una matrícula ITLA para **Enmanuel Alberto Arias de Jesus** porque no existe una referencia verificada dentro de la documentación disponible.
+El cruce institucional documenta la trayectoria educativa previa de los cuatro integrantes del equipo. No implica que hayan cursado juntos una misma asignatura en ITLA.
 
 CertiChain forma parte de la evolución académica y técnica de proyectos preservados y modernizados posteriormente con prácticas de ingeniería de software.
 
