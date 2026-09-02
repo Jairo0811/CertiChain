@@ -62,10 +62,10 @@ El desarrollo planificado de las **Fases 0–8 está implementado**. La base de 
 
 | Integrante | Matrícula |
 |---|---|
-| **Francis Jairo Matías Rosario** | **A00115261** |
-| **Pieranyela José Carrasco Rodríguez** | **A00116415** |
-| **Jenrry Monegro Rosario** | **A00116621** |
-| **Enmanuel Alberto Arias de Jesus** | **A00117358** |
+| 👨🏻‍💻 **Francis Jairo Matías Rosario** | **A00115261** |
+| 👩🏻‍💻 **Pieranyela José Carrasco Rodríguez** | **A00116415** |
+| 👨🏻‍💻 **Jenrry Monegro Rosario** | **A00116621** |
+| 👨🏻‍💻 **Enmanuel Alberto Arias de Jesus** | **A00117358** |
 
 ## 🧭 Continuidad académica
 
