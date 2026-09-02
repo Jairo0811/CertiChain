@@ -73,14 +73,15 @@ CertiChain ocupa un punto intermedio dentro de varias relaciones académicas ver
 
 ### 👥 Continuidad por estudiantes
 
-**Pieranyela José Carrasco Rodríguez (A00116415)** y **Jenrry Monegro Rosario (A00116621)** participaron junto a Francis Jairo Matías Rosario en **CertiChain (ISO-915)** durante **Septiembre - Diciembre de 2025** y volvieron a coincidir en [**CineGest**](https://github.com/Jairo0811/CineGest), correspondiente a **Desarrollo de Software con Tecnología Open Source I (ISO-610)** durante **Enero - Abril de 2026**.
+**Pieranyela José Carrasco Rodríguez (A00116415)** y **Jenrry Monegro Rosario (A00116621)** coincidieron con Francis Jairo Matías Rosario en dos asignaturas distintas durante **Septiembre - Diciembre de 2025**: **CertiChain (ISO-915)** y [**AccessiUX Market**](https://github.com/Jairo0811/AccessiUX-Market), originado en **Ingeniería de la Usabilidad (ISO-505)**. Posteriormente, ambos volvieron a coincidir con Francis en [**CineGest**](https://github.com/Jairo0811/CineGest), correspondiente a **Desarrollo de Software con Tecnología Open Source I (ISO-610)** durante **Enero - Abril de 2026**.
 
 | Orden | Asignatura | Proyecto | Período |
 |---:|---|---|---|
 | 1 | Fundamentos de Seguridad de Software (ISO-915) | **CertiChain** | Septiembre - Diciembre 2025 |
-| 2 | Desarrollo de Software con Tecnología Open Source I (ISO-610) | [**CineGest**](https://github.com/Jairo0811/CineGest) | Enero - Abril 2026 |
+| 2 | Ingeniería de la Usabilidad (ISO-505) | [**AccessiUX Market**](https://github.com/Jairo0811/AccessiUX-Market) | Septiembre - Diciembre 2025 |
+| 3 | Desarrollo de Software con Tecnología Open Source I (ISO-610) | [**CineGest**](https://github.com/Jairo0811/CineGest) | Enero - Abril 2026 |
 
-La recurrencia queda respaldada por el mismo **nombre completo y matrícula** en los equipos académicos de ambos proyectos.
+La recurrencia queda respaldada por el mismo **nombre completo y matrícula** en los equipos académicos de los tres proyectos. La relación es formativa y cronológica; no implica dependencia técnica entre las aplicaciones.
 
 ### 👨‍🏫 Continuidad por profesor
 
@@ -105,7 +106,7 @@ Dentro del equipo de CertiChain existen trayectorias previas documentadas en el 
 | Jenrry Monegro Rosario | A00116621 | 2019-8690 |
 | Enmanuel Alberto Arias de Jesus | A00117358 | 2019-7415 |
 
-El cruce institucional documenta la trayectoria educativa previa de los cuatro integrantes del equipo. No implica que hayan cursado juntos una misma asignatura en ITLA.
+El cruce institucional documenta la trayectoria educativa previa de los cuatro integrantes del equipo. Para Pieranyela y Jenrry, la continuidad posterior en UNAPEC queda además documentada en **AccessiUX Market** y **CineGest**. No implica que hayan cursado juntos una misma asignatura en ITLA.
 
 CertiChain forma parte de la evolución académica y técnica de proyectos preservados y modernizados posteriormente con prácticas de ingeniería de software.
 
