@@ -207,6 +207,39 @@ CertiChain forma parte de la evolución académica y técnica de proyectos prese
 
 ## 🧱 Stack tecnológico
 
+### 📱 Mobile y Web
+
+<p align="center">
+  <img src="https://skillicons.dev/icons?i=react,ts,vite" alt="React, TypeScript y Vite" />
+  <img src="https://img.shields.io/badge/Expo-000020?style=for-the-badge&logo=expo&logoColor=white" alt="Expo" />
+</p>
+
+### ⚙️ Backend y API
+
+<p align="center">
+  <img src="https://skillicons.dev/icons?i=nodejs,express,ts" alt="Node.js, Express y TypeScript" />
+  <img src="https://img.shields.io/badge/Zod-3E67B1?style=for-the-badge&logo=zod&logoColor=white" alt="Zod" />
+  <img src="https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white" alt="JWT" />
+</p>
+
+### 🗄️ Datos, Blockchain y Storage
+
+<p align="center">
+  <img src="https://skillicons.dev/icons?i=postgres,solidity" alt="PostgreSQL y Solidity" />
+  <img src="https://img.shields.io/badge/Hardhat-FFF100?style=for-the-badge&logo=hardhat&logoColor=000000" alt="Hardhat" />
+  <img src="https://img.shields.io/badge/OpenZeppelin-4E5EE4?style=for-the-badge&logo=openzeppelin&logoColor=white" alt="OpenZeppelin" />
+  <img src="https://img.shields.io/badge/IPFS-65C2CB?style=for-the-badge&logo=ipfs&logoColor=white" alt="IPFS" />
+</p>
+
+### 🧪 Testing, Seguridad y DevOps
+
+<p align="center">
+  <img src="https://skillicons.dev/icons?i=docker,github,githubactions" alt="Docker, GitHub y GitHub Actions" />
+  <img src="https://img.shields.io/badge/Vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white" alt="Vitest" />
+  <img src="https://img.shields.io/badge/CodeQL-181717?style=for-the-badge&logo=github&logoColor=white" alt="CodeQL" />
+  <img src="https://img.shields.io/badge/Prometheus-E6522C?style=for-the-badge&logo=prometheus&logoColor=white" alt="Prometheus" />
+</p>
+
 | Capa | Tecnologías |
 |---|---|
 | Mobile | React Native, Expo, TypeScript, Expo Camera, Secure Store |
