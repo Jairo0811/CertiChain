@@ -1,12 +1,13 @@
 # CertiChain — Production Readiness v1.0
 
-Este documento distingue entre **capacidades implementadas en el repositorio** y **operaciones externas de go-live** que requieren credenciales, infraestructura o aprobación humana.
+CertiChain se considera **finalizado como proyecto académico de portafolio de UNAPEC en versión 1.0.0**. Este documento conserva la arquitectura y los controles necesarios para una eventual conversión a servicio productivo real, pero esas operaciones externas **no forman parte de los criterios pendientes del cierre académico**.
 
 ## Estado técnico de v1.0
 
 ### Implementado en código
 
 - quality gates: formato, lint, type-check, tests y build;
+- `package-lock.json` v3 y uso de `npm ci` en CI y builds Docker;
 - pruebas de smart contracts;
 - portal web institucional y verificación pública;
 - aplicación móvil con wallet local, QR e historial;
@@ -15,7 +16,7 @@ Este documento distingue entre **capacidades implementadas en el repositorio** y
 - creación automática de esquema SQL e índices necesarios;
 - cifrado de documentos con AES-256-GCM antes de persistirlos;
 - almacenamiento local cifrado para desarrollo;
-- adaptador IPFS para producción;
+- adaptador IPFS para un despliegue productivo opcional;
 - SHA-256 calculado sobre el documento original antes del cifrado;
 - healthcheck `/health` y readiness `/ready`;
 - métricas Prometheus en `/metrics`, protegibles mediante `METRICS_TOKEN`;
@@ -28,7 +29,27 @@ Este documento distingue entre **capacidades implementadas en el repositorio** y
 - CodeQL para JavaScript/TypeScript;
 - pruebas de ciclo de vida de certificados: autenticación → emisión → listado → revocación → verificación.
 
-## Requisitos obligatorios de producción
+## Cierre académico / portafolio
+
+Para el alcance de portafolio, se consideran cumplidos los siguientes criterios:
+
+- [x] arquitectura completa y documentada;
+- [x] implementación funcional de web, API, móvil y smart contract;
+- [x] persistencia SQL y almacenamiento cifrado;
+- [x] separación on-chain/off-chain de datos sensibles;
+- [x] pruebas automatizadas y quality gates;
+- [x] análisis CodeQL;
+- [x] contenedores reproducibles;
+- [x] ejecución local documentada;
+- [x] observabilidad y readiness;
+- [x] scripts operativos de backup/restore;
+- [x] flujo de despliegue blockchain preparado;
+- [x] documentación de seguridad y producción;
+- [x] versión de portafolio `1.0.0` consolidada.
+
+El proyecto **no necesita almacenar datos académicos reales, pagar infraestructura, desplegar en Polygon PoS ni contratar un proveedor IPFS** para demostrar el cumplimiento de su objetivo académico y técnico.
+
+## Requisitos únicamente para un despliegue productivo real
 
 La API rechaza `NODE_ENV=production` si no se han configurado correctamente:
 
@@ -44,9 +65,9 @@ La API rechaza `NODE_ENV=production` si no se han configurado correctamente:
 - `IPFS_API_URL`;
 - `METRICS_TOKEN`.
 
-Esto evita iniciar accidentalmente una instancia de producción con persistencia temporal, claves bootstrap o almacenamiento sin cifrar.
+Esto evita iniciar accidentalmente una instancia real con persistencia temporal, claves bootstrap o almacenamiento inseguro.
 
-## Arquitectura objetivo
+## Arquitectura objetivo para producción
 
 - Web estática detrás de CDN/WAF.
 - API en contenedores administrados.
@@ -70,9 +91,9 @@ Solo deben publicarse datos necesarios para demostrar autenticidad:
 
 PII, documentos académicos completos y secretos permanecen off-chain.
 
-## Go-live: operaciones externas pendientes
+## Extensión opcional: go-live real
 
-Estas tareas **no deben hardcodearse ni simularse desde el repositorio** y requieren infraestructura/credenciales reales:
+Las siguientes tareas se conservan como **extensiones opcionales** y no como deuda del portafolio:
 
 - [ ] crear secretos de producción en un gestor seguro;
 - [ ] provisionar PostgreSQL administrado y ejecutar una prueba real de backup/restore;
@@ -84,14 +105,16 @@ Estas tareas **no deben hardcodearse ni simularse desde el repositorio** y requi
 - [ ] realizar auditoría independiente del smart contract antes de mainnet;
 - [ ] ejecutar pruebas E2E contra staging real (web, API, móvil, IPFS y blockchain);
 - [ ] aprobar política de privacidad, retención y procedimiento de incidentes;
-- [ ] crear tag `v1.0.0` para publicar el release una vez aprobado staging.
+- [ ] publicar un GitHub Release/tag si se desea distribuir la aplicación formalmente.
 
-## Entornos
+Estas actividades solo son obligatorias si CertiChain evoluciona desde proyecto académico hacia un servicio que procese credenciales reales.
+
+## Entornos previstos
 
 1. `development` — Docker local, PostgreSQL local y almacenamiento cifrado local.
 2. `test` — CI y pruebas automatizadas.
-3. `staging` — Polygon Amoy + PostgreSQL/IPFS equivalentes a producción.
-4. `production` — Polygon PoS + servicios administrados.
+3. `staging` — opcional; Polygon Amoy + PostgreSQL/IPFS equivalentes a producción.
+4. `production` — opcional; Polygon PoS + servicios administrados.
 
 Nunca reutilizar claves privadas, contraseñas o llaves de cifrado entre entornos.
 
@@ -106,4 +129,4 @@ Nunca reutilizar claves privadas, contraseñas o llaves de cifrado entre entorno
 - emisión por lotes;
 - integración con sistemas académicos externos.
 
-La v1.0 queda preparada para staging y producción. El despliegue real a servicios externos continúa siendo una operación controlada porque requiere secretos y activos que nunca deben almacenarse en Git.
+**Conclusión:** la v1.0 está completa para su propósito académico y de portafolio. La infraestructura externa queda preservada como ruta de evolución futura, no como requisito pendiente de CertiChain.
