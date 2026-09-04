@@ -6,11 +6,9 @@
  <img src="https://img.shields.io/badge/UNAPEC-ISO--915-003B70?style=for-the-badge" alt="UNAPEC ISO-915">
 </p>
 
-
 <p align="center">
- 
   <img src="https://img.shields.io/badge/Versi%C3%B3n-1.0.0-22C55E?style=for-the-badge" alt="Versión 1.0.0">
-  <img src="https://img.shields.io/badge/Estado-Staging%20Ready-2563EB?style=for-the-badge" alt="Estado: Staging Ready">
+  <img src="https://img.shields.io/badge/Estado-Portfolio%20Ready-2563EB?style=for-the-badge" alt="Estado: Portfolio Ready">
   <img src="https://img.shields.io/badge/Blockchain-Ethereum%20%2F%20Polygon-7C3AED?style=for-the-badge&logo=ethereum&logoColor=white" alt="Ethereum / Polygon">
 </p>
 
@@ -28,7 +26,9 @@ La arquitectura sigue un enfoque **off-chain first**: los datos personales y doc
 
 ## ✅ Estado actual
 
-El desarrollo planificado de las **Fases 0–8 está implementado**. La base de código está preparada para staging y para un release `v1.0.0` una vez se conecten los servicios externos reales.
+El desarrollo planificado de las **Fases 0–8 está implementado** y CertiChain **v1.0.0 queda finalizado como proyecto académico de portafolio de UNAPEC**. El repositorio contiene una implementación funcional, reproducible y documentada de todas las capas necesarias para demostrar su propuesta técnica.
+
+La conexión con PostgreSQL administrado, IPFS contratado, RPC/wallet de Polygon, dominio público o servicios cloud reales se conserva como **extensión opcional de producción**. No constituye una deuda ni un requisito pendiente para el cierre académico.
 
 | Área | Estado |
 |---|:---:|
@@ -42,14 +42,17 @@ El desarrollo planificado de las **Fases 0–8 está implementado**. La base de 
 | Cifrado AES-256-GCM | ✅ |
 | Adaptador IPFS | ✅ |
 | Docker / Docker Compose | ✅ |
+| `package-lock.json` / `npm ci` | ✅ |
 | CI / CodeQL | ✅ |
 | Métricas / readiness / logging | ✅ |
 | Backup / restore | ✅ |
 | Deploy automatizado del contrato | ✅ Preparado |
-| Polygon/IPFS/DB administrados reales | ⏳ Requiere infraestructura externa |
-| Auditoría independiente del smart contract | ⏳ Pre-mainnet |
+| Infraestructura cloud/mainnet real | ➕ Opcional |
+| Auditoría independiente del smart contract | ➕ Solo antes de mainnet real |
 
-> `main` no contiene claves privadas, tokens de infraestructura ni credenciales de producción. El go-live real requiere secretos externos y aprobaciones operativas.
+> `main` no contiene claves privadas, tokens de infraestructura ni credenciales de producción. Para el alcance académico, los servicios externos reales no son necesarios y no deben simularse ni hardcodearse.
+
+Consulta [`docs/portfolio-readiness.md`](docs/portfolio-readiness.md) para el criterio de cierre y el escenario recomendado de demostración. La ruta opcional hacia un despliegue real se documenta en [`docs/production-readiness.md`](docs/production-readiness.md).
 
 ---
 
@@ -308,7 +311,7 @@ El healthcheck de Docker utiliza `/ready`, por lo que el portal web espera a que
 
 ### Desarrollo sin blockchain
 
-Blockchain puede permanecer sin configurar durante pruebas locales. En ese modo, los certificados se almacenan off-chain con estado `pending`. Para staging/producción, la configuración de blockchain es obligatoria.
+Blockchain puede permanecer sin configurar durante pruebas locales y demostraciones de portafolio. En ese modo, los certificados se almacenan off-chain con estado `pending`. La configuración blockchain externa solo es obligatoria para un staging/producción real.
 
 ---
 
@@ -322,7 +325,7 @@ En desarrollo:
 STORAGE_DRIVER=local
 ```
 
-En producción:
+En una producción real opcional:
 
 ```env
 STORAGE_DRIVER=ipfs
@@ -358,7 +361,7 @@ El workflow **Deploy CertificateRegistry** se ejecuta manualmente desde GitHub A
 - `amoy`;
 - `polygon`.
 
-Los RPC y `BLOCKCHAIN_PRIVATE_KEY` deben estar configurados como secretos del environment correspondiente. Nunca se almacenan en el repositorio.
+Los RPC y `BLOCKCHAIN_PRIVATE_KEY` deben estar configurados como secretos del environment correspondiente. Nunca se almacenan en el repositorio. Para el proyecto académico basta con que esta capacidad permanezca implementada y documentada; no es necesario financiar un despliegue mainnet.
 
 ---
 
@@ -378,7 +381,7 @@ En producción, `/metrics` exige `METRICS_TOKEN`. Las solicitudes generan logs J
 
 ## 🧪 Quality gates
 
-Cada cambio debe superar:
+Las instalaciones de CI utilizan el `package-lock.json` mediante `npm ci`. Cada cambio debe superar:
 
 ```text
 format
@@ -411,23 +414,23 @@ Los smart contracts cuentan con pruebas de permisos, emisión, revocación e int
 | 5 | Verificación pública | ✅ |
 | 6 | Seguridad, privacidad y storage | ✅ |
 | 7 | Testing, DevOps y despliegue | ✅ |
-| 8 | Producción y expansión | ✅ Base implementada |
+| 8 | Production readiness y expansión | ✅ Base implementada |
+| Cierre | Reproducibilidad, documentación y portfolio readiness | ✅ |
 
-### Operaciones de go-live
+### Extensiones opcionales de producción
 
-El código está preparado, pero los siguientes pasos dependen de servicios/credenciales externos:
+El proyecto académico está cerrado. Si en el futuro CertiChain se convierte en un servicio operativo, se podrá añadir:
 
 - PostgreSQL administrado;
-- proveedor IPFS;
-- RPC de Polygon;
-- wallet de despliegue;
+- proveedor IPFS real;
+- RPC de Polygon y wallet de despliegue;
 - dominio HTTPS + CDN/WAF;
-- plataforma de observabilidad;
+- plataforma de observabilidad administrada;
 - auditoría independiente del smart contract;
 - pruebas E2E sobre staging real;
-- creación final del tag `v1.0.0`.
+- publicación formal mediante GitHub Release/tag.
 
-Consulta [`docs/production-readiness.md`](docs/production-readiness.md) para el checklist detallado.
+Estas actividades no son requisitos pendientes del portafolio. Consulta [`docs/production-readiness.md`](docs/production-readiness.md) para la ruta de evolución y [`CHANGELOG.md`](CHANGELOG.md) para el cierre de la versión.
 
 ---
 
