@@ -9,7 +9,7 @@ COPY apps ./apps
 COPY packages ./packages
 COPY blockchain ./blockchain
 
-RUN npm install
+RUN npm ci
 RUN npm run build -w @certichain/web
 
 FROM nginx:1.27-alpine AS runtime
