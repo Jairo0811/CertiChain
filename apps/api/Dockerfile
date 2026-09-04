@@ -6,7 +6,7 @@ COPY apps ./apps
 COPY packages ./packages
 COPY blockchain ./blockchain
 
-RUN npm install
+RUN npm ci
 RUN npm run build -w @certichain/api
 
 FROM node:20-alpine AS runtime
