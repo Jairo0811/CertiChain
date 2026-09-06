@@ -149,13 +149,14 @@ export function App() {
 
   async function issue(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
     try {
       await api("/api/certificates", {
         method: "POST",
         body: JSON.stringify(Object.fromEntries(form.entries())),
       });
-      event.currentTarget.reset();
+      formElement.reset();
       setMessage("Certificado registrado correctamente.");
       await loadCertificates();
       setView("certificates");
