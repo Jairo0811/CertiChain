@@ -57,7 +57,7 @@ describe("CertiChain API", () => {
     expect(response.body.encryption).toBe("AES-256-GCM");
   });
 
-  it("automatically generates, encrypts and downloads the issued certificate PDF", async () => {
+  it("automatically generates wallet, evidence, PDF and public hash lookup", async () => {
     const app = createApp();
     const token = await loginToken();
 
@@ -66,7 +66,6 @@ describe("CertiChain API", () => {
       .set("Authorization", `Bearer ${token}`)
       .send({
         studentName: "María José Pérez",
-        studentWallet: `0x${"34".repeat(20)}`,
         title: "Fundamentos de Seguridad de Software",
         institution: "Universidad APEC (UNAPEC)",
         issuedAt: "2026-09-06",
@@ -74,9 +73,16 @@ describe("CertiChain API", () => {
 
     expect(issued.status).toBe(201);
     expect(issued.body.status).toBe("pending");
+    expect(issued.body.studentWallet).toMatch(/^0x[a-f0-9]{40}$/);
     expect(issued.body.documentHash).toMatch(/^0x[a-f0-9]{64}$/);
     expect(issued.body.metadataURI).toMatch(/^local-encrypted:\/\//);
     expect(issued.body.documentAvailable).toBe(true);
+
+    const evidence = await request(app).get(`/api/verify/${issued.body.id}/evidence`);
+    expect(evidence.status).toBe(200);
+    expect(evidence.body.id).toBe(issued.body.id);
+    expect(evidence.body.documentHash).toBe(issued.body.documentHash);
+    expect(evidence.body.source).toBe("certichain-registry");
 
     const downloaded = await request(app)
       .get(`/api/certificates/${issued.body.id}/pdf`)
