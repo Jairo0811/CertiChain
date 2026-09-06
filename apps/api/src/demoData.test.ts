@@ -9,9 +9,9 @@ describe("portfolio demo dataset", () => {
     expect(certificates.filter((item) => item.status === "active")).toHaveLength(21);
     expect(certificates.filter((item) => item.status === "revoked")).toHaveLength(2);
     expect(certificates.filter((item) => item.status === "pending")).toHaveLength(1);
-    expect(new Set(certificates.map((item) => item.institution))).toHaveSize(3);
-    expect(new Set(certificates.map((item) => item.id))).toHaveSize(24);
-    expect(new Set(certificates.map((item) => item.documentHash))).toHaveSize(24);
+    expect(new Set(certificates.map((item) => item.institution)).size).toBe(3);
+    expect(new Set(certificates.map((item) => item.id)).size).toBe(24);
+    expect(new Set(certificates.map((item) => item.documentHash)).size).toBe(24);
   });
 
   it("keeps all showcase identities explicitly marked as demo data", () => {
