@@ -1,10 +1,11 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import helmet from "helmet";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 import { certificateRegistry } from "./blockchain.js";
+import { buildCertificatePdf } from "./certificatePdf.js";
 import { config } from "./config.js";
 import { AuthUser, CertificateRecord } from "./domain.js";
 import { observability, renderPrometheusMetrics } from "./observability.js";
@@ -28,15 +29,25 @@ const loginSchema = z.object({
   password: z.string().min(8),
 });
 
-const issueSchema = z.object({
-  studentName: z.string().min(2).max(160),
-  studentWallet: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
-  title: z.string().min(2).max(200),
-  institution: z.string().min(2).max(200),
-  issuedAt: z.string().date(),
-  documentHash: hashSchema,
-  metadataURI: z.string().min(1).max(500),
-});
+const issueSchema = z
+  .object({
+    studentName: z.string().min(2).max(160),
+    studentWallet: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
+    title: z.string().min(2).max(200),
+    institution: z.string().min(2).max(200),
+    issuedAt: z.string().date(),
+    documentHash: hashSchema.optional(),
+    metadataURI: z.string().min(1).max(500).optional(),
+  })
+  .superRefine((value, ctx) => {
+    if (Boolean(value.documentHash) !== Boolean(value.metadataURI)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["documentHash"],
+        message: "documentHash and metadataURI must be supplied together or omitted together",
+      });
+    }
+  });
 
 function createToken(user: AuthUser): string {
   return jwt.sign(user, config.JWT_SECRET, { expiresIn: "8h", issuer: "certichain-api" });
@@ -81,6 +92,28 @@ async function audit(
     timestamp: new Date().toISOString(),
     metadata,
   });
+}
+
+function withDocumentAvailability(certificate: CertificateRecord) {
+  return {
+    ...certificate,
+    documentAvailable: storageService.canReadDocument(certificate.metadataURI),
+  };
+}
+
+async function storeGeneratedPdf(
+  input: Pick<CertificateRecord, "id" | "studentName" | "studentWallet" | "title" | "institution" | "issuedAt">,
+  actor: string,
+) {
+  const pdf = buildCertificatePdf(input);
+  const stored = await storageService.saveDocument(pdf, `certichain-${input.id}.pdf`, "application/pdf");
+  await audit(actor, "document.upload", input.id, {
+    documentHash: stored.documentHash,
+    metadataURI: stored.metadataURI,
+    encryption: stored.encryption,
+    generatedBy: "certichain-pdf",
+  });
+  return stored;
 }
 
 export function createApp() {
@@ -164,17 +197,32 @@ export function createApp() {
   );
 
   app.get("/api/certificates", authenticate, async (_req, res) => {
-    res.json({ items: await store.listCertificates() });
+    const certificates = await store.listCertificates();
+    res.json({ items: certificates.map(withDocumentAvailability) });
   });
 
   app.post("/api/certificates", authenticate, authorize("admin", "issuer"), async (req, res) => {
     const parsed = issueSchema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ error: "Invalid certificate payload", details: parsed.error.flatten() });
 
+    const id = randomUUID();
     const now = new Date().toISOString();
+    const { documentHash: suppliedHash, metadataURI: suppliedMetadataURI, ...credentialData } = parsed.data;
+
+    let documentHash = suppliedHash;
+    let metadataURI = suppliedMetadataURI;
+
+    if (!documentHash || !metadataURI) {
+      const stored = await storeGeneratedPdf({ id, ...credentialData }, req.user!.email);
+      documentHash = stored.documentHash;
+      metadataURI = stored.metadataURI;
+    }
+
     const certificate: CertificateRecord = {
-      id: randomUUID(),
-      ...parsed.data,
+      id,
+      ...credentialData,
+      documentHash,
+      metadataURI,
       status: "pending",
       issuerEmail: req.user!.email,
       createdAt: now,
@@ -194,9 +242,58 @@ export function createApp() {
     await audit(req.user!.email, "certificate.issue", certificate.id, {
       blockchainId: certificate.blockchainId,
       blockchainConfigured: certificateRegistry.configured,
+      generatedPdf: !suppliedHash,
     });
 
-    return res.status(201).json(certificate);
+    return res.status(201).json(withDocumentAvailability(certificate));
+  });
+
+  app.post("/api/certificates/:id/pdf", authenticate, authorize("admin", "issuer"), async (req, res) => {
+    const parsedId = idSchema.safeParse(req.params.id);
+    if (!parsedId.success) return res.status(400).json({ error: "Invalid certificate id" });
+
+    const certificate = await store.getCertificate(parsedId.data);
+    if (!certificate) return res.status(404).json({ error: "Certificate not found" });
+    if (storageService.canReadDocument(certificate.metadataURI)) {
+      return res.json(withDocumentAvailability(certificate));
+    }
+    if (certificate.status !== "pending" || certificate.blockchainId) {
+      return res.status(409).json({ error: "Stored evidence cannot be replaced for an active or blockchain-bound certificate" });
+    }
+
+    const stored = await storeGeneratedPdf(certificate, req.user!.email);
+    certificate.documentHash = stored.documentHash;
+    certificate.metadataURI = stored.metadataURI;
+    await store.saveCertificate(certificate);
+
+    return res.json(withDocumentAvailability(certificate));
+  });
+
+  app.get("/api/certificates/:id/pdf", authenticate, async (req, res) => {
+    const parsedId = idSchema.safeParse(req.params.id);
+    if (!parsedId.success) return res.status(400).json({ error: "Invalid certificate id" });
+
+    const certificate = await store.getCertificate(parsedId.data);
+    if (!certificate) return res.status(404).json({ error: "Certificate not found" });
+    if (!storageService.canReadDocument(certificate.metadataURI)) {
+      return res.status(404).json({ error: "Certificate PDF is not available in this environment" });
+    }
+
+    try {
+      const document = await storageService.readDocument(certificate.metadataURI);
+      const documentHash = `0x${createHash("sha256").update(document).digest("hex")}`;
+      if (documentHash.toLowerCase() !== certificate.documentHash.toLowerCase()) {
+        return res.status(409).json({ error: "Stored certificate PDF failed its SHA-256 integrity check" });
+      }
+
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment; filename="certichain-${certificate.id}.pdf"`);
+      res.setHeader("Cache-Control", "private, no-store");
+      return res.send(document);
+    } catch (error) {
+      console.error(error);
+      return res.status(404).json({ error: "Certificate PDF could not be retrieved" });
+    }
   });
 
   app.post("/api/certificates/:id/revoke", authenticate, authorize("admin", "issuer"), async (req, res) => {
@@ -216,7 +313,7 @@ export function createApp() {
     await store.saveCertificate(certificate);
     await audit(req.user!.email, "certificate.revoke", certificate.id);
 
-    return res.json(certificate);
+    return res.json(withDocumentAvailability(certificate));
   });
 
   app.get("/api/verify/:id", async (req, res) => {

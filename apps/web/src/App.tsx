@@ -4,9 +4,13 @@ type Certificate = {
   id: string;
   blockchainId?: string;
   studentName: string;
+  studentWallet: string;
   title: string;
   institution: string;
   issuedAt: string;
+  documentHash: string;
+  metadataURI: string;
+  documentAvailable?: boolean;
   status: "pending" | "active" | "revoked";
 };
 
@@ -34,6 +38,17 @@ function statusLabel(status: Certificate["status"]) {
   if (status === "active") return "Vigente";
   if (status === "revoked") return "Revocado";
   return "Pendiente";
+}
+
+function pdfFilename(certificate: Certificate) {
+  const slug = certificate.title
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 48);
+  return `certichain-${slug || "certificado"}-${certificate.id.slice(0, 8)}.pdf`;
 }
 
 export function App() {
@@ -152,14 +167,50 @@ export function App() {
     const formElement = event.currentTarget;
     const form = new FormData(formElement);
     try {
-      await api("/api/certificates", {
+      const created = await api("/api/certificates", {
         method: "POST",
         body: JSON.stringify(Object.fromEntries(form.entries())),
-      });
+      }) as Certificate;
       formElement.reset();
-      setMessage("Certificado registrado correctamente.");
+      setMessage("Certificado emitido correctamente. El PDF y su SHA-256 quedaron generados y cifrados.");
       await loadCertificates();
       setView("certificates");
+      setSelectedCertificate(created);
+    } catch (error) {
+      setMessage((error as Error).message);
+    }
+  }
+
+  async function downloadCertificatePdf(certificate: Certificate) {
+    try {
+      let downloadable = certificate;
+
+      if (!downloadable.documentAvailable) {
+        downloadable = await api(`/api/certificates/${encodeURIComponent(downloadable.id)}/pdf`, {
+          method: "POST",
+        }) as Certificate;
+        setCertificates((items) => items.map((item) => item.id === downloadable.id ? downloadable : item));
+        setSelectedCertificate(downloadable);
+      }
+
+      const response = await fetch(`${API_URL}/api/certificates/${encodeURIComponent(downloadable.id)}/pdf`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({ error: "No fue posible descargar el PDF" }));
+        throw new Error(body.error ?? "No fue posible descargar el PDF");
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = pdfFilename(downloadable);
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setMessage("Certificado PDF descargado correctamente.");
     } catch (error) {
       setMessage((error as Error).message);
     }
@@ -459,7 +510,7 @@ export function App() {
             <div>
               <p className="eyebrow">EMISIÓN</p>
               <h2>Emitir certificado</h2>
-              <p className="muted">Registra una credencial académica y prepara su evidencia verificable.</p>
+              <p className="muted">Registra una credencial académica y genera su evidencia PDF verificable.</p>
             </div>
             <form onSubmit={issue} className="form-grid two-columns">
               <label>Estudiante<input name="studentName" placeholder="Ej. Ana Pérez" required /></label>
@@ -467,9 +518,10 @@ export function App() {
               <label>Título<input name="title" placeholder="Ej. Ingeniería de Software" required /></label>
               <label>Institución<input name="institution" placeholder="Ej. Universidad Demo" required /></label>
               <label>Fecha<input name="issuedAt" type="date" required /></label>
-              <label>Metadata URI<input name="metadataURI" placeholder="ipfs://..." required /></label>
-              <label className="full">SHA-256<input name="documentHash" placeholder="0x + 64 caracteres hexadecimales" required /></label>
-              <button className="full" type="submit">Emitir / registrar certificado</button>
+              <p className="evidence-note">
+                CertiChain generará automáticamente el PDF, calculará su SHA-256 y almacenará la evidencia cifrada con AES-256-GCM.
+              </p>
+              <button className="full" type="submit">Emitir certificado y generar PDF</button>
             </form>
           </section>
         )}
@@ -487,7 +539,16 @@ export function App() {
               <span>Fecha de emisión<strong>{formatDate(selectedCertificate.issuedAt)}</strong></span>
               <span>Estado<strong className={`status ${selectedCertificate.status}`}>{statusLabel(selectedCertificate.status)}</strong></span>
               <span>ID / Blockchain ID<strong className="mono">{selectedCertificate.blockchainId ?? selectedCertificate.id}</strong></span>
+              <span>SHA-256<strong className="mono credential-hash">{selectedCertificate.documentHash}</strong></span>
             </div>
+            {(selectedCertificate.documentAvailable || (selectedCertificate.status === "pending" && !selectedCertificate.blockchainId)) && (
+              <button
+                className="pdf-download-button full-width"
+                onClick={() => void downloadCertificatePdf(selectedCertificate)}
+              >
+                {selectedCertificate.documentAvailable ? "Descargar certificado PDF" : "Generar y descargar PDF"}
+              </button>
+            )}
             {selectedCertificate.status !== "revoked" && (
               <button className="danger full-width" onClick={() => void revoke(selectedCertificate.id)}>Revocar certificado</button>
             )}

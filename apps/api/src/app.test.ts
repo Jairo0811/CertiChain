@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import request from "supertest";
 import { describe, expect, it } from "vitest";
 import { createApp } from "./app.js";
@@ -54,6 +55,44 @@ describe("CertiChain API", () => {
     expect(response.body.documentHash).toMatch(/^0x[a-f0-9]{64}$/);
     expect(response.body.metadataURI).toMatch(/^local-encrypted:\/\//);
     expect(response.body.encryption).toBe("AES-256-GCM");
+  });
+
+  it("automatically generates, encrypts and downloads the issued certificate PDF", async () => {
+    const app = createApp();
+    const token = await loginToken();
+
+    const issued = await request(app)
+      .post("/api/certificates")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        studentName: "María José Pérez",
+        studentWallet: `0x${"34".repeat(20)}`,
+        title: "Fundamentos de Seguridad de Software",
+        institution: "Universidad APEC (UNAPEC)",
+        issuedAt: "2026-09-06",
+      });
+
+    expect(issued.status).toBe(201);
+    expect(issued.body.status).toBe("pending");
+    expect(issued.body.documentHash).toMatch(/^0x[a-f0-9]{64}$/);
+    expect(issued.body.metadataURI).toMatch(/^local-encrypted:\/\//);
+    expect(issued.body.documentAvailable).toBe(true);
+
+    const downloaded = await request(app)
+      .get(`/api/certificates/${issued.body.id}/pdf`)
+      .set("Authorization", `Bearer ${token}`)
+      .buffer(true)
+      .parse((response, callback) => {
+        const chunks: Buffer[] = [];
+        response.on("data", (chunk: Buffer) => chunks.push(chunk));
+        response.on("end", () => callback(null, Buffer.concat(chunks)));
+      });
+
+    expect(downloaded.status).toBe(200);
+    expect(downloaded.headers["content-type"]).toMatch(/application\/pdf/);
+    const pdf = downloaded.body as Buffer;
+    expect(pdf.subarray(0, 8).toString("latin1")).toBe("%PDF-1.4");
+    expect(`0x${createHash("sha256").update(pdf).digest("hex")}`).toBe(issued.body.documentHash);
   });
 
   it("executes the authenticated issue-list-revoke-verify lifecycle", async () => {
