@@ -35,17 +35,35 @@ CertiChain demuestra una solución integral de credenciales académicas verifica
 - scripts de backup/restore de PostgreSQL;
 - workflow preparado para despliegue de smart contracts.
 
+## Dataset demo opcional de portafolio
+
+Para capturas, demostraciones y revisión visual existe un seed **explícito, idempotente y exclusivo de entornos no productivos**. Inserta 24 credenciales ficticias marcadas como `Demo`, distribuidas en 3 instituciones ficticias:
+
+- 21 vigentes;
+- 2 revocadas;
+- 1 pendiente.
+
+Después de levantar/reconstruir la API con Docker:
+
+```bash
+docker compose exec api node apps/api/dist/demoSeed.js
+```
+
+El comando devuelve además un par ID + SHA-256 listo para probar el verificador público. El seed utiliza identificadores deterministas, por lo que puede ejecutarse varias veces sin duplicar esas 24 credenciales. No borra certificados existentes.
+
+La ejecución se bloquea cuando `NODE_ENV=production` para evitar que datos ficticios entren accidentalmente en un entorno operativo.
+
 ## Escenario recomendado de demostración
 
 1. Copiar `.env.example` a `.env` y configurar secretos locales.
 2. Ejecutar `docker compose up -d --build`.
 3. Confirmar `/health` y `/ready`.
-4. Iniciar sesión en el portal institucional.
-5. Emitir una credencial de demostración.
-6. Consultarla desde el listado institucional.
-7. Verificarla públicamente mediante ID + SHA-256.
+4. Opcionalmente ejecutar `docker compose exec api node apps/api/dist/demoSeed.js` para poblar el showcase visual.
+5. Iniciar sesión en el portal institucional.
+6. Consultar el dashboard y el listado institucional.
+7. Verificar públicamente una credencial vigente mediante ID + SHA-256.
 8. Escanear o importar la credencial desde la aplicación móvil.
-9. Revocar la credencial desde el portal.
+9. Revocar una credencial desde el portal.
 10. Repetir la verificación y observar el cambio de estado.
 
 El flujo puede demostrarse sin blockchain externa configurada. En ese modo la plataforma utiliza su comportamiento degradado/off-chain de desarrollo. La integración real con Polygon se mantiene como capacidad preparada, no como requisito de presentación académica.
@@ -60,6 +78,7 @@ El flujo puede demostrarse sin blockchain externa configurada. En ese modo la pl
 - Producción aplica validaciones estrictas para impedir configuraciones inseguras.
 - La verificación pública minimiza datos personales.
 - Se aplican RBAC, rate limiting, headers defensivos y auditoría.
+- El dataset de portafolio se bloquea explícitamente en producción.
 
 ## Evidencia de ingeniería
 
@@ -74,7 +93,8 @@ El repositorio incluye:
 - scripts operativos;
 - documentación de arquitectura, seguridad y production readiness;
 - pruebas de API y smart contracts;
-- lockfile reproducible.
+- lockfile reproducible;
+- dataset demo determinista para showcases sin utilizar PII real.
 
 ## Fuera del alcance académico
 
