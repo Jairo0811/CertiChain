@@ -10,18 +10,7 @@ type Certificate = {
   status: "pending" | "active" | "revoked";
 };
 
-type Verification = {
-  valid: boolean;
-  certificate?: Certificate;
-  checks?: {
-    existsOffChain: boolean;
-    hashMatches: boolean;
-    blockchain: unknown;
-  };
-  error?: string;
-};
-
-type View = "dashboard" | "certificates" | "issue" | "verify";
+type View = "dashboard" | "certificates" | "issue";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000";
 const PAGE_SIZE = 5;
@@ -29,7 +18,11 @@ const PAGE_SIZE = 5;
 function formatDate(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat("es-DO", { day: "2-digit", month: "short", year: "numeric" }).format(date);
+  return new Intl.DateTimeFormat("es-DO", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(date);
 }
 
 function shortId(certificate: Certificate) {
@@ -37,11 +30,16 @@ function shortId(certificate: Certificate) {
   return value.length > 18 ? `${value.slice(0, 10)}…${value.slice(-6)}` : value;
 }
 
+function statusLabel(status: Certificate["status"]) {
+  if (status === "active") return "Vigente";
+  if (status === "revoked") return "Revocado";
+  return "Pendiente";
+}
+
 export function App() {
   const [token, setToken] = useState(() => sessionStorage.getItem("certichain-token") ?? "");
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [message, setMessage] = useState("");
-  const [verification, setVerification] = useState<Verification | null>(null);
   const [view, setView] = useState<View>("dashboard");
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -64,6 +62,11 @@ export function App() {
     [certificates],
   );
 
+  const institutionCount = useMemo(
+    () => new Set(certificates.map((item) => item.institution)).size,
+    [certificates],
+  );
+
   const filteredCertificates = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     return certificates.filter((certificate) => {
@@ -76,9 +79,22 @@ export function App() {
   const totalPages = Math.max(1, Math.ceil(filteredCertificates.length / PAGE_SIZE));
   const visibleCertificates = filteredCertificates.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
+  const donutBackground = useMemo(() => {
+    if (stats.total === 0) return "conic-gradient(#1e293b 0 100%)";
+    const activeEnd = (stats.active / stats.total) * 100;
+    const revokedEnd = ((stats.active + stats.revoked) / stats.total) * 100;
+    return `conic-gradient(#22c55e 0 ${activeEnd}%, #ef4444 ${activeEnd}% ${revokedEnd}%, #f59e0b ${revokedEnd}% 100%)`;
+  }, [stats]);
+
   useEffect(() => {
     if (page > totalPages) setPage(totalPages);
   }, [page, totalPages]);
+
+  useEffect(() => {
+    if (!message || !token) return;
+    const timer = window.setTimeout(() => setMessage(""), 3500);
+    return () => window.clearTimeout(timer);
+  }, [message, token]);
 
   async function api(path: string, options: RequestInit = {}) {
     const headers = new Headers(options.headers);
@@ -104,6 +120,11 @@ export function App() {
   useEffect(() => {
     void loadCertificates();
   }, [token]);
+
+  function navigate(nextView: View) {
+    setView(nextView);
+    setMessage("");
+  }
 
   async function login(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -135,7 +156,7 @@ export function App() {
         body: JSON.stringify(Object.fromEntries(form.entries())),
       });
       event.currentTarget.reset();
-      setMessage("Certificado registrado. Si blockchain está configurado, fue emitido on-chain.");
+      setMessage("Certificado registrado correctamente.");
       await loadCertificates();
       setView("certificates");
     } catch (error) {
@@ -154,43 +175,43 @@ export function App() {
     }
   }
 
-  async function verify(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    const id = encodeURIComponent(String(form.get("id")));
-    const hash = encodeURIComponent(String(form.get("hash")));
-
-    try {
-      const result = await fetch(`${API_URL}/api/verify/${id}?hash=${hash}`).then(async (response) => {
-        const body = await response.json();
-        if (!response.ok && response.status !== 404) throw new Error(body.error ?? "Verification failed");
-        return body;
-      });
-      setVerification(result);
-    } catch (error) {
-      setVerification({ valid: false, error: (error as Error).message });
-    }
-  }
-
   function logout() {
     sessionStorage.removeItem("certichain-token");
     setToken("");
+    setMessage("");
   }
 
   if (!token) {
     return (
       <main className="auth-shell">
         <section className="auth-card">
-          <div className="brand-lockup auth-brand"><div className="brand-mark">CC</div><div><strong>CertiChain</strong><span>Verified. Immutable. Trusted.</span></div></div>
+          <div className="brand-lockup auth-brand">
+            <div className="brand-mark">CC</div>
+            <div>
+              <strong>CertiChain</strong>
+              <span>Verified. Immutable. Trusted.</span>
+            </div>
+          </div>
           <p className="eyebrow">ACADEMIC CREDENTIAL SECURITY</p>
           <h1>Portal institucional</h1>
-          <p className="muted">Emite y verifica credenciales académicas con integridad criptográfica y blockchain.</p>
+          <p className="muted">
+            Emite y administra credenciales académicas con integridad criptográfica y evidencia verificable.
+          </p>
           <form onSubmit={login} className="form-grid">
-            <label>Email<input name="email" type="email" defaultValue="admin@certichain.local" required /></label>
-            <label>Contraseña<input name="password" type="password" defaultValue="CertiChain123!" required /></label>
+            <label>
+              Email
+              <input name="email" type="email" defaultValue="admin@certichain.local" required />
+            </label>
+            <label>
+              Contraseña
+              <input name="password" type="password" placeholder="Contraseña del entorno local" required />
+            </label>
             <button type="submit">Entrar al portal</button>
           </form>
           {message && <p className="notice">{message}</p>}
+          <a href="/verify" className="public-access-link">
+            Verificar una credencial sin iniciar sesión ↗
+          </a>
         </section>
       </main>
     );
@@ -199,65 +220,279 @@ export function App() {
   return (
     <main className="dashboard-shell">
       <aside className="sidebar">
-        <div className="brand-lockup"><div className="brand-mark small">CC</div><div><strong>CertiChain</strong><span>Verified. Immutable. Trusted.</span></div></div>
+        <div className="brand-lockup">
+          <div className="brand-mark small">CC</div>
+          <div>
+            <strong>CertiChain</strong>
+            <span>Verified. Immutable. Trusted.</span>
+          </div>
+        </div>
+
         <nav className="sidebar-nav">
-          <button className={view === "dashboard" ? "active" : ""} onClick={() => setView("dashboard")}>⌂ <span>Dashboard</span></button>
-          <button className={view === "certificates" ? "active" : ""} onClick={() => setView("certificates")}>▣ <span>Certificados</span></button>
-          <button className={view === "issue" ? "active" : ""} onClick={() => setView("issue")}>＋ <span>Emitir certificado</span></button>
-          <button className={view === "verify" ? "active" : ""} onClick={() => setView("verify")}>⌕ <span>Verificación pública</span></button>
+          <button className={view === "dashboard" ? "active" : ""} onClick={() => navigate("dashboard")}>
+            ⌂ <span>Dashboard</span>
+          </button>
+          <button className={view === "certificates" ? "active" : ""} onClick={() => navigate("certificates")}>
+            ▣ <span>Certificados</span>
+          </button>
+          <button className={view === "issue" ? "active" : ""} onClick={() => navigate("issue")}>
+            ＋ <span>Emitir certificado</span>
+          </button>
+          <a href="/verify" target="_blank" rel="noreferrer">
+            ⌕ <span>Verificador público</span><small>↗</small>
+          </a>
         </nav>
+
         <div className="sidebar-spacer" />
-        <div className="profile-card"><div className="avatar">AM</div><div><strong>Admin CertiChain</strong><span>admin@certichain.local</span></div></div>
+        <div className="profile-card">
+          <div className="avatar">AM</div>
+          <div>
+            <strong>Admin CertiChain</strong>
+            <span>admin@certichain.local</span>
+          </div>
+        </div>
       </aside>
 
       <section className="content-shell">
         <header className="topbar">
-          <div><p className="eyebrow">CERTICHAIN ACADEMY</p><strong>{view === "dashboard" ? "Dashboard" : view === "certificates" ? "Certificados" : view === "issue" ? "Emitir certificado" : "Verificación pública"}</strong></div>
-          <div className="topbar-actions"><span className="notification">3</span><button className="ghost" onClick={logout}>Cerrar sesión</button></div>
+          <div>
+            <p className="eyebrow">PORTAL INSTITUCIONAL</p>
+            <strong>
+              {view === "dashboard" ? "Dashboard" : view === "certificates" ? "Certificados" : "Emitir certificado"}
+            </strong>
+          </div>
+          <div className="topbar-actions">
+            <a className="topbar-public-link" href="/verify" target="_blank" rel="noreferrer">
+              Verificador público ↗
+            </a>
+            <button className="ghost" onClick={logout}>Cerrar sesión</button>
+          </div>
         </header>
 
-        {message && <p className="notice content-notice">{message}</p>}
+        {message && <p className="notice content-notice" role="status">{message}</p>}
 
         {view === "dashboard" && (
           <>
-            <section className="page-heading"><div><h1>Dashboard</h1><p>Resumen general de la plataforma</p></div><select aria-label="Rango de fechas" defaultValue="30"><option value="30">Últimos 30 días</option><option value="90">Últimos 90 días</option><option value="365">Último año</option></select></section>
-            <section className="stats-grid">
-              <article><span>Certificados emitidos</span><strong>{stats.total}</strong><small>Base registrada</small></article>
-              <article><span>Verificaciones</span><strong>{stats.total * 4}</strong><small>Estimado del portal</small></article>
-              <article><span>Revocados</span><strong>{stats.revoked}</strong><small>Estado actual</small></article>
-              <article><span>Instituciones</span><strong>{new Set(certificates.map((item) => item.institution)).size}</strong><small>Emisores registrados</small></article>
+            <section className="page-heading">
+              <div>
+                <h1>Dashboard</h1>
+                <p>Resumen general de la plataforma</p>
+              </div>
+              <select aria-label="Rango de fechas" defaultValue="30">
+                <option value="30">Últimos 30 días</option>
+                <option value="90">Últimos 90 días</option>
+                <option value="365">Último año</option>
+              </select>
             </section>
+
+            <section className="stats-grid">
+              <article>
+                <span>Certificados emitidos</span>
+                <strong>{stats.total}</strong>
+                <small>Base registrada</small>
+              </article>
+              <article>
+                <span>Credenciales vigentes</span>
+                <strong>{stats.active}</strong>
+                <small>Disponibles para verificar</small>
+              </article>
+              <article>
+                <span>Revocados</span>
+                <strong>{stats.revoked}</strong>
+                <small>Estado actual</small>
+              </article>
+              <article>
+                <span>Instituciones</span>
+                <strong>{institutionCount}</strong>
+                <small>Emisores registrados</small>
+              </article>
+            </section>
+
             <section className="dashboard-grid">
-              <article className="panel activity-panel"><div className="panel-heading"><div><p className="eyebrow">ACTIVIDAD</p><h2>Actividad reciente</h2></div><button className="text-button" onClick={() => setView("certificates")}>Ver todo</button></div>
+              <article className="panel activity-panel">
+                <div className="panel-heading">
+                  <div>
+                    <p className="eyebrow">ACTIVIDAD</p>
+                    <h2>Actividad reciente</h2>
+                  </div>
+                  {recentActivity.length > 0 && (
+                    <button className="text-button" onClick={() => navigate("certificates")}>Ver todo</button>
+                  )}
+                </div>
                 <div className="activity-list">
-                  {recentActivity.length === 0 && <p className="empty-card">No hay actividad registrada todavía.</p>}
-                  {recentActivity.map((certificate) => <button key={certificate.id} className="activity-row" onClick={() => setSelectedCertificate(certificate)}><span className={`activity-dot ${certificate.status}`} /><span><strong>{certificate.status === "revoked" ? "Certificado revocado" : "Certificado emitido"}</strong><small>{certificate.title} · {certificate.studentName}</small></span><time>{formatDate(certificate.issuedAt)}</time></button>)}
+                  {recentActivity.length === 0 ? (
+                    <div className="empty-state">
+                      <div className="empty-state-icon">◇</div>
+                      <strong>Aún no hay credenciales registradas</strong>
+                      <p>Emite tu primer certificado para comenzar a poblar el dashboard y la trazabilidad.</p>
+                      <button onClick={() => navigate("issue")}>＋ Emitir primer certificado</button>
+                    </div>
+                  ) : (
+                    recentActivity.map((certificate) => (
+                      <button
+                        key={certificate.id}
+                        className="activity-row"
+                        onClick={() => setSelectedCertificate(certificate)}
+                      >
+                        <span className={`activity-dot ${certificate.status}`} />
+                        <span>
+                          <strong>{certificate.status === "revoked" ? "Certificado revocado" : "Certificado registrado"}</strong>
+                          <small>{certificate.title} · {certificate.studentName}</small>
+                        </span>
+                        <time>{formatDate(certificate.issuedAt)}</time>
+                      </button>
+                    ))
+                  )}
                 </div>
               </article>
-              <article className="panel status-panel"><p className="eyebrow">ESTADO</p><h2>Certificados por estado</h2><div className="donut-wrap"><div className="donut" style={{ background: `conic-gradient(#22c55e 0 ${(stats.active / Math.max(stats.total, 1)) * 100}%, #ef4444 ${(stats.active / Math.max(stats.total, 1)) * 100}% ${((stats.active + stats.revoked) / Math.max(stats.total, 1)) * 100}%, #f59e0b ${((stats.active + stats.revoked) / Math.max(stats.total, 1)) * 100}% 100%)` }}><div><strong>{stats.total}</strong><span>Total</span></div></div><div className="legend"><span><i className="green" /> Vigentes <strong>{stats.active}</strong></span><span><i className="red" /> Revocados <strong>{stats.revoked}</strong></span><span><i className="yellow" /> Pendientes <strong>{stats.pending}</strong></span></div></div></article>
+
+              <article className="panel status-panel">
+                <p className="eyebrow">ESTADO</p>
+                <h2>Certificados por estado</h2>
+                <div className="donut-wrap">
+                  <div className={`donut ${stats.total === 0 ? "empty-donut" : ""}`} style={{ background: donutBackground }}>
+                    <div>
+                      <strong>{stats.total === 0 ? "—" : stats.total}</strong>
+                      <span>{stats.total === 0 ? "Sin datos" : "Total"}</span>
+                    </div>
+                  </div>
+                  <div className="legend">
+                    <span><i className="green" /> Vigentes <strong>{stats.active}</strong></span>
+                    <span><i className="red" /> Revocados <strong>{stats.revoked}</strong></span>
+                    <span><i className="yellow" /> Pendientes <strong>{stats.pending}</strong></span>
+                  </div>
+                </div>
+              </article>
             </section>
           </>
         )}
 
         {view === "certificates" && (
           <section className="panel certificates-page">
-            <div className="panel-heading"><div><p className="eyebrow">GESTIÓN</p><h2>Lista de certificados</h2><p className="muted">Gestiona todos los certificados emitidos.</p></div><button onClick={() => setView("issue")}>＋ Emitir certificado</button></div>
-            <div className="filters"><input value={query} onChange={(event) => { setQuery(event.target.value); setPage(1); }} placeholder="Buscar certificado, estudiante, institución o ID..." /><select value={statusFilter} onChange={(event) => { setStatusFilter(event.target.value); setPage(1); }}><option value="all">Estado: todos</option><option value="active">Vigentes</option><option value="pending">Pendientes</option><option value="revoked">Revocados</option></select><button className="ghost" onClick={() => void loadCertificates()}>Actualizar</button></div>
-            <div className="table-wrap"><table><thead><tr><th>ID / Blockchain ID</th><th>Estudiante</th><th>Título</th><th>Fecha</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>{visibleCertificates.length === 0 && <tr><td colSpan={6} className="empty">No hay certificados que coincidan con los filtros.</td></tr>}{visibleCertificates.map((certificate) => <tr key={certificate.id}><td className="mono">{shortId(certificate)}</td><td>{certificate.studentName}</td><td>{certificate.title}<small className="table-subtitle">{certificate.institution}</small></td><td>{formatDate(certificate.issuedAt)}</td><td><span className={`status ${certificate.status}`}>{certificate.status}</span></td><td className="actions"><button className="icon-button" title="Ver detalle" onClick={() => setSelectedCertificate(certificate)}>◉</button>{certificate.status !== "revoked" && <button className="danger" onClick={() => void revoke(certificate.id)}>Revocar</button>}</td></tr>)}</tbody></table></div>
-            <div className="pagination"><button className="ghost" disabled={page === 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>‹</button><span>Página {page} de {totalPages}</span><button className="ghost" disabled={page === totalPages} onClick={() => setPage((value) => Math.min(totalPages, value + 1))}>›</button></div>
+            <div className="panel-heading">
+              <div>
+                <p className="eyebrow">GESTIÓN</p>
+                <h2>Lista de certificados</h2>
+                <p className="muted">Gestiona todos los certificados registrados.</p>
+              </div>
+              <button onClick={() => navigate("issue")}>＋ Emitir certificado</button>
+            </div>
+
+            <div className="filters">
+              <input
+                value={query}
+                onChange={(event) => { setQuery(event.target.value); setPage(1); }}
+                placeholder="Buscar certificado, estudiante, institución o ID..."
+              />
+              <select
+                value={statusFilter}
+                onChange={(event) => { setStatusFilter(event.target.value); setPage(1); }}
+              >
+                <option value="all">Estado: todos</option>
+                <option value="active">Vigentes</option>
+                <option value="pending">Pendientes</option>
+                <option value="revoked">Revocados</option>
+              </select>
+              <button className="ghost" onClick={() => void loadCertificates()}>Actualizar</button>
+            </div>
+
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID / Blockchain ID</th>
+                    <th>Estudiante</th>
+                    <th>Título</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {visibleCertificates.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="empty">
+                        <div className="table-empty-state">
+                          <strong>{certificates.length === 0 ? "No hay certificados registrados" : "Sin resultados"}</strong>
+                          <span>
+                            {certificates.length === 0
+                              ? "Emite una credencial para verla aquí."
+                              : "Prueba con otros términos o cambia el filtro de estado."}
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                  {visibleCertificates.map((certificate) => (
+                    <tr key={certificate.id}>
+                      <td className="mono">{shortId(certificate)}</td>
+                      <td>{certificate.studentName}</td>
+                      <td>
+                        {certificate.title}
+                        <small className="table-subtitle">{certificate.institution}</small>
+                      </td>
+                      <td>{formatDate(certificate.issuedAt)}</td>
+                      <td><span className={`status ${certificate.status}`}>{statusLabel(certificate.status)}</span></td>
+                      <td className="actions">
+                        <button className="icon-button" title="Ver detalle" onClick={() => setSelectedCertificate(certificate)}>◉</button>
+                        {certificate.status !== "revoked" && (
+                          <button className="danger" onClick={() => void revoke(certificate.id)}>Revocar</button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="pagination">
+              <button className="ghost" disabled={page === 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>‹</button>
+              <span>Página {page} de {totalPages}</span>
+              <button className="ghost" disabled={page === totalPages} onClick={() => setPage((value) => Math.min(totalPages, value + 1))}>›</button>
+            </div>
           </section>
         )}
 
         {view === "issue" && (
-          <section className="panel form-page"><div><p className="eyebrow">EMISIÓN</p><h2>Emitir certificado</h2><p className="muted">Registra una credencial académica y prepara su evidencia verificable.</p></div><form onSubmit={issue} className="form-grid two-columns"><label>Estudiante<input name="studentName" required /></label><label>Wallet<input name="studentWallet" placeholder="0x..." required /></label><label>Título<input name="title" required /></label><label>Institución<input name="institution" required /></label><label>Fecha<input name="issuedAt" type="date" required /></label><label>Metadata URI<input name="metadataURI" placeholder="ipfs://..." required /></label><label className="full">SHA-256<input name="documentHash" placeholder="0x + 64 hex" required /></label><button className="full" type="submit">Emitir / registrar certificado</button></form></section>
-        )}
-
-        {view === "verify" && (
-          <section className="verify-layout"><article className="panel"><p className="eyebrow">VERIFICACIÓN</p><h2>Verificación pública</h2><p className="muted">Valida la autenticidad de una credencial por ID y hash SHA-256.</p><form onSubmit={verify} className="form-grid"><label>ID o Blockchain ID<input name="id" required /></label><label>SHA-256<input name="hash" required /></label><button type="submit">Verificar credencial</button></form></article>{verification && <article className={`panel verification-card ${verification.valid ? "valid" : "invalid"}`}><div className="verification-icon">{verification.valid ? "✓" : "✕"}</div><h2>{verification.valid ? "Certificado válido" : "No verificado"}</h2>{verification.certificate && <div className="credential-summary"><span>Título<strong>{verification.certificate.title}</strong></span><span>Estudiante<strong>{verification.certificate.studentName}</strong></span><span>Institución<strong>{verification.certificate.institution}</strong></span><span>Fecha<strong>{formatDate(verification.certificate.issuedAt)}</strong></span><span>Estado<strong>{verification.certificate.status}</strong></span><span>ID<strong className="mono">{verification.certificate.blockchainId ?? verification.certificate.id}</strong></span></div>}{verification.error && <p>{verification.error}</p>}</article>}</section>
+          <section className="panel form-page">
+            <div>
+              <p className="eyebrow">EMISIÓN</p>
+              <h2>Emitir certificado</h2>
+              <p className="muted">Registra una credencial académica y prepara su evidencia verificable.</p>
+            </div>
+            <form onSubmit={issue} className="form-grid two-columns">
+              <label>Estudiante<input name="studentName" placeholder="Ej. Ana Pérez" required /></label>
+              <label>Wallet<input name="studentWallet" placeholder="0x..." required /></label>
+              <label>Título<input name="title" placeholder="Ej. Ingeniería de Software" required /></label>
+              <label>Institución<input name="institution" placeholder="Ej. Universidad Demo" required /></label>
+              <label>Fecha<input name="issuedAt" type="date" required /></label>
+              <label>Metadata URI<input name="metadataURI" placeholder="ipfs://..." required /></label>
+              <label className="full">SHA-256<input name="documentHash" placeholder="0x + 64 caracteres hexadecimales" required /></label>
+              <button className="full" type="submit">Emitir / registrar certificado</button>
+            </form>
+          </section>
         )}
       </section>
 
-      {selectedCertificate && <div className="modal-backdrop" onClick={() => setSelectedCertificate(null)}><aside className="detail-drawer" onClick={(event) => event.stopPropagation()}><button className="close-button" onClick={() => setSelectedCertificate(null)}>×</button><p className="eyebrow">DETALLE DE CREDENCIAL</p><h2>{selectedCertificate.title}</h2><div className="credential-summary"><span>Estudiante<strong>{selectedCertificate.studentName}</strong></span><span>Institución<strong>{selectedCertificate.institution}</strong></span><span>Fecha de emisión<strong>{formatDate(selectedCertificate.issuedAt)}</strong></span><span>Estado<strong className={`status ${selectedCertificate.status}`}>{selectedCertificate.status}</strong></span><span>ID / Blockchain ID<strong className="mono">{selectedCertificate.blockchainId ?? selectedCertificate.id}</strong></span></div>{selectedCertificate.status !== "revoked" && <button className="danger full-width" onClick={() => void revoke(selectedCertificate.id)}>Revocar certificado</button>}</aside></div>}
+      {selectedCertificate && (
+        <div className="modal-backdrop" onClick={() => setSelectedCertificate(null)}>
+          <aside className="detail-drawer" onClick={(event) => event.stopPropagation()}>
+            <button className="close-button" onClick={() => setSelectedCertificate(null)}>×</button>
+            <p className="eyebrow">DETALLE DE CREDENCIAL</p>
+            <h2>{selectedCertificate.title}</h2>
+            <div className="credential-summary">
+              <span>Estudiante<strong>{selectedCertificate.studentName}</strong></span>
+              <span>Institución<strong>{selectedCertificate.institution}</strong></span>
+              <span>Fecha de emisión<strong>{formatDate(selectedCertificate.issuedAt)}</strong></span>
+              <span>Estado<strong className={`status ${selectedCertificate.status}`}>{statusLabel(selectedCertificate.status)}</strong></span>
+              <span>ID / Blockchain ID<strong className="mono">{selectedCertificate.blockchainId ?? selectedCertificate.id}</strong></span>
+            </div>
+            {selectedCertificate.status !== "revoked" && (
+              <button className="danger full-width" onClick={() => void revoke(selectedCertificate.id)}>Revocar certificado</button>
+            )}
+          </aside>
+        </div>
+      )}
     </main>
   );
 }
