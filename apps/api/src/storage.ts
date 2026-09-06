@@ -1,5 +1,5 @@
-import { createCipheriv, createHash, randomBytes, randomUUID } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
+import { createCipheriv, createDecipheriv, createHash, randomBytes, randomUUID } from "node:crypto";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { config } from "./config.js";
 
@@ -32,6 +32,27 @@ class StorageService {
     };
   }
 
+  async readDocument(metadataURI: string): Promise<Buffer> {
+    let encrypted: Buffer;
+
+    if (metadataURI.startsWith("local-encrypted://")) {
+      const filename = metadataURI.slice("local-encrypted://".length);
+      if (!/^[a-zA-Z0-9._-]+$/.test(filename)) throw new Error("Invalid local document reference");
+      encrypted = await readFile(resolve(process.cwd(), ".data/documents", filename));
+    } else if (metadataURI.startsWith("ipfs://")) {
+      encrypted = await downloadFromIpfs(metadataURI.slice("ipfs://".length));
+    } else {
+      throw new Error("Certificate document is not managed by CertiChain storage");
+    }
+
+    return decrypt(encrypted);
+  }
+
+  canReadDocument(metadataURI: string): boolean {
+    if (metadataURI.startsWith("local-encrypted://")) return true;
+    return metadataURI.startsWith("ipfs://") && Boolean(config.IPFS_API_URL);
+  }
+
   get configured(): boolean {
     return this.driver === "local" || Boolean(config.IPFS_API_URL);
   }
@@ -53,6 +74,25 @@ function encrypt(plaintext: Buffer): Buffer {
   const tag = cipher.getAuthTag();
   const magic = Buffer.from("CERTICHAIN1", "ascii");
   return Buffer.concat([magic, iv, tag, ciphertext]);
+}
+
+function decrypt(encrypted: Buffer): Buffer {
+  const magic = Buffer.from("CERTICHAIN1", "ascii");
+  const minimumLength = magic.length + 12 + 16 + 1;
+  if (encrypted.length < minimumLength || !encrypted.subarray(0, magic.length).equals(magic)) {
+    throw new Error("Invalid CertiChain encrypted document");
+  }
+
+  const ivStart = magic.length;
+  const tagStart = ivStart + 12;
+  const ciphertextStart = tagStart + 16;
+  const iv = encrypted.subarray(ivStart, tagStart);
+  const tag = encrypted.subarray(tagStart, ciphertextStart);
+  const ciphertext = encrypted.subarray(ciphertextStart);
+
+  const decipher = createDecipheriv("aes-256-gcm", resolveEncryptionKey(), iv);
+  decipher.setAuthTag(tag);
+  return Buffer.concat([decipher.update(ciphertext), decipher.final()]);
 }
 
 async function saveLocally(encrypted: Buffer, filename: string): Promise<string> {
@@ -94,6 +134,21 @@ async function uploadToIpfs(encrypted: Buffer, filename: string, originalMimeTyp
   const payload = (await response.json()) as { Hash?: string };
   if (!payload.Hash) throw new Error("IPFS response did not include a CID");
   return `ipfs://${payload.Hash}`;
+}
+
+async function downloadFromIpfs(cid: string): Promise<Buffer> {
+  if (!config.IPFS_API_URL) throw new Error("IPFS storage is not configured");
+  if (!/^[a-zA-Z0-9]+$/.test(cid)) throw new Error("Invalid IPFS CID");
+
+  const endpoint = new URL("api/v0/cat", ensureTrailingSlash(config.IPFS_API_URL));
+  endpoint.searchParams.set("arg", cid);
+
+  const headers = new Headers();
+  if (config.IPFS_API_TOKEN) headers.set("Authorization", `Bearer ${config.IPFS_API_TOKEN}`);
+
+  const response = await fetch(endpoint, { method: "POST", headers });
+  if (!response.ok) throw new Error(`IPFS download failed with HTTP ${response.status}`);
+  return Buffer.from(await response.arrayBuffer());
 }
 
 function sanitizeFilename(filename: string): string {
