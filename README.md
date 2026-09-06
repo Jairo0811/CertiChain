@@ -20,7 +20,9 @@
 
 ## 📌 Descripción
 
-**CertiChain** es una plataforma para emitir, proteger, administrar, compartir y verificar certificados académicos utilizando evidencia criptográfica y blockchain. Nació como proyecto final de **Fundamentos de Seguridad de Software (ISO-915)** en la Universidad APEC y evolucionó hacia una implementación profesional con portal institucional, aplicación móvil, API, smart contracts, persistencia SQL, almacenamiento cifrado e infraestructura Docker.
+**CertiChain** es una plataforma para emitir, proteger, administrar, compartir y verificar certificados académicos utilizando evidencia criptográfica y blockchain. 
+
+Nació como proyecto final de **Fundamentos de Seguridad de Software (ISO-915)** en la Universidad APEC y evolucionó hacia una implementación profesional con portal institucional, aplicación móvil, API, smart contracts, persistencia SQL, almacenamiento cifrado e infraestructura Docker.
 
 La arquitectura sigue un enfoque **off-chain first**: los datos personales y documentos completos permanecen fuera de una blockchain pública, mientras la cadena conserva únicamente la evidencia necesaria para demostrar autenticidad, integridad, emisor y estado.
 
