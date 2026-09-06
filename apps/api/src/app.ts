@@ -1,4 +1,4 @@
-import { createHash, randomUUID } from "node:crypto";
+import { createHash, randomBytes, randomUUID } from "node:crypto";
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import helmet from "helmet";
@@ -32,7 +32,7 @@ const loginSchema = z.object({
 const issueSchema = z
   .object({
     studentName: z.string().min(2).max(160),
-    studentWallet: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
+    studentWallet: z.string().regex(/^0x[a-fA-F0-9]{40}$/).optional(),
     title: z.string().min(2).max(200),
     institution: z.string().min(2).max(200),
     issuedAt: z.string().date(),
@@ -51,6 +51,10 @@ const issueSchema = z
 
 function createToken(user: AuthUser): string {
   return jwt.sign(user, config.JWT_SECRET, { expiresIn: "8h", issuer: "certichain-api" });
+}
+
+function generateTechnicalWallet(): string {
+  return `0x${randomBytes(20).toString("hex")}`;
 }
 
 function authenticate(req: Request, res: Response, next: NextFunction): void {
@@ -207,7 +211,23 @@ export function createApp() {
 
     const id = randomUUID();
     const now = new Date().toISOString();
-    const { documentHash: suppliedHash, metadataURI: suppliedMetadataURI, ...credentialData } = parsed.data;
+    const {
+      documentHash: suppliedHash,
+      metadataURI: suppliedMetadataURI,
+      studentWallet: suppliedWallet,
+      ...credentialInput
+    } = parsed.data;
+
+    if (certificateRegistry.configured && !suppliedWallet) {
+      return res.status(400).json({
+        error: "A holder wallet is required when blockchain integration is configured",
+      });
+    }
+
+    const credentialData = {
+      ...credentialInput,
+      studentWallet: suppliedWallet ?? generateTechnicalWallet(),
+    };
 
     let documentHash = suppliedHash;
     let metadataURI = suppliedMetadataURI;
@@ -243,6 +263,7 @@ export function createApp() {
       blockchainId: certificate.blockchainId,
       blockchainConfigured: certificateRegistry.configured,
       generatedPdf: !suppliedHash,
+      generatedWallet: !suppliedWallet,
     });
 
     return res.status(201).json(withDocumentAvailability(certificate));
@@ -314,6 +335,22 @@ export function createApp() {
     await audit(req.user!.email, "certificate.revoke", certificate.id);
 
     return res.json(withDocumentAvailability(certificate));
+  });
+
+  app.get("/api/verify/:id/evidence", async (req, res) => {
+    const parsedId = idSchema.safeParse(req.params.id);
+    if (!parsedId.success) return res.status(400).json({ error: "Invalid certificate id" });
+
+    const certificate = await store.getCertificate(parsedId.data);
+    if (!certificate) return res.status(404).json({ error: "Certificate not found" });
+
+    res.setHeader("Cache-Control", "no-store");
+    return res.json({
+      id: certificate.id,
+      blockchainId: certificate.blockchainId,
+      documentHash: certificate.documentHash,
+      source: "certichain-registry",
+    });
   });
 
   app.get("/api/verify/:id", async (req, res) => {

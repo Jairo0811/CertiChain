@@ -172,7 +172,7 @@ export function App() {
         body: JSON.stringify(Object.fromEntries(form.entries())),
       }) as Certificate;
       formElement.reset();
-      setMessage("Certificado emitido correctamente. El PDF y su SHA-256 quedaron generados y cifrados.");
+      setMessage("Certificado emitido correctamente. Wallet, PDF, Metadata URI y SHA-256 quedaron generados automáticamente.");
       await loadCertificates();
       setView("certificates");
       setSelectedCertificate(created);
@@ -514,14 +514,13 @@ export function App() {
             </div>
             <form onSubmit={issue} className="form-grid two-columns">
               <label>Estudiante<input name="studentName" placeholder="Ej. Ana Pérez" required /></label>
-              <label>Wallet<input name="studentWallet" placeholder="0x..." required /></label>
               <label>Título<input name="title" placeholder="Ej. Ingeniería de Software" required /></label>
               <label>Institución<input name="institution" placeholder="Ej. Universidad Demo" required /></label>
               <label>Fecha<input name="issuedAt" type="date" required /></label>
               <p className="evidence-note">
-                CertiChain generará automáticamente el PDF, calculará su SHA-256 y almacenará la evidencia cifrada con AES-256-GCM.
+                CertiChain generará automáticamente la wallet técnica local, el PDF, el Metadata URI y el SHA-256; la evidencia se almacena cifrada con AES-256-GCM.
               </p>
-              <button className="full" type="submit">Emitir certificado y generar PDF</button>
+              <button className="full" type="submit">Emitir certificado y generar evidencia</button>
             </form>
           </section>
         )}
