@@ -1,0 +1,26 @@
+.brand-mark {
+  color: transparent !important;
+  font-size: 0 !important;
+  letter-spacing: 0 !important;
+  background-color: transparent !important;
+  background-image: url('/branding/certichain-isotipo.png') !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: contain !important;
+  box-shadow: none !important;
+}
+
+.brand-mark.small {
+  background-size: contain !important;
+}
+
+.auth-brand .brand-mark {
+  width: 74px;
+  height: 74px;
+}
+
+.public-brand .brand-mark,
+.sidebar .brand-mark.small {
+  width: 46px;
+  height: 46px;
+}
