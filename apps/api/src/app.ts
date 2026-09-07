@@ -127,7 +127,13 @@ export function createApp() {
   app.use(helmet({ crossOriginResourcePolicy: { policy: "same-site" } }));
   app.use(requestSecurity);
   app.use(observability);
-  app.use(cors({ origin: config.CORS_ORIGIN, methods: ["GET", "POST"], allowedHeaders: ["Content-Type", "Authorization", "X-Request-Id", "X-File-Name"] }));
+  app.use(
+    cors({
+      origin: config.CORS_ORIGIN,
+      methods: ["GET", "POST", "DELETE"],
+      allowedHeaders: ["Content-Type", "Authorization", "X-Request-Id", "X-File-Name"],
+    }),
+  );
   app.use(express.json({ limit: "128kb", strict: true }));
   app.use("/api", rateLimit({ windowMs: 60_000, max: 120 }));
   app.use("/api/auth", rateLimit({ windowMs: 15 * 60_000, max: 20 }));
@@ -207,7 +213,9 @@ export function createApp() {
 
   app.post("/api/certificates", authenticate, authorize("admin", "issuer"), async (req, res) => {
     const parsed = issueSchema.safeParse(req.body);
-    if (!parsed.success) return res.status(400).json({ error: "Invalid certificate payload", details: parsed.error.flatten() });
+    if (!parsed.success) {
+      return res.status(400).json({ error: "Invalid certificate payload", details: parsed.error.flatten() });
+    }
 
     const id = randomUUID();
     const now = new Date().toISOString();
@@ -337,6 +345,33 @@ export function createApp() {
     return res.json(withDocumentAvailability(certificate));
   });
 
+  app.delete("/api/certificates/:id", authenticate, authorize("admin"), async (req, res) => {
+    const parsedId = idSchema.safeParse(req.params.id);
+    if (!parsedId.success) return res.status(400).json({ error: "Invalid certificate id" });
+
+    const certificate = await store.getCertificate(parsedId.data);
+    if (!certificate) return res.status(404).json({ error: "Certificate not found" });
+
+    if (certificate.blockchainId && certificateRegistry.configured) {
+      return res.status(409).json({
+        error: "A blockchain-bound certificate cannot be deleted. Revoke it to preserve the audit trail.",
+      });
+    }
+
+    const evidenceDeleted = await storageService.deleteDocument(certificate.metadataURI);
+    const deleted = await store.deleteCertificate(certificate.id);
+    if (!deleted) return res.status(404).json({ error: "Certificate not found" });
+
+    await audit(req.user!.email, "certificate.delete", certificate.id, {
+      previousStatus: certificate.status,
+      blockchainId: certificate.blockchainId,
+      evidenceDeleted,
+      cleanupScope: "off-chain-admin-cleanup",
+    });
+
+    return res.json({ deleted: true, id: certificate.id, evidenceDeleted });
+  });
+
   app.get("/api/verify/:id/evidence", async (req, res) => {
     const parsedId = idSchema.safeParse(req.params.id);
     if (!parsedId.success) return res.status(400).json({ error: "Invalid certificate id" });
@@ -369,7 +404,10 @@ export function createApp() {
     }
 
     const hashMatches = certificate.documentHash.toLowerCase() === parsedHash.data.toLowerCase();
-    const valid = certificate.status === "active" && hashMatches && (!blockchain || (blockchain.exists && blockchain.active && blockchain.hashMatches));
+    const valid =
+      certificate.status === "active" &&
+      hashMatches &&
+      (!blockchain || (blockchain.exists && blockchain.active && blockchain.hashMatches));
 
     await audit("public-verifier", "certificate.verify", certificate.id, { valid });
 
