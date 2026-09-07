@@ -4,42 +4,35 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/UNAPEC-ISO--915-003B70?style=for-the-badge" alt="UNAPEC ISO-915">
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/badge/Versi%C3%B3n-1.0.0-22C55E?style=for-the-badge" alt="Versión 1.0.0">
   <img src="https://img.shields.io/badge/Estado-Portfolio%20Ready-2563EB?style=for-the-badge" alt="Estado: Portfolio Ready">
   <img src="https://img.shields.io/badge/Blockchain-Ethereum%20%2F%20Polygon-7C3AED?style=for-the-badge&logo=ethereum&logoColor=white" alt="Ethereum / Polygon">
 </p>
 
-<p align="center"><strong>Sistema de Certificados Académicos Verificables con Evidencia Criptográfica y Blockchain</strong></p>
+<p align="center"><strong>Sistema de Certificados Académicos con Blockchain</strong></p>
 
-<p align="center">Verified. Immutable. Trusted.</p>
+<p align="center">Verificación inmutable, transparente y portable de credenciales académicas.</p>
 
 ---
 
 ## 📌 Descripción
 
-**CertiChain** es una plataforma académica para emitir, proteger, administrar, descargar, compartir y verificar credenciales mediante evidencia criptográfica, almacenamiento cifrado y una capa blockchain opcional.
+**CertiChain** es una plataforma para emitir, proteger, administrar, compartir y verificar certificados académicos utilizando evidencia criptográfica y blockchain.
 
-Nació como proyecto final de **Fundamentos de Seguridad de Software (ISO-915)** en la Universidad APEC y evolucionó hacia un monorepo profesional con:
+Nació como proyecto final de **Fundamentos de Seguridad de Software (ISO-915)** en la Universidad APEC y evolucionó hacia una implementación profesional con portal institucional, aplicación móvil, API, smart contracts, persistencia SQL, almacenamiento cifrado e infraestructura Docker.
 
-- portal institucional web;
-- verificador público;
-- aplicación móvil Expo / React Native;
-- API Node.js + Express + TypeScript;
-- PostgreSQL;
-- almacenamiento cifrado AES-256-GCM;
-- smart contracts Solidity;
-- Docker / Docker Compose;
-- CI, CodeQL, observabilidad y automatización de despliegue.
-
-La arquitectura sigue un enfoque **off-chain first**: los documentos completos y la información personal permanecen fuera de una blockchain pública; la cadena conserva únicamente evidencia mínima de autenticidad, integridad, emisor y estado cuando la integración blockchain está configurada.
+La arquitectura sigue un enfoque **off-chain first**: los datos personales y documentos completos permanecen fuera de una blockchain pública, mientras la cadena conserva únicamente la evidencia necesaria para demostrar autenticidad, integridad, emisor y estado.
 
 ---
 
 ## ✅ Estado actual
 
-CertiChain **v1.0.0** está cerrado como proyecto académico de portafolio y continúa recibiendo **hardening de presentación y experiencia de usuario**, sin convertirlo en un SaaS comercial ni ampliar innecesariamente el alcance académico.
+El desarrollo planificado de las **Fases 0–8 está implementado** y CertiChain **v1.0.0 queda finalizado como proyecto académico de portafolio de UNAPEC**. El repositorio contiene una implementación funcional, reproducible y documentada de todas las capas necesarias para demostrar su propuesta técnica.
 
-### Estado por área
+La conexión con PostgreSQL administrado, IPFS contratado, RPC/wallet de Polygon, dominio público o servicios cloud reales se conserva como **extensión opcional de producción**. No constituye una deuda ni un requisito pendiente para el cierre académico.
 
 | Área | Estado |
 |---|:---:|
@@ -50,7 +43,7 @@ CertiChain **v1.0.0** está cerrado como proyecto académico de portafolio y con
 | Certificate PDF v3.1 | ✅ |
 | Gestión de estados off-chain | ✅ |
 | Descarga / eliminación controlada | ✅ |
-| Aplicación móvil | ✅ Base funcional / 🎨 polish en curso |
+| Aplicación móvil | ✅ Final Polish |
 | QR / cámara / wallet local | ✅ |
 | PostgreSQL | ✅ |
 | Cifrado AES-256-GCM | ✅ |
@@ -64,13 +57,15 @@ CertiChain **v1.0.0** está cerrado como proyecto académico de portafolio y con
 | Infraestructura cloud/mainnet real | ➕ Opcional |
 | Auditoría independiente del smart contract | ➕ Solo antes de mainnet real |
 
-> `main` no contiene claves privadas, tokens de infraestructura ni credenciales de producción. Los servicios cloud/mainnet reales son extensiones opcionales y no requisitos pendientes del cierre académico.
+> `main` no contiene claves privadas, tokens de infraestructura ni credenciales de producción. Para el alcance académico, los servicios externos reales no son necesarios y no deben simularse ni hardcodearse.
+
+Consulta [`docs/portfolio-readiness.md`](docs/portfolio-readiness.md) para el criterio de cierre y el escenario recomendado de demostración. La ruta opcional hacia un despliegue real se documenta en [`docs/production-readiness.md`](docs/production-readiness.md).
 
 ---
 
-## 🆕 Hardening final Web / API / PDF — septiembre 2026
+## 🆕 Hardening final Web / API / PDF / Mobile — septiembre 2026
 
-La última ronda de trabajo dejó consolidado el flujo principal de CertiChain antes de continuar con el polish móvil.
+La ronda final de hardening consolidó los flujos principales de CertiChain sin alterar su alcance académico.
 
 ### Portal institucional
 
@@ -109,6 +104,21 @@ La última ronda de trabajo dejó consolidado el flujo principal de CertiChain a
 - wallet / identidad técnica;
 - estado dinámico: el PDF no fija como verdad permanente un estado que pueda cambiar después.
 
+### Aplicación móvil
+
+- branding oficial con logo/isotipo de CertiChain;
+- navegación inferior y componentes visuales modernizados;
+- eliminación de placeholders visuales heredados como `CC`;
+- validación por **ID / Blockchain ID sin escribir SHA-256 manualmente**;
+- recuperación automática del hash mediante la API;
+- escáner compatible con los QR actuales del Certificate PDF v3.1;
+- compatibilidad con deep links legacy que incluyen `hash`;
+- wallet local con estado vigente, pendiente o revocado;
+- revalidación desde el detalle de la credencial;
+- enlaces compartibles hacia el verificador público;
+- historial local protegido mediante `expo-secure-store`;
+- eliminación del historial con confirmación explícita.
+
 ### Docker y persistencia
 
 - runtime de API no-root;
@@ -132,108 +142,133 @@ La última ronda de trabajo dejó consolidado el flujo principal de CertiChain a
 
 | Integrante | Matrícula |
 |---|---|
-| **Francis Jairo Matías Rosario** | **A00115261** |
-| **Pieranyela José Carrasco Rodríguez** | **A00116415** |
-| **Jenrry Monegro Rosario** | **A00116621** |
-| **Enmanuel Alberto Arias de Jesus** | **A00117358** |
+| 👨🏻‍💻 **Francis Jairo Matías Rosario** | **A00115261** |
+| 👩🏻‍💻 **Pieranyela José Carrasco Rodríguez** | **A00116415** |
+| 👨🏻‍💻 **Jenrry Monegro Rosario** | **A00116621** |
+| 👨🏻‍💻 **Enmanuel Alberto Arias de Jesus** | **A00117358** |
 
-### 🧭 Continuidad académica
+## 🧭 Continuidad académica
 
-CertiChain forma parte de una línea de proyectos preservados y modernizados durante la trayectoria académica en UNAPEC.
+CertiChain ocupa un punto intermedio dentro de varias relaciones académicas verificables de la trayectoria en UNAPEC. Estas relaciones se documentan por separado para distinguir la recurrencia de estudiantes, la continuidad docente y el cruce institucional ITLA → UNAPEC.
 
-- Pieranyela José Carrasco Rodríguez y Jenrry Monegro Rosario coincidieron también en **AccessiUX Market** (ISO-505) y posteriormente en **CineGest** (ISO-610).
-- El profesor Ing. Pedro José Ramirez Rodriguez aparece también en **NutriFlow** (INF-164) y **Digital Sanctuary** (ISO-710), dentro de una continuidad formativa de proyectos independientes.
-- Los cuatro integrantes del equipo cuentan además con trayectoria académica previa documentada en ITLA antes de coincidir en UNAPEC.
+### 👥 Continuidad por estudiantes
 
-Estas relaciones son académicas y cronológicas; no implican dependencia técnica entre los proyectos.
+**Pieranyela José Carrasco Rodríguez (A00116415)** y **Jenrry Monegro Rosario (A00116621)** coincidieron con Francis Jairo Matías Rosario en dos asignaturas distintas durante **Septiembre - Diciembre de 2025**: **CertiChain (ISO-915)** y [**AccessiUX Market**](https://github.com/Jairo0811/AccessiUX-Market), originado en **Ingeniería de la Usabilidad (ISO-505)**. Posteriormente, ambos volvieron a coincidir con Francis en [**CineGest**](https://github.com/Jairo0811/CineGest), correspondiente a **Desarrollo de Software con Tecnología Open Source I (ISO-610)** durante **Enero - Abril de 2026**.
+
+| Orden | Asignatura | Proyecto | Período |
+|---:|---|---|---|
+| 1 | Fundamentos de Seguridad de Software (ISO-915) | **CertiChain** | Septiembre - Diciembre 2025 |
+| 2 | Ingeniería de la Usabilidad (ISO-505) | [**AccessiUX Market**](https://github.com/Jairo0811/AccessiUX-Market) | Septiembre - Diciembre 2025 |
+| 3 | Desarrollo de Software con Tecnología Open Source I (ISO-610) | [**CineGest**](https://github.com/Jairo0811/CineGest) | Enero - Abril 2026 |
+
+La recurrencia queda respaldada por el mismo **nombre completo y matrícula** en los equipos académicos de los tres proyectos. La relación es formativa y cronológica; no implica dependencia técnica entre las aplicaciones.
+
+### 👨‍🏫 Continuidad por profesor
+
+El profesor **Ing. Pedro José Ramirez Rodriguez** aparece en una secuencia formativa de tres proyectos independientes: [**NutriFlow**](https://github.com/Jairo0811/NutriFlow), CertiChain y [**Digital Sanctuary**](https://github.com/Jairo0811/DigitalSanctuary).
+
+| Orden | Asignatura | Proyecto | Período |
+|---:|---|---|---|
+| 1 | Bases de Datos 1 (INF-164) | [**NutriFlow**](https://github.com/Jairo0811/NutriFlow) | Mayo - Agosto 2024 |
+| 2 | Fundamentos de Seguridad de Software (ISO-915) | **CertiChain** | Septiembre - Diciembre 2025 |
+| 3 | Desarrollo de Software con Tecnología Propietaria 2 (ISO-710) | [**Digital Sanctuary**](https://github.com/Jairo0811/DigitalSanctuary) | Mayo - Agosto 2026 |
+
+La secuencia es **formativa y cronológica**: comienza con fundamentos de datos y modelado, continúa con seguridad de software y blockchain, y posteriormente llega al desarrollo de una aplicación Android nativa. Los proyectos no constituyen versiones ni dependencias técnicas entre sí.
+
+### 🏫 Cruce institucional ITLA → UNAPEC
+
+Dentro del equipo de CertiChain existen trayectorias previas documentadas en el **Instituto Tecnológico de Las Américas (ITLA)** antes de coincidir en UNAPEC:
+
+| Integrante | Matrícula UNAPEC | Matrícula ITLA |
+|---|---|---|
+| Francis Jairo Matías Rosario | A00115261 | 2015-2984 |
+| Pieranyela José Carrasco Rodríguez | A00116415 | 2019-8767 |
+| Jenrry Monegro Rosario | A00116621 | 2019-8690 |
+| Enmanuel Alberto Arias de Jesus | A00117358 | 2019-7415 |
+
+El cruce institucional documenta la trayectoria educativa previa de los cuatro integrantes del equipo. Para Pieranyela y Jenrry, la continuidad posterior en UNAPEC queda además documentada en **AccessiUX Market** y **CineGest**. No implica que hayan cursado juntos una misma asignatura en ITLA.
+
+CertiChain forma parte de la evolución académica y técnica de proyectos preservados y modernizados posteriormente con prácticas de ingeniería de software.
 
 ---
 
 ## ✨ Funcionalidades
 
-### 🖥️ Portal institucional
+### Portal institucional
 
 - autenticación administrativa;
-- dashboard con métricas y actividad reciente;
-- emisión automática de evidencia PDF;
-- listado, búsqueda, filtros y paginación;
-- detalle de credenciales;
-- validación criptográfica in-place;
-- gestión de estado local/off-chain;
-- descarga del PDF;
-- revocación;
-- eliminación segura de certificados de prueba;
-- verificador público independiente.
+- dashboard con métricas, actividad reciente y estados;
+- emisión de certificados con wallet técnica, Metadata URI y SHA-256 automáticos;
+- listado, búsqueda, filtrado y paginación;
+- detalle, validación, descarga PDF, revocación y eliminación controlada;
+- gestión de estados off-chain;
+- verificador público independiente;
+- diseño responsive alineado con el sistema visual de CertiChain.
 
-### 📱 Aplicación móvil
+### Aplicación móvil
 
-Base funcional existente:
-
-- React Native + Expo + TypeScript;
 - wallet local de credenciales verificadas;
 - navegación Inicio / Escanear / Historial / Perfil;
-- QR de credenciales;
-- escáner real con `expo-camera`;
-- detalle de credenciales;
-- copiar y compartir identificadores;
+- generación y lectura de QR;
+- escáner real mediante cámara;
+- validación automática por ID con recuperación del SHA-256;
+- detalle y revalidación de credenciales;
+- copia y compartición de identificadores y enlaces públicos;
 - historial protegido mediante `expo-secure-store`;
-- icono, adaptive icon, splash y branding assets de CertiChain.
+- branding oficial de CertiChain.
 
-**Siguiente foco:** llevar la app móvil al mismo nivel visual y de UX que el portal institucional, eliminar placeholders visuales heredados (`CC`), alinear el flujo de verificación con la recuperación automática de SHA-256 y mejorar estados, feedback y experiencia de cámara.
-
-### ⚙️ Backend
+### Backend
 
 - Node.js + Express + TypeScript;
 - JWT y RBAC;
 - emisión, revocación, verificación, cambio de estado local y auditoría;
-- Zod;
+- validación mediante Zod;
 - rate limiting y headers defensivos;
-- PostgreSQL con `DATABASE_URL`;
-- JSON únicamente como fallback local/test;
-- almacenamiento de documentos cifrados;
-- generación PDF;
-- QR;
+- PostgreSQL en entornos con `DATABASE_URL`;
+- fallback JSON únicamente para desarrollo/test;
+- `POST /api/documents` para cifrar y almacenar certificados;
+- generación de PDF y QR;
 - `/health`, `/ready` y `/metrics`.
 
-### ⛓️ Blockchain
+### Blockchain
 
 - `CertificateRegistry.sol`;
-- emisores autorizados;
+- instituciones/emisores autorizados;
 - emisión y revocación;
-- verificación de hashes;
-- eventos de trazabilidad;
+- consulta y verificación de hashes;
+- eventos para trazabilidad;
 - Hardhat + OpenZeppelin;
-- redes Sepolia, Polygon Amoy y Polygon PoS preparadas.
+- redes Sepolia, Polygon Amoy y Polygon PoS.
 
 ---
 
 ## 🏗️ Arquitectura
 
 ```text
-┌───────────────────────────────────────────────────────────────┐
-│                           Clientes                            │
-│                                                               │
-│   📱 Mobile App      🖥️ Portal Institucional      🔍 Verify   │
-└───────────────┬──────────────────┬────────────────────────────┘
-                │                  │
-                └─────────┬────────┘
-                          ▼
-                ┌──────────────────────┐
-                │      REST API        │
-                │ Node.js / Express TS │
-                └──────────┬───────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                         Clientes                            │
+│                                                             │
+│  📱 Mobile App        🖥️ Portal Institucional   🔍 Verifier │
+└───────────────┬─────────────────────┬───────────────────────┘
+                │                     │
+                └──────────┬──────────┘
+                           ▼
+                 ┌───────────────────┐
+                 │    REST API       │
+                 │ Node.js / TS      │
+                 └─────────┬─────────┘
                            │
-              ┌────────────┼──────────────┐
-              ▼            ▼              ▼
-         PostgreSQL    Encrypted       Blockchain
+             ┌─────────────┼─────────────┐
+             ▼             ▼             ▼
+        PostgreSQL     Encrypted       Blockchain
                        Storage/IPFS     Gateway
-                           │              │
-                           │              ▼
-                           │       CertificateRegistry
-                           │       Solidity / Polygon
-                           └──────────────┬─────────────
-                                          ▼
-                                   Audit / Metrics
+                           │             │
+                           │             ▼
+                           │        CertificateRegistry
+                           │        Solidity / Polygon
+                           └─────────────┬─────────────
+                                         ▼
+                                  Audit / Metrics
 ```
 
 ### Datos on-chain
@@ -248,8 +283,8 @@ Base funcional existente:
 ### Datos off-chain
 
 - nombre del estudiante;
-- PDF y documentos académicos;
-- wallet / identidad técnica local;
+- documentos académicos;
+- PDF completo;
 - información privada institucional;
 - secretos y claves.
 
@@ -257,12 +292,45 @@ Base funcional existente:
 
 ## 🧱 Stack tecnológico
 
+### 📱 Mobile y Web
+
+<p>
+  <img src="https://skillicons.dev/icons?i=react,ts,vite" alt="React, TypeScript y Vite" />
+  <img src="https://img.shields.io/badge/Expo-000020?style=for-the-badge&logo=expo&logoColor=white" alt="Expo" />
+</p>
+
+### ⚙️ Backend y API
+
+<p>
+  <img src="https://skillicons.dev/icons?i=nodejs,express,ts" alt="Node.js, Express y TypeScript" />
+  <img src="https://img.shields.io/badge/Zod-3E67B1?style=for-the-badge&logo=zod&logoColor=white" alt="Zod" />
+  <img src="https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white" alt="JWT" />
+</p>
+
+### 🗄️ Datos, Blockchain y Storage
+
+<p>
+  <img src="https://skillicons.dev/icons?i=postgres,solidity" alt="PostgreSQL y Solidity" />
+  <img src="https://img.shields.io/badge/Hardhat-FFF100?style=for-the-badge&logo=hardhat&logoColor=000000" alt="Hardhat" />
+  <img src="https://img.shields.io/badge/OpenZeppelin-4E5EE4?style=for-the-badge&logo=openzeppelin&logoColor=white" alt="OpenZeppelin" />
+  <img src="https://img.shields.io/badge/IPFS-65C2CB?style=for-the-badge&logo=ipfs&logoColor=white" alt="IPFS" />
+</p>
+
+### 🧪 Testing, Seguridad y DevOps
+
+<p>
+  <img src="https://skillicons.dev/icons?i=docker,github,githubactions" alt="Docker, GitHub y GitHub Actions" />
+  <img src="https://img.shields.io/badge/Vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white" alt="Vitest" />
+  <img src="https://img.shields.io/badge/CodeQL-181717?style=for-the-badge&logo=github&logoColor=white" alt="CodeQL" />
+  <img src="https://img.shields.io/badge/Prometheus-E6522C?style=for-the-badge&logo=prometheus&logoColor=white" alt="Prometheus" />
+</p>
+
 | Capa | Tecnologías |
 |---|---|
-| Mobile | React Native, Expo 54, TypeScript, Expo Camera, Secure Store, QR Code SVG |
-| Web | React 19, TypeScript, Vite |
+| Mobile | React Native, Expo 54, TypeScript, Expo Camera, Secure Store, React Native SVG, QR Code SVG |
+| Web | React 19, TypeScript, Vite, Font Awesome |
 | API | Node.js, Express, TypeScript, Zod, JWT |
-| Persistencia | PostgreSQL; JSON como fallback local/test |
+| Persistencia | PostgreSQL; JSON solo como fallback local/test |
 | Blockchain | Solidity, Hardhat, OpenZeppelin, Ethers.js |
 | Redes | Sepolia, Polygon Amoy, Polygon PoS |
 | Storage | AES-256-GCM + Local/IPFS adapter |
@@ -287,7 +355,7 @@ Base funcional existente:
 cp .env.example .env
 ```
 
-Para desarrollo local configura al menos:
+Para una prueba local, cambia al menos:
 
 ```env
 JWT_SECRET=replace-this-with-a-long-local-secret
@@ -296,9 +364,10 @@ CORS_ORIGIN=http://localhost:8080
 VITE_API_URL=http://localhost:4000
 PUBLIC_VERIFY_URL=http://localhost:8080/verify
 EXPO_PUBLIC_API_URL=http://localhost:4000
+EXPO_PUBLIC_VERIFY_URL=http://localhost:8080/verify
 ```
 
-> En producción, `PUBLIC_VERIFY_URL` debe usar HTTPS, un dominio real y terminar en `/verify`.
+> En producción, `PUBLIC_VERIFY_URL` y `EXPO_PUBLIC_VERIFY_URL` deben apuntar al dominio HTTPS real. En un teléfono físico, `EXPO_PUBLIC_API_URL` no puede usar `localhost` del dispositivo: debe ser una URL alcanzable por LAN o HTTPS.
 
 ### 2. Levantar el stack
 
@@ -306,42 +375,44 @@ EXPO_PUBLIC_API_URL=http://localhost:4000
 docker compose up -d --build
 ```
 
-Servicios:
+Se levantan:
 
 - PostgreSQL;
 - API: `http://localhost:4000`;
 - Web: `http://localhost:8080`.
 
-### 3. Health / readiness
+### 3. Verificación
 
 ```bash
 curl http://localhost:4000/health
 curl http://localhost:4000/ready
 ```
 
-### 4. Mobile
+El healthcheck de Docker utiliza `/ready`, por lo que el portal web espera a que la persistencia esté disponible.
 
-Desde el monorepo:
+### 4. Mobile
 
 ```bash
 npm run start --workspace=@certichain/mobile
 ```
 
-Para un dispositivo físico, `EXPO_PUBLIC_API_URL` debe apuntar a una URL alcanzable desde el teléfono —por ejemplo la IP LAN del equipo que ejecuta la API— y no a `localhost` del teléfono.
+### Desarrollo sin blockchain
+
+Blockchain puede permanecer sin configurar durante pruebas locales y demostraciones de portafolio. En ese modo, los certificados se almacenan off-chain y pueden transicionar entre `pending`, `active` y `revoked`. La configuración blockchain externa solo es obligatoria para un staging/producción real.
 
 ---
 
 ## 🔐 Documentos cifrados e IPFS
 
-La API calcula **SHA-256 sobre el documento original** y después cifra el contenido con **AES-256-GCM** antes de escribirlo en storage.
+La API calcula **SHA-256 sobre el documento original** y posteriormente lo cifra con **AES-256-GCM**. Solo el contenido cifrado se escribe en storage/IPFS.
 
-Desarrollo:
+En desarrollo:
 
 ```env
 STORAGE_DRIVER=local
 ```
 
-Producción opcional:
+En una producción real opcional:
 
 ```env
 STORAGE_DRIVER=ipfs
@@ -350,36 +421,40 @@ IPFS_API_URL=https://...
 IPFS_API_TOKEN=...
 ```
 
+`NODE_ENV=production` no inicia si falta la llave de cifrado o si el storage no es IPFS.
+
 ---
 
 ## 🗄️ PostgreSQL y recuperación
 
-Con `DATABASE_URL`, la API utiliza PostgreSQL y crea tablas e índices requeridos de manera idempotente.
+Con `DATABASE_URL`, la API utiliza PostgreSQL y crea las tablas/índices requeridos de manera idempotente.
+
+Scripts operativos:
 
 ```bash
 scripts/backup-postgres.sh
 ALLOW_RESTORE=YES scripts/restore-postgres.sh backups/certichain-<timestamp>.dump
 ```
 
-Los backups generan checksum SHA-256 y el restore exige confirmación explícita.
+Los backups generan checksum SHA-256 y el restore requiere confirmación explícita mediante `ALLOW_RESTORE=YES`.
 
 ---
 
-## ⛓️ Smart contracts
+## ⛓️ Despliegue de smart contracts
 
-El workflow **Deploy CertificateRegistry** permite despliegue manual hacia:
+El workflow **Deploy CertificateRegistry** se ejecuta manualmente desde GitHub Actions y permite seleccionar:
 
 - `sepolia`;
 - `amoy`;
 - `polygon`.
 
-Los RPC y `BLOCKCHAIN_PRIVATE_KEY` deben residir únicamente en secretos de GitHub Environments.
-
-Para el alcance académico no es necesario financiar un despliegue mainnet.
+Los RPC y `BLOCKCHAIN_PRIVATE_KEY` deben estar configurados como secretos del environment correspondiente. Nunca se almacenan en el repositorio. Para el proyecto académico basta con que esta capacidad permanezca implementada y documentada; no es necesario financiar un despliegue mainnet.
 
 ---
 
 ## 📊 Observabilidad
+
+Endpoints:
 
 ```text
 GET /health
@@ -387,13 +462,13 @@ GET /ready
 GET /metrics
 ```
 
-Las solicitudes generan logs estructurados con request ID, método, ruta, código HTTP y duración. En producción, `/metrics` puede protegerse mediante `METRICS_TOKEN`.
+En producción, `/metrics` exige `METRICS_TOKEN`. Las solicitudes generan logs JSON con request ID, método, ruta, estado y duración.
 
 ---
 
 ## 🧪 Quality gates
 
-CI utiliza `package-lock.json` + `npm ci` y exige:
+Las instalaciones de CI utilizan el `package-lock.json` mediante `npm ci`. Cada cambio debe superar:
 
 ```text
 format
@@ -412,14 +487,14 @@ autenticación
 → generación PDF / SHA-256
 → listado
 → validación
+→ recuperación automática de evidencia
 → pending ↔ active ↔ revoked en off-chain
 → revocación
-→ eliminación de prueba
+→ eliminación controlada
+→ QR moderno y compatibilidad móvil legacy
 ```
 
-Los contratos cuentan con pruebas de permisos, emisión, revocación e integridad.
-
-> El reporte global de `npm audit` del monorepo debe analizarse por workspace antes de aplicar upgrades; no se recomienda `npm audit fix --force` sin revisar impacto sobre Expo/Hardhat y dependencias transitivas.
+Los smart contracts cuentan con pruebas de permisos, emisión, revocación e integridad.
 
 ---
 
@@ -431,38 +506,43 @@ Los contratos cuentan con pruebas de permisos, emisión, revocación e integrida
 | 1 | Blockchain Core | ✅ |
 | 2 | Backend API | ✅ |
 | 3 | Portal institucional | ✅ |
-| 4 | Aplicación móvil base | ✅ |
+| 4 | Aplicación móvil | ✅ |
 | 5 | Verificación pública | ✅ |
 | 6 | Seguridad, privacidad y storage | ✅ |
 | 7 | Testing, DevOps y despliegue | ✅ |
-| 8 | Production readiness | ✅ Base implementada |
-| Hardening Web/API/PDF 2026 | UX, branding, Certificate PDF v3.1, estados, cleanup | ✅ |
-| Mobile Final Polish | Visual parity, verificación y UX móvil | 🚧 En curso |
+| 8 | Production readiness y expansión | ✅ Base implementada |
+| Cierre | Reproducibilidad, documentación y portfolio readiness | ✅ |
+| Hardening final | Web / API / PDF / Mobile polish | ✅ |
 
 ### Extensiones opcionales de producción
+
+El proyecto académico está cerrado. Si en el futuro CertiChain se convierte en un servicio operativo, se podrá añadir:
 
 - PostgreSQL administrado;
 - proveedor IPFS real;
 - RPC de Polygon y wallet de despliegue;
 - dominio HTTPS + CDN/WAF;
-- observabilidad administrada;
+- plataforma de observabilidad administrada;
 - auditoría independiente del smart contract;
-- staging E2E;
-- GitHub Release/tag formal.
+- pruebas E2E sobre staging real;
+- publicación formal mediante GitHub Release/tag.
 
-Consulta [`docs/portfolio-readiness.md`](docs/portfolio-readiness.md), [`docs/production-readiness.md`](docs/production-readiness.md) y [`CHANGELOG.md`](CHANGELOG.md).
+Estas actividades no son requisitos pendientes del portafolio. Consulta [`docs/production-readiness.md`](docs/production-readiness.md) para la ruta de evolución y [`CHANGELOG.md`](CHANGELOG.md) para el cierre de la versión.
 
 ---
 
 ## 🔒 Seguridad
 
 - ningún secreto debe almacenarse en Git;
-- PII y documentos completos permanecen off-chain;
+- producción exige configuración fuerte y completa;
+- PII permanece off-chain;
 - documentos se cifran antes de storage/IPFS;
-- cambios administrativos sensibles quedan auditados;
-- una credencial blockchain-bound no puede borrarse ni cambiar de estado manualmente de forma incompatible con la cadena;
-- wallets de despliegue deben usar mínimo privilegio y fondos limitados;
+- credenciales ligadas a blockchain no deben editar su estado localmente de forma incompatible con la cadena;
+- wallets de despliegue deben utilizar mínimo privilegio y fondos limitados;
+- secretos de staging y producción nunca se reutilizan;
 - antes de Polygon Mainnet se requiere revisión independiente del smart contract.
+
+> Los resultados de `npm audit` deben evaluarse por workspace, runtime y alcance real. No se recomienda aplicar `npm audit fix --force` de forma ciega en el monorepo.
 
 Consulta [`SECURITY.md`](SECURITY.md) para el proceso de reporte de vulnerabilidades.
 
