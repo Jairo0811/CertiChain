@@ -1,5 +1,5 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes, randomUUID } from "node:crypto";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { config } from "./config.js";
 
@@ -36,8 +36,7 @@ class StorageService {
     let encrypted: Buffer;
 
     if (metadataURI.startsWith("local-encrypted://")) {
-      const filename = metadataURI.slice("local-encrypted://".length);
-      if (!/^[a-zA-Z0-9._-]+$/.test(filename)) throw new Error("Invalid local document reference");
+      const filename = localDocumentFilename(metadataURI);
       encrypted = await readFile(resolve(process.cwd(), ".data/documents", filename));
     } else if (metadataURI.startsWith("ipfs://")) {
       encrypted = await downloadFromIpfs(metadataURI.slice("ipfs://".length));
@@ -48,6 +47,18 @@ class StorageService {
     return decrypt(encrypted);
   }
 
+  async deleteDocument(metadataURI: string): Promise<boolean> {
+    if (!metadataURI.startsWith("local-encrypted://")) {
+      // IPFS content cannot be guaranteed to disappear from the distributed network.
+      // Keep the CID immutable and only remove local/off-chain test evidence here.
+      return false;
+    }
+
+    const filename = localDocumentFilename(metadataURI);
+    await rm(resolve(process.cwd(), ".data/documents", filename), { force: true });
+    return true;
+  }
+
   canReadDocument(metadataURI: string): boolean {
     if (metadataURI.startsWith("local-encrypted://")) return true;
     return metadataURI.startsWith("ipfs://") && Boolean(config.IPFS_API_URL);
@@ -56,6 +67,12 @@ class StorageService {
   get configured(): boolean {
     return this.driver === "local" || Boolean(config.IPFS_API_URL);
   }
+}
+
+function localDocumentFilename(metadataURI: string): string {
+  const filename = metadataURI.slice("local-encrypted://".length);
+  if (!/^[a-zA-Z0-9._-]+$/.test(filename)) throw new Error("Invalid local document reference");
+  return filename;
 }
 
 function resolveEncryptionKey(): Buffer {
