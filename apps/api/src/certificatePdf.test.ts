@@ -1,6 +1,47 @@
 import { describe, expect, it } from "vitest";
 import { buildCertificatePdf } from "./certificatePdf.js";
 
+function readJpegDimensions(image: Buffer): { width: number; height: number } | null {
+  if (image.length < 4 || image[0] !== 0xff || image[1] !== 0xd8) return null;
+
+  let offset = 2;
+  while (offset + 4 <= image.length) {
+    if (image[offset] !== 0xff) {
+      offset += 1;
+      continue;
+    }
+
+    while (offset < image.length && image[offset] === 0xff) offset += 1;
+    if (offset >= image.length) return null;
+
+    const marker = image[offset];
+    if (marker === 0xd9 || marker === 0xda) return null;
+    if (marker === undefined) return null;
+
+    if ((marker >= 0xd0 && marker <= 0xd7) || marker === 0x01) {
+      offset += 1;
+      continue;
+    }
+
+    if (offset + 2 >= image.length) return null;
+    const segmentLength = image.readUInt16BE(offset + 1);
+    const markerStart = offset - 1;
+
+    if (marker >= 0xc0 && marker <= 0xc3) {
+      if (segmentLength < 8 || markerStart + 9 >= image.length) return null;
+      return {
+        height: image.readUInt16BE(markerStart + 5),
+        width: image.readUInt16BE(markerStart + 7),
+      };
+    }
+
+    if (segmentLength < 2) return null;
+    offset = markerStart + 2 + segmentLength;
+  }
+
+  return null;
+}
+
 describe("certificate PDF", () => {
   it("builds a branded one-page PDF with verification QR and trust-layer metadata", () => {
     const pdf = buildCertificatePdf({
@@ -28,7 +69,7 @@ describe("certificate PDF", () => {
     expect(pdf.length).toBeGreaterThan(12_000);
   });
 
-  it("embeds a complete JPEG stream for the CertiChain isotipo", () => {
+  it("embeds a structurally valid JPEG stream for the CertiChain isotipo", () => {
     const pdf = buildCertificatePdf({
       id: "555e26b1-c13d-494a-a251-53a98707bc4e",
       studentName: "CertiChain Test Student",
@@ -47,6 +88,7 @@ describe("certificate PDF", () => {
     const imageHeader = pdf.subarray(imageObjectStart, imageHeaderEnd).toString("latin1");
     const lengthMatch = /\/Length (\d+)/.exec(imageHeader);
     expect(lengthMatch?.[1]).toBeDefined();
+    expect(imageHeader).toContain("/Width 180 /Height 180");
 
     const imageLength = Number(lengthMatch?.[1]);
     const imageStart = imageHeaderEnd + Buffer.byteLength("stream\n", "latin1");
@@ -55,5 +97,6 @@ describe("certificate PDF", () => {
     expect(image).toHaveLength(imageLength);
     expect(image.subarray(0, 2)).toEqual(Buffer.from([0xff, 0xd8]));
     expect(image.subarray(-2)).toEqual(Buffer.from([0xff, 0xd9]));
+    expect(readJpegDimensions(image)).toEqual({ width: 180, height: 180 });
   });
 });
