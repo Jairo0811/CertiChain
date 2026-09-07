@@ -13,15 +13,16 @@ FROM node:20-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 
-COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/apps/api/package.json ./apps/api/package.json
-COPY --from=build /app/apps/api/dist ./apps/api/dist
-COPY --from=build /app/apps/api/assets ./apps/api/assets
-COPY --from=build /app/apps/web/public/branding/certichain-isotipo.png ./apps/web/public/branding/certichain-isotipo.png
-
-RUN addgroup -S certichain && adduser -S certichain -G certichain \
+RUN addgroup -S certichain \
+  && adduser -S certichain -G certichain \
   && mkdir -p /app/.data \
-  && chown -R certichain:certichain /app
+  && chown certichain:certichain /app /app/.data
+
+COPY --from=build --chown=certichain:certichain /app/node_modules ./node_modules
+COPY --from=build --chown=certichain:certichain /app/apps/api/package.json ./apps/api/package.json
+COPY --from=build --chown=certichain:certichain /app/apps/api/dist ./apps/api/dist
+COPY --from=build --chown=certichain:certichain /app/apps/api/assets ./apps/api/assets
+COPY --from=build --chown=certichain:certichain /app/apps/web/public/branding/certichain-isotipo.png ./apps/web/public/branding/certichain-isotipo.png
 
 USER certichain
 EXPOSE 4000
