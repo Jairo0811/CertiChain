@@ -106,7 +106,7 @@ export function AdminValidationBridge({ children }: PropsWithChildren) {
       const response = await fetch(
         `${API_URL}/api/certificates/${encodeURIComponent(certificate.id)}/status`,
         {
-          method: "PATCH",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
