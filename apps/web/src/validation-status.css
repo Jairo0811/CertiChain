@@ -1,0 +1,47 @@
+.validation-status-manager {
+  display: grid;
+  gap: 12px;
+  margin-top: 24px;
+  padding: 16px;
+  border: 1px solid rgba(99, 102, 241, .18);
+  border-radius: 14px;
+  background: linear-gradient(145deg, rgba(37, 99, 235, .06), rgba(124, 58, 237, .045));
+}
+
+.validation-status-manager .eyebrow {
+  margin: 0;
+}
+
+.validation-status-manager label {
+  display: grid;
+  gap: 7px;
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.validation-status-manager select {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid rgba(148, 163, 184, .16);
+  border-radius: 10px;
+  background: #0b1329;
+  color: #e5e7eb;
+}
+
+.validation-status-manager button {
+  width: 100%;
+}
+
+.validation-status-manager small {
+  color: #7180a8;
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.validation-status-manager select:disabled,
+.validation-status-manager button:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}

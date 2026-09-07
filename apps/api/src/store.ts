@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { Pool } from "pg";
@@ -26,6 +27,7 @@ export class JsonStore implements Store {
   private state: PersistedState = { certificates: [], audit: [] };
   private initialized = false;
   private readonly dataFile: string;
+  private persistQueue: Promise<void> = Promise.resolve();
 
   constructor(dataFile = resolve(process.cwd(), config.CERTICHAIN_DATA_FILE)) {
     this.dataFile = dataFile;
@@ -91,9 +93,16 @@ export class JsonStore implements Store {
   }
 
   private async persist(): Promise<void> {
-    const tempFile = `${this.dataFile}.tmp`;
-    await writeFile(tempFile, JSON.stringify(this.state, null, 2), "utf8");
-    await rename(tempFile, this.dataFile);
+    const snapshot = JSON.stringify(this.state, null, 2);
+    const writeSnapshot = async () => {
+      const tempFile = `${this.dataFile}.${process.pid}.${randomUUID()}.tmp`;
+      await writeFile(tempFile, snapshot, "utf8");
+      await rename(tempFile, this.dataFile);
+    };
+
+    const next = this.persistQueue.then(writeSnapshot, writeSnapshot);
+    this.persistQueue = next;
+    await next;
   }
 }
 

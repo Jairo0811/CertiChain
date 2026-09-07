@@ -7,6 +7,7 @@ import "./styles.css";
 import "./fontawesome-icons.css";
 import "./branding.css";
 import "./pdf-certificate.css";
+import "./validation-status.css";
 
 const isPublicVerification = window.location.pathname === "/verify";
 
