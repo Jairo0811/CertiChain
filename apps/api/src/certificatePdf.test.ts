@@ -4,11 +4,11 @@ import { describe, expect, it } from "vitest";
 import { buildCertificatePdf } from "./certificatePdf.js";
 
 const ORIGINAL_LOGO = readFileSync(
-  new URL("../../web/public/branding/certichain-isotipo.png", import.meta.url),
+  new URL("../../web/public/branding/certichain-logo.png", import.meta.url),
 );
 
 describe("certificate PDF", () => {
-  it("uses the committed original CertiChain isotipo PNG as the branding source", () => {
+  it("uses the committed original full CertiChain logo PNG as the branding source", () => {
     expect(ORIGINAL_LOGO.subarray(0, 8)).toEqual(
       Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
     );
@@ -16,7 +16,7 @@ describe("certificate PDF", () => {
     expect(ORIGINAL_LOGO.readUInt32BE(20)).toBeGreaterThan(500);
   });
 
-  it("builds a branded one-page PDF with accents, QR and trust-layer metadata", () => {
+  it("builds a clean branded one-page PDF with accents, QR and integrity metadata", () => {
     const pdf = buildCertificatePdf({
       id: "555e26b1-c13d-494a-a251-53a98707bc4e",
       studentName: "María José Pérez",
@@ -33,14 +33,12 @@ describe("certificate PDF", () => {
     expect(text).toContain("CERTIFICADO ACADÉMICO VERIFICABLE");
     expect(text).toContain("credencial académica");
     expect(text).toContain("Fecha de emisión");
-    expect(text).toContain("VERIFICACIÓN PÚBLICA");
-    expect(text).toContain("automáticamente");
-    expect(text).toContain("dinámico");
-    expect(text).toContain("revocación");
-    expect(text).toContain("TRUST LAYER");
+    expect(text).toContain("VALIDACIÓN POR QR");
+    expect(text).toContain("Validación automática");
+    expect(text).toContain("INTEGRIDAD DIGITAL");
     expect(text).toContain("SHA-256");
     expect(text).toContain("AES-256-GCM");
-    expect(text).toContain("BLOCKCHAIN READY");
+    expect(text).toContain("BLOCKCHAIN-READY");
     expect(text).toContain("/Logo Do");
     expect(text).toContain("/Subtype /Image");
     expect(text).toContain("/FlateDecode");
@@ -49,7 +47,7 @@ describe("certificate PDF", () => {
     expect(pdf.length).toBeGreaterThan(12_000);
   });
 
-  it("embeds a decodable RGB raster derived from the original PNG instead of JPEG", () => {
+  it("embeds a decodable aspect-preserving RGB raster derived from the full original PNG", () => {
     const pdf = buildCertificatePdf({
       id: "555e26b1-c13d-494a-a251-53a98707bc4e",
       studentName: "CertiChain Test Student",
@@ -67,18 +65,27 @@ describe("certificate PDF", () => {
 
     const imageHeader = pdf.subarray(imageObjectStart, imageHeaderEnd).toString("latin1");
     const lengthMatch = /\/Length (\d+)/.exec(imageHeader);
+    const widthMatch = /\/Width (\d+)/.exec(imageHeader);
+    const heightMatch = /\/Height (\d+)/.exec(imageHeader);
     expect(lengthMatch?.[1]).toBeDefined();
-    expect(imageHeader).toContain("/Width 180");
-    expect(imageHeader).toContain("/Height 180");
+    expect(widthMatch?.[1]).toBeDefined();
+    expect(heightMatch?.[1]).toBeDefined();
     expect(imageHeader).toContain("/DeviceRGB");
     expect(imageHeader).toContain("/FlateDecode");
 
     const imageLength = Number(lengthMatch?.[1]);
+    const width = Number(widthMatch?.[1]);
+    const height = Number(heightMatch?.[1]);
+    expect(width).toBeGreaterThan(0);
+    expect(height).toBeGreaterThan(0);
+    expect(width).toBeLessThanOrEqual(250);
+    expect(height).toBeLessThanOrEqual(72);
+
     const imageStart = imageHeaderEnd + Buffer.byteLength("stream\n", "latin1");
     const compressed = pdf.subarray(imageStart, imageStart + imageLength);
     const rgb = inflateSync(compressed);
 
-    expect(rgb).toHaveLength(180 * 180 * 3);
+    expect(rgb).toHaveLength(width * height * 3);
     expect(new Set(rgb).size).toBeGreaterThan(32);
   });
 });
