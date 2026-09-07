@@ -8,7 +8,7 @@
     "userInterfaceStyle": "dark",
     "icon": "./assets/icon.png",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/branding/certichain-logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#050817"
     },
@@ -33,9 +33,6 @@
     },
     "web": {
       "favicon": "./assets/icon.png"
-    },
-    "extra": {
-      "apiUrl": "http://localhost:4000"
     }
   }
 }
