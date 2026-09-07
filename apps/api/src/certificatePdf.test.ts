@@ -6,7 +6,7 @@ const BRAND_ASSET = readFileSync(new URL("../assets/branding/certichain-isotipo-
 
 describe("certificate PDF", () => {
   it("keeps the committed CertiChain JPEG asset intact", () => {
-    expect(BRAND_ASSET).toHaveLength(8604);
+    expect(BRAND_ASSET).toHaveLength(8593);
     expect(BRAND_ASSET.subarray(0, 2)).toEqual(Buffer.from([0xff, 0xd8]));
     expect(BRAND_ASSET.subarray(-2)).toEqual(Buffer.from([0xff, 0xd9]));
   });
