@@ -1,7 +1,16 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { buildCertificatePdf } from "./certificatePdf.js";
 
+const BRAND_ASSET = readFileSync(new URL("../assets/branding/certichain-isotipo-header.jpg", import.meta.url));
+
 describe("certificate PDF", () => {
+  it("keeps the committed CertiChain JPEG asset intact", () => {
+    expect(BRAND_ASSET).toHaveLength(7927);
+    expect(BRAND_ASSET.subarray(0, 2)).toEqual(Buffer.from([0xff, 0xd8]));
+    expect(BRAND_ASSET.subarray(-2)).toEqual(Buffer.from([0xff, 0xd9]));
+  });
+
   it("builds a branded one-page PDF with verification QR and trust-layer metadata", () => {
     const pdf = buildCertificatePdf({
       id: "555e26b1-c13d-494a-a251-53a98707bc4e",
@@ -25,10 +34,10 @@ describe("certificate PDF", () => {
     expect(text).toContain("/Logo Do");
     expect(text).toContain("/Subtype /Image");
     expect(text).toContain("%%EOF");
-    expect(pdf.length).toBeGreaterThan(12_000);
+    expect(pdf.length).toBeGreaterThan(17_000);
   });
 
-  it("embeds a complete JPEG stream for the CertiChain isotipo", () => {
+  it("embeds the exact committed JPEG stream for the CertiChain isotipo", () => {
     const pdf = buildCertificatePdf({
       id: "555e26b1-c13d-494a-a251-53a98707bc4e",
       studentName: "CertiChain Test Student",
@@ -52,7 +61,8 @@ describe("certificate PDF", () => {
     const imageStart = imageHeaderEnd + Buffer.byteLength("stream\n", "latin1");
     const image = pdf.subarray(imageStart, imageStart + imageLength);
 
-    expect(image).toHaveLength(imageLength);
+    expect(imageLength).toBe(BRAND_ASSET.length);
+    expect(image).toEqual(BRAND_ASSET);
     expect(image.subarray(0, 2)).toEqual(Buffer.from([0xff, 0xd8]));
     expect(image.subarray(-2)).toEqual(Buffer.from([0xff, 0xd9]));
   });
