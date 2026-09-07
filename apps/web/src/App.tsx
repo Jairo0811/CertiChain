@@ -51,6 +51,11 @@ function pdfFilename(certificate: Certificate) {
   return `certichain-${slug || "certificado"}-${certificate.id.slice(0, 8)}.pdf`;
 }
 
+function validationHref(certificate: Certificate) {
+  const id = certificate.blockchainId ?? certificate.id;
+  return `/verify?id=${encodeURIComponent(id)}&autoverify=1`;
+}
+
 export function App() {
   const [token, setToken] = useState(() => sessionStorage.getItem("certichain-token") ?? "");
   const [certificates, setCertificates] = useState<Certificate[]>([]);
@@ -139,6 +144,10 @@ export function App() {
   function navigate(nextView: View) {
     setView(nextView);
     setMessage("");
+  }
+
+  function validateCertificate(certificate: Certificate) {
+    window.open(validationHref(certificate), "_blank", "noopener,noreferrer");
   }
 
   async function login(event: FormEvent<HTMLFormElement>) {
@@ -487,6 +496,14 @@ export function App() {
                       <td><span className={`status ${certificate.status}`}>{statusLabel(certificate.status)}</span></td>
                       <td className="actions">
                         <button className="icon-button" title="Ver detalle" aria-label="Ver detalle" onClick={() => setSelectedCertificate(certificate)}>◉</button>
+                        <button
+                          className="ghost"
+                          style={{ padding: "8px 10px" }}
+                          title="Validar credencial"
+                          onClick={() => validateCertificate(certificate)}
+                        >
+                          <i className="fa-solid fa-shield-halved" aria-hidden="true" /> Validar
+                        </button>
                         {(certificate.documentAvailable || (certificate.status === "pending" && !certificate.blockchainId)) && (
                           <button
                             className="ghost"
@@ -550,6 +567,12 @@ export function App() {
               <span>ID / Blockchain ID<strong className="mono">{selectedCertificate.blockchainId ?? selectedCertificate.id}</strong></span>
               <span>SHA-256<strong className="mono credential-hash">{selectedCertificate.documentHash}</strong></span>
             </div>
+            <button
+              className="ghost full-width"
+              onClick={() => validateCertificate(selectedCertificate)}
+            >
+              <i className="fa-solid fa-shield-halved" aria-hidden="true" /> Validar credencial
+            </button>
             {(selectedCertificate.documentAvailable || (selectedCertificate.status === "pending" && !selectedCertificate.blockchainId)) && (
               <button
                 className="pdf-download-button full-width"
