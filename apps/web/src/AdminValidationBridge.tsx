@@ -17,6 +17,7 @@ type Verification = {
     existsOffChain: boolean;
     hashMatches: boolean;
     blockchain: unknown;
+    statusManagedByBlockchain?: boolean;
   };
   error?: string;
 };
@@ -43,6 +44,8 @@ function statusLabel(status?: CertificateStatus) {
 
 export function AdminValidationBridge({ children }: PropsWithChildren) {
   const [validation, setValidation] = useState<ValidationState | null>(null);
+  const [statusDraft, setStatusDraft] = useState<CertificateStatus>("pending");
+  const [changingStatus, setChangingStatus] = useState(false);
 
   const validate = useCallback(async (id: string) => {
     setValidation({ id, loading: true });
@@ -65,6 +68,7 @@ export function AdminValidationBridge({ children }: PropsWithChildren) {
         throw new Error(result.error ?? "No fue posible validar la credencial");
       }
 
+      if (result.certificate) setStatusDraft(result.certificate.status);
       setValidation({ id, loading: false, result });
     } catch (error) {
       setValidation({
@@ -74,6 +78,51 @@ export function AdminValidationBridge({ children }: PropsWithChildren) {
       });
     }
   }, []);
+
+  async function changeStatus() {
+    const certificate = validation?.result?.certificate;
+    if (!certificate || changingStatus) return;
+
+    if (validation?.result?.checks?.statusManagedByBlockchain) return;
+
+    const token = sessionStorage.getItem("certichain-token");
+    if (!token) {
+      setValidation((current) => current ? { ...current, error: "La sesión institucional expiró." } : current);
+      return;
+    }
+
+    if (statusDraft === certificate.status) return;
+
+    if (
+      certificate.status === "revoked" &&
+      statusDraft !== "revoked" &&
+      !window.confirm("Esta credencial está revocada. ¿Deseas cambiar su estado en este entorno off-chain/local?")
+    ) {
+      return;
+    }
+
+    setChangingStatus(true);
+    try {
+      const response = await fetch(
+        `${API_URL}/api/certificates/${encodeURIComponent(certificate.id)}/status`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ status: statusDraft }),
+        },
+      );
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.error ?? "No fue posible cambiar el estado");
+      await validate(validation.id);
+    } catch (error) {
+      setValidation((current) => current ? { ...current, error: (error as Error).message } : current);
+    } finally {
+      setChangingStatus(false);
+    }
+  }
 
   useEffect(() => {
     const originalOpen = window.open;
@@ -110,6 +159,9 @@ export function AdminValidationBridge({ children }: PropsWithChildren) {
     if (result.certificate?.status === "pending") return "Credencial pendiente";
     return "Credencial no verificada";
   }, [validation]);
+
+  const statusManagedByBlockchain = Boolean(validation?.result?.checks?.statusManagedByBlockchain);
+  const currentStatus = validation?.result?.certificate?.status;
 
   return (
     <>
@@ -182,6 +234,36 @@ export function AdminValidationBridge({ children }: PropsWithChildren) {
                       Blockchain {validation.result.checks.blockchain ? "consultada" : "no configurada"}
                     </span>
                   </div>
+                )}
+
+                {validation.result.certificate && (
+                  <section className="validation-status-manager">
+                    <p className="eyebrow">GESTIÓN DE ESTADO</p>
+                    <label>
+                      Estado de la credencial
+                      <select
+                        value={statusDraft}
+                        disabled={statusManagedByBlockchain || changingStatus}
+                        onChange={(event) => setStatusDraft(event.target.value as CertificateStatus)}
+                      >
+                        <option value="pending">Pendiente</option>
+                        <option value="active">Vigente</option>
+                        <option value="revoked">Revocado</option>
+                      </select>
+                    </label>
+                    <button
+                      type="button"
+                      disabled={statusManagedByBlockchain || changingStatus || statusDraft === currentStatus}
+                      onClick={() => void changeStatus()}
+                    >
+                      {changingStatus ? "Actualizando..." : "Actualizar estado"}
+                    </button>
+                    <small>
+                      {statusManagedByBlockchain
+                        ? "El estado está controlado por blockchain y no admite cambios manuales."
+                        : "Disponible para credenciales locales/off-chain. Cada cambio queda registrado en auditoría."}
+                    </small>
+                  </section>
                 )}
 
                 {validation.result.error && (
