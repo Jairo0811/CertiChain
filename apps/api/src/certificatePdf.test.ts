@@ -27,4 +27,33 @@ describe("certificate PDF", () => {
     expect(text).toContain("%%EOF");
     expect(pdf.length).toBeGreaterThan(12_000);
   });
+
+  it("embeds a complete JPEG stream for the CertiChain isotipo", () => {
+    const pdf = buildCertificatePdf({
+      id: "555e26b1-c13d-494a-a251-53a98707bc4e",
+      studentName: "CertiChain Test Student",
+      studentWallet: `0x${"22".repeat(20)}`,
+      title: "Blockchain Credential",
+      institution: "CertiChain Test Academy",
+      issuedAt: "2026-09-06",
+    });
+
+    const imageObjectStart = pdf.indexOf(Buffer.from("/Subtype /Image", "latin1"));
+    expect(imageObjectStart).toBeGreaterThanOrEqual(0);
+
+    const imageHeaderEnd = pdf.indexOf(Buffer.from("stream\n", "latin1"), imageObjectStart);
+    expect(imageHeaderEnd).toBeGreaterThan(imageObjectStart);
+
+    const imageHeader = pdf.subarray(imageObjectStart, imageHeaderEnd).toString("latin1");
+    const lengthMatch = /\/Length (\d+)/.exec(imageHeader);
+    expect(lengthMatch?.[1]).toBeDefined();
+
+    const imageLength = Number(lengthMatch?.[1]);
+    const imageStart = imageHeaderEnd + Buffer.byteLength("stream\n", "latin1");
+    const image = pdf.subarray(imageStart, imageStart + imageLength);
+
+    expect(image).toHaveLength(imageLength);
+    expect(image.subarray(0, 2)).toEqual(Buffer.from([0xff, 0xd8]));
+    expect(image.subarray(-2)).toEqual(Buffer.from([0xff, 0xd9]));
+  });
 });
