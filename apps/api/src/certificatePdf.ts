@@ -14,7 +14,6 @@ interface CertificatePdfInput {
 }
 
 type Rgb = [number, number, number];
-type Point = readonly [number, number];
 type PdfObject = Buffer;
 
 type RasterBrand = {
@@ -25,11 +24,12 @@ type RasterBrand = {
 
 const PAGE_WIDTH = 841.89;
 const PAGE_HEIGHT = 595.28;
-const BRAND_RENDER_SIZE = 180;
+const BRAND_MAX_WIDTH = 250;
+const BRAND_MAX_HEIGHT = 72;
 const HEADER_BACKGROUND: readonly [number, number, number] = [7, 14, 36];
 const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 const ORIGINAL_BRAND_PNG = readFileSync(
-  new URL("../../web/public/branding/certichain-isotipo.png", import.meta.url),
+  new URL("../../web/public/branding/certichain-logo.png", import.meta.url),
 );
 
 function normalizePdfText(value: string): string {
@@ -135,90 +135,25 @@ function pushLine(
   );
 }
 
-function pushPolygon(
-  commands: string[],
-  points: Point[],
-  options: { fill?: Rgb; stroke?: Rgb; lineWidth?: number },
-): void {
-  const first = points[0];
-  if (!first || points.length < 3) return;
-
-  commands.push("q");
-  if (options.fill) commands.push(`${options.fill.join(" ")} rg`);
-  if (options.stroke) {
-    commands.push(`${options.stroke.join(" ")} RG`, `${options.lineWidth ?? 1} w`);
-  }
-  commands.push(`${first[0].toFixed(2)} ${first[1].toFixed(2)} m`);
-  for (const [x, y] of points.slice(1)) commands.push(`${x.toFixed(2)} ${y.toFixed(2)} l`);
-  commands.push(
-    `h ${options.fill && options.stroke ? "B" : options.fill ? "f" : "S"}`,
-    "Q",
-  );
-}
-
-function regularPolygon(
-  centerX: number,
-  centerY: number,
-  radius: number,
-  sides: number,
-  rotation = 0,
-): Point[] {
-  return Array.from({ length: sides }, (_, index) => {
-    const angle = rotation + (Math.PI * 2 * index) / sides;
-    return [centerX + Math.cos(angle) * radius, centerY + Math.sin(angle) * radius] as const;
-  });
-}
-
-function pushHexagon(
-  commands: string[],
-  centerX: number,
-  centerY: number,
-  radius: number,
-  color: Rgb,
-): void {
-  pushPolygon(commands, regularPolygon(centerX, centerY, radius, 6), {
-    stroke: color,
-    lineWidth: 0.55,
-  });
-}
-
-function pushBlockchainPattern(commands: string[]): void {
-  const cyan: Rgb = [0.82, 0.92, 0.99];
-  const violet: Rgb = [0.9, 0.86, 0.99];
+function pushMinimalBlockchainAccent(commands: string[]): void {
+  const line: Rgb = [0.86, 0.91, 0.98];
+  const violet: Rgb = [0.91, 0.88, 0.99];
   const nodes = [
-    [530, 420],
-    [570, 448],
-    [612, 420],
-    [653, 447],
-    [698, 420],
-    [742, 448],
-    [785, 420],
-    [548, 265],
-    [594, 286],
-    [640, 263],
-    [688, 286],
-    [734, 263],
-    [778, 286],
+    [590, 407],
+    [626, 431],
+    [663, 407],
+    [700, 431],
+    [738, 407],
   ] as const;
 
-  for (let index = 0; index < 6; index += 1) {
+  for (let index = 0; index < nodes.length - 1; index += 1) {
     const from = nodes[index];
     const to = nodes[index + 1];
-    if (from && to) pushLine(commands, from[0], from[1], to[0], to[1], cyan, 0.55);
+    if (from && to) pushLine(commands, from[0], from[1], to[0], to[1], index % 2 ? violet : line, 0.55);
   }
-  for (let index = 7; index < nodes.length - 1; index += 1) {
-    const from = nodes[index];
-    const to = nodes[index + 1];
-    if (from && to) pushLine(commands, from[0], from[1], to[0], to[1], violet, 0.55);
+  for (const [x, y] of nodes) {
+    pushRect(commands, x - 1.8, y - 1.8, 3.6, 3.6, { fill: [0.76, 0.85, 0.98] });
   }
-  for (const [nodeX, nodeY] of nodes) {
-    pushRect(commands, nodeX - 1.7, nodeY - 1.7, 3.4, 3.4, {
-      fill: [0.76, 0.86, 0.98],
-    });
-  }
-  pushHexagon(commands, 751, 356, 31, violet);
-  pushHexagon(commands, 751, 356, 19, cyan);
-  pushHexagon(commands, 566, 353, 18, cyan);
 }
 
 function paethPredictor(left: number, up: number, upperLeft: number): number {
@@ -343,22 +278,55 @@ function decodeOriginalBrandPng(png: Buffer): {
   return { width, height, rgba };
 }
 
+function visibleBounds(decoded: { width: number; height: number; rgba: Buffer }) {
+  let minX = decoded.width;
+  let minY = decoded.height;
+  let maxX = -1;
+  let maxY = -1;
+
+  for (let y = 0; y < decoded.height; y += 1) {
+    for (let x = 0; x < decoded.width; x += 1) {
+      const alpha = decoded.rgba[(y * decoded.width + x) * 4 + 3] ?? 255;
+      if (alpha <= 8) continue;
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x);
+      maxY = Math.max(maxY, y);
+    }
+  }
+
+  if (maxX < minX || maxY < minY) {
+    return { x: 0, y: 0, width: decoded.width, height: decoded.height };
+  }
+
+  return {
+    x: minX,
+    y: minY,
+    width: maxX - minX + 1,
+    height: maxY - minY + 1,
+  };
+}
+
 function buildOriginalBrandRaster(): RasterBrand {
   const decoded = decodeOriginalBrandPng(ORIGINAL_BRAND_PNG);
-  const rgb = Buffer.alloc(BRAND_RENDER_SIZE * BRAND_RENDER_SIZE * 3);
+  const bounds = visibleBounds(decoded);
+  const scale = Math.min(BRAND_MAX_WIDTH / bounds.width, BRAND_MAX_HEIGHT / bounds.height);
+  const targetWidth = Math.max(1, Math.round(bounds.width * scale));
+  const targetHeight = Math.max(1, Math.round(bounds.height * scale));
+  const rgb = Buffer.alloc(targetWidth * targetHeight * 3);
 
-  for (let targetY = 0; targetY < BRAND_RENDER_SIZE; targetY += 1) {
+  for (let targetY = 0; targetY < targetHeight; targetY += 1) {
     const sourceY = Math.min(
-      decoded.height - 1,
-      Math.floor(((targetY + 0.5) * decoded.height) / BRAND_RENDER_SIZE),
+      bounds.y + bounds.height - 1,
+      bounds.y + Math.floor(((targetY + 0.5) * bounds.height) / targetHeight),
     );
-    for (let targetX = 0; targetX < BRAND_RENDER_SIZE; targetX += 1) {
+    for (let targetX = 0; targetX < targetWidth; targetX += 1) {
       const sourceX = Math.min(
-        decoded.width - 1,
-        Math.floor(((targetX + 0.5) * decoded.width) / BRAND_RENDER_SIZE),
+        bounds.x + bounds.width - 1,
+        bounds.x + Math.floor(((targetX + 0.5) * bounds.width) / targetWidth),
       );
       const sourceIndex = (sourceY * decoded.width + sourceX) * 4;
-      const targetIndex = (targetY * BRAND_RENDER_SIZE + targetX) * 3;
+      const targetIndex = (targetY * targetWidth + targetX) * 3;
       const alpha = (decoded.rgba[sourceIndex + 3] ?? 255) / 255;
 
       for (let channel = 0; channel < 3; channel += 1) {
@@ -370,8 +338,8 @@ function buildOriginalBrandRaster(): RasterBrand {
   }
 
   return {
-    width: BRAND_RENDER_SIZE,
-    height: BRAND_RENDER_SIZE,
+    width: targetWidth,
+    height: targetHeight,
     data: deflateSync(rgb, { level: 9 }),
   };
 }
@@ -412,7 +380,7 @@ function pushQrCode(commands: string[], value: string, x: number, y: number, siz
   const moduleSize = size / (matrix.length + quietZone * 2);
   pushRect(commands, x, y, size, size, {
     fill: [1, 1, 1],
-    stroke: [0.78, 0.84, 0.95],
+    stroke: [0.72, 0.8, 0.93],
     lineWidth: 0.8,
   });
   commands.push("q", "0.03 0.07 0.16 rg");
@@ -484,11 +452,7 @@ function buildPdf(commands: string[]): Buffer {
   }
 
   const xrefOffset = length;
-  const xrefLines = [
-    `xref`,
-    `0 ${objects.length}`,
-    "0000000000 65535 f ",
-  ];
+  const xrefLines = ["xref", `0 ${objects.length}`, "0000000000 65535 f "];
   for (let index = 1; index < objects.length; index += 1) {
     xrefLines.push(`${String(offsets[index]).padStart(10, "0")} 00000 n `);
   }
@@ -510,62 +474,63 @@ export function buildCertificatePdf(certificate: CertificatePdfInput | Certifica
   const verificationUrl = buildVerificationUrl(certificate.id);
 
   pushRect(commands, 0, 0, PAGE_WIDTH, PAGE_HEIGHT, { fill: [0.975, 0.98, 1] });
-  pushBlockchainPattern(commands);
-  pushRect(commands, 0, 482, PAGE_WIDTH, 113.28, { fill: [0.027, 0.055, 0.14] });
-  pushRect(commands, 0, 477, PAGE_WIDTH / 2, 5, { fill: [0.04, 0.47, 0.98] });
-  pushRect(commands, PAGE_WIDTH / 2, 477, PAGE_WIDTH / 2, 5, {
-    fill: [0.49, 0.23, 0.93],
-  });
-  commands.push("q", "58 0 0 58 43 511 cm", "/Logo Do", "Q");
-  pushText(commands, "CertiChain", 116, 548, 24, { bold: true, color: [1, 1, 1] });
-  pushText(commands, "Verified. Immutable. Trusted.", 116, 527, 9.5, {
-    color: [0.55, 0.84, 0.96],
-  });
-  pushText(commands, "VERIFIABLE CREDENTIAL", PAGE_WIDTH - 50, 553, 8.5, {
+  pushRect(commands, 0, 487, PAGE_WIDTH, 108.28, { fill: [0.027, 0.055, 0.14] });
+  pushRect(commands, 0, 483, PAGE_WIDTH / 2, 4, { fill: [0.04, 0.47, 0.98] });
+  pushRect(commands, PAGE_WIDTH / 2, 483, PAGE_WIDTH / 2, 4, { fill: [0.49, 0.23, 0.93] });
+
+  const brandY = 505 + Math.max(0, (66 - ORIGINAL_BRAND_RASTER.height) / 2);
+  commands.push(
+    "q",
+    `${ORIGINAL_BRAND_RASTER.width} 0 0 ${ORIGINAL_BRAND_RASTER.height} 48 ${brandY.toFixed(2)} cm`,
+    "/Logo Do",
+    "Q",
+  );
+
+  pushText(commands, "CREDENCIAL VERIFICABLE", PAGE_WIDTH - 48, 556, 8.5, {
     bold: true,
     color: [0.34, 0.9, 0.9],
     align: "right",
   });
-  pushText(commands, "CREDENTIAL ID", PAGE_WIDTH - 50, 534, 7.5, {
+  pushText(commands, "ID", PAGE_WIDTH - 48, 535, 7.2, {
     bold: true,
-    color: [0.6, 0.67, 0.82],
+    color: [0.58, 0.66, 0.82],
     align: "right",
   });
-  pushText(commands, certificate.id, PAGE_WIDTH - 50, 518, 8.5, {
+  pushText(commands, certificate.id, PAGE_WIDTH - 48, 520, 8.3, {
     color: [0.92, 0.95, 1],
     align: "right",
   });
-  pushText(commands, formatIssuedDate(certificate.issuedAt), PAGE_WIDTH - 50, 500, 8.5, {
+  pushText(commands, formatIssuedDate(certificate.issuedAt), PAGE_WIDTH - 48, 501, 8.3, {
     color: [0.66, 0.73, 0.88],
     align: "right",
   });
 
-  pushText(commands, "CERTIFICADO ACADÉMICO VERIFICABLE", 56, 443, 10, {
+  pushText(commands, "CERTIFICADO ACADÉMICO VERIFICABLE", 56, 449, 10, {
     bold: true,
     color: [0.02, 0.44, 0.93],
   });
-  pushText(commands, "Se certifica que", 56, 416, 12, { color: [0.35, 0.4, 0.52] });
+  pushText(commands, "Se certifica que", 56, 421, 12, { color: [0.35, 0.4, 0.52] });
   const studentSize = fitFontSize(certificate.studentName, 525, 31, 19, true);
-  pushText(commands, certificate.studentName, 56, 378, studentSize, {
+  pushText(commands, certificate.studentName, 56, 382, studentSize, {
     bold: true,
     color: [0.035, 0.06, 0.13],
   });
-  pushRect(commands, 56, 354, 94, 3.5, { fill: [0.04, 0.47, 0.98] });
-  pushRect(commands, 150, 354, 94, 3.5, { fill: [0.49, 0.23, 0.93] });
-  pushText(commands, "ha recibido la credencial académica", 56, 329, 11.5, {
+  pushRect(commands, 56, 358, 96, 3.2, { fill: [0.04, 0.47, 0.98] });
+  pushRect(commands, 152, 358, 96, 3.2, { fill: [0.49, 0.23, 0.93] });
+  pushText(commands, "ha recibido la credencial académica", 56, 333, 11.5, {
     color: [0.35, 0.4, 0.52],
   });
   const titleSize = fitFontSize(certificate.title, 520, 22, 15, true);
-  pushText(commands, certificate.title, 56, 296, titleSize, {
+  pushText(commands, certificate.title, 56, 299, titleSize, {
     bold: true,
     color: [0.37, 0.19, 0.82],
   });
-  pushText(commands, "EMITIDA POR", 56, 263, 8.5, {
+  pushText(commands, "EMITIDA POR", 56, 266, 8.5, {
     bold: true,
     color: [0.39, 0.45, 0.57],
   });
   const institutionSize = fitFontSize(certificate.institution, 510, 16, 11, true);
-  pushText(commands, certificate.institution, 56, 239, institutionSize, {
+  pushText(commands, certificate.institution, 56, 242, institutionSize, {
     bold: true,
     color: [0.035, 0.06, 0.13],
   });
@@ -573,96 +538,83 @@ export function buildCertificatePdf(certificate: CertificatePdfInput | Certifica
     commands,
     `Fecha de emisión · ${formatIssuedDate(certificate.issuedAt)}`,
     56,
-    216,
+    219,
     9.5,
     { color: [0.39, 0.45, 0.57] },
   );
 
-  pushRect(commands, 620, 334, 168, 112, {
-    fill: [0.95, 0.965, 1],
-    stroke: [0.78, 0.84, 0.95],
-    lineWidth: 0.8,
+  pushMinimalBlockchainAccent(commands);
+  pushRect(commands, 618, 350, 170, 90, {
+    fill: [0.955, 0.968, 1],
+    stroke: [0.8, 0.85, 0.95],
+    lineWidth: 0.7,
   });
-  pushText(commands, "TRUST LAYER", 638, 423, 8.5, {
+  pushText(commands, "INTEGRIDAD DIGITAL", 636, 417, 8.2, {
     bold: true,
     color: [0.05, 0.54, 0.78],
   });
-  pushText(commands, "SHA-256", 653, 397, 10, {
-    bold: true,
-    color: [0.08, 0.13, 0.24],
-  });
-  pushText(commands, "Integridad registrada", 653, 383, 7.5, {
-    color: [0.39, 0.45, 0.57],
-  });
-  pushRect(commands, 638, 396, 7, 7, { fill: [0.08, 0.78, 0.69] });
-  pushText(commands, "AES-256-GCM", 653, 365, 10, {
-    bold: true,
-    color: [0.08, 0.13, 0.24],
-  });
-  pushText(commands, "Evidencia cifrada", 653, 351, 7.5, {
-    color: [0.39, 0.45, 0.57],
-  });
-  pushRect(commands, 638, 364, 7, 7, { fill: [0.28, 0.45, 0.98] });
-  pushText(commands, "BLOCKCHAIN READY", 653, 333, 9, {
+  pushRect(commands, 636, 392, 6, 6, { fill: [0.08, 0.78, 0.69] });
+  pushText(commands, "SHA-256", 650, 390, 9.2, { bold: true, color: [0.08, 0.13, 0.24] });
+  pushRect(commands, 636, 372, 6, 6, { fill: [0.28, 0.45, 0.98] });
+  pushText(commands, "AES-256-GCM", 650, 370, 9.2, { bold: true, color: [0.08, 0.13, 0.24] });
+  pushRect(commands, 636, 352, 6, 6, { fill: [0.55, 0.25, 0.95] });
+  pushText(commands, "BLOCKCHAIN-READY", 650, 350, 8.8, {
     bold: true,
     color: [0.37, 0.19, 0.82],
   });
-  pushRect(commands, 638, 333, 7, 7, { fill: [0.55, 0.25, 0.95] });
 
-  pushRect(commands, 55, 70, 733, 126, {
+  pushRect(commands, 55, 70, 733, 124, {
     fill: [0.03, 0.065, 0.15],
     stroke: [0.12, 0.2, 0.38],
     lineWidth: 0.8,
   });
-  pushText(commands, "IDENTIDAD DE LA CREDENCIAL", 76, 173, 8.5, {
+  pushText(commands, "IDENTIDAD DE LA CREDENCIAL", 76, 171, 8.5, {
     bold: true,
     color: [0.32, 0.87, 0.92],
   });
-  pushText(commands, "ID", 76, 151, 7.5, {
+  pushText(commands, "ID", 76, 148, 7.3, {
     bold: true,
     color: [0.52, 0.63, 0.82],
   });
-  pushText(commands, certificate.id, 76, 136, 9.2, { color: [0.96, 0.98, 1] });
+  pushText(commands, certificate.id, 76, 133, 9.1, { color: [0.96, 0.98, 1] });
   const wallet =
     certificate.studentWallet.length > 42
       ? `${certificate.studentWallet.slice(0, 20)}...${certificate.studentWallet.slice(-12)}`
       : certificate.studentWallet;
-  pushText(commands, "WALLET / IDENTIDAD TÉCNICA", 76, 113, 7.5, {
+  pushText(commands, "WALLET / IDENTIDAD TÉCNICA", 76, 109, 7.3, {
     bold: true,
     color: [0.52, 0.63, 0.82],
   });
-  pushText(commands, wallet, 76, 97, 8.7, { color: [0.84, 0.89, 0.99] });
-  pushLine(commands, 407, 88, 407, 178, [0.15, 0.24, 0.43], 0.8);
-  pushText(commands, "VERIFICACIÓN PÚBLICA", 430, 173, 8.5, {
+  pushText(commands, wallet, 76, 94, 8.5, { color: [0.84, 0.89, 0.99] });
+
+  pushLine(commands, 407, 88, 407, 176, [0.15, 0.24, 0.43], 0.8);
+  pushText(commands, "VALIDACIÓN POR QR", 430, 171, 8.5, {
     bold: true,
     color: [0.67, 0.46, 0.98],
   });
-  pushText(commands, "Escanea el QR para consultar", 430, 149, 10.5, {
+  pushText(commands, "Escanea para comprobar", 430, 145, 10.5, {
     bold: true,
     color: [0.96, 0.98, 1],
   });
-  pushText(commands, "el estado actual y la evidencia.", 430, 133, 10.5, {
+  pushText(commands, "estado e integridad.", 430, 129, 10.5, {
     bold: true,
     color: [0.96, 0.98, 1],
   });
-  pushText(commands, "Verificador público CertiChain", 430, 110, 7.8, {
+  pushText(commands, "Validación automática · CertiChain", 430, 103, 7.8, {
     color: [0.55, 0.73, 0.96],
   });
-  pushText(commands, "El SHA-256 se recupera automáticamente", 430, 91, 7.4, {
-    color: [0.63, 0.7, 0.84],
-  });
-  pushQrCode(commands, verificationUrl, 684, 86, 94);
+  pushQrCode(commands, verificationUrl, 690, 88, 82);
 
   pushLine(commands, 55, 50, 788, 50, [0.84, 0.87, 0.94], 0.7);
   pushText(
     commands,
-    "El estado es dinámico: vigencia y revocación se consultan en el Verificador CertiChain.",
+    "Estado actual: consultar el QR o el Verificador CertiChain.",
     55,
     30,
-    8.3,
+    8.2,
     { color: [0.36, 0.42, 0.54] },
   );
-  pushText(commands, "Verify once. Trust anywhere.", PAGE_WIDTH - 54, 30, 8.3, {
+  pushText(commands, "Verify once. Trust anywhere.", PAGE_WIDTH - 54, 30, 8.2, {
     bold: true,
     color: [0.37, 0.19, 0.82],
     align: "right",
