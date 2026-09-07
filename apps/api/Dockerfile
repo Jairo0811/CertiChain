@@ -16,6 +16,7 @@ ENV NODE_ENV=production
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/apps/api/package.json ./apps/api/package.json
 COPY --from=build /app/apps/api/dist ./apps/api/dist
+COPY --from=build /app/apps/api/assets ./apps/api/assets
 
 RUN addgroup -S certichain && adduser -S certichain -G certichain \
   && mkdir -p /app/.data \

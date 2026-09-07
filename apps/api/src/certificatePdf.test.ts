@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { buildCertificatePdf } from "./certificatePdf.js";
 
 describe("certificate PDF", () => {
-  it("builds a renderable one-page PDF with Latin credential data", () => {
+  it("builds a branded one-page PDF with verification QR and trust-layer metadata", () => {
     const pdf = buildCertificatePdf({
       id: "555e26b1-c13d-494a-a251-53a98707bc4e",
       studentName: "María José Pérez",
@@ -12,11 +12,19 @@ describe("certificate PDF", () => {
       issuedAt: "2026-09-06",
     });
 
+    const text = pdf.toString("latin1");
     expect(pdf.subarray(0, 8).toString("latin1")).toBe("%PDF-1.4");
-    expect(pdf.toString("latin1")).toContain("María José Pérez");
-    expect(pdf.toString("latin1")).toContain("Criptografía Aplicada");
-    expect(pdf.toString("latin1")).toContain("555e26b1-c13d-494a-a251-53a98707bc4e");
-    expect(pdf.toString("latin1")).toContain("%%EOF");
-    expect(pdf.length).toBeGreaterThan(2_000);
+    expect(text).toContain("María José Pérez");
+    expect(text).toContain("Criptografía Aplicada");
+    expect(text).toContain("555e26b1-c13d-494a-a251-53a98707bc4e");
+    expect(text).toContain("CERTIFICADO ACADEMICO VERIFICABLE");
+    expect(text).toContain("TRUST LAYER");
+    expect(text).toContain("SHA-256");
+    expect(text).toContain("AES-256-GCM");
+    expect(text).toContain("BLOCKCHAIN READY");
+    expect(text).toContain("/Logo Do");
+    expect(text).toContain("/Subtype /Image");
+    expect(text).toContain("%%EOF");
+    expect(pdf.length).toBeGreaterThan(12_000);
   });
 });

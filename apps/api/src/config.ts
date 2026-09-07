@@ -19,6 +19,7 @@ const schema = z
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
     PORT: z.coerce.number().int().positive().max(65535).default(4000),
     CORS_ORIGIN: z.string().min(1).default("http://localhost:5173"),
+    PUBLIC_VERIFY_URL: z.string().url().max(60).default("http://localhost:8080/verify"),
     JWT_SECRET: z.string().min(16).default(DEVELOPMENT_JWT_SECRET),
     ADMIN_EMAIL: z.string().email().default("admin@certichain.local"),
     ADMIN_PASSWORD: z.string().min(8).default(DEVELOPMENT_ADMIN_PASSWORD),
@@ -66,6 +67,14 @@ const schema = z
 
     if (value.CORS_ORIGIN.includes("localhost")) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["CORS_ORIGIN"], message: "Production CORS origin cannot use localhost" });
+    }
+
+    if (value.PUBLIC_VERIFY_URL.includes("localhost")) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["PUBLIC_VERIFY_URL"],
+        message: "Production public verifier URL cannot use localhost",
+      });
     }
 
     const requiredProductionValues: Array<[keyof typeof value, unknown, string]> = [

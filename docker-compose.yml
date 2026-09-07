@@ -22,6 +22,7 @@ services:
       NODE_ENV: ${NODE_ENV:-development}
       PORT: 4000
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:8080}
+      PUBLIC_VERIFY_URL: ${PUBLIC_VERIFY_URL:-http://localhost:8080/verify}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@certichain.local}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ADMIN_PASSWORD is required}
