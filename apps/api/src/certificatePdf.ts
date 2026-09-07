@@ -1,4 +1,3 @@
-import { readFileSync } from "node:fs";
 import { config } from "./config.js";
 import { CertificateRecord } from "./domain.js";
 import { buildQrMatrix } from "./qrCode.js";
@@ -14,7 +13,9 @@ interface CertificatePdfInput {
 
 const PAGE_WIDTH = 841.89;
 const PAGE_HEIGHT = 595.28;
-const BRAND_ISOTYPE = readFileSync(new URL("../assets/branding/certichain-isotipo-header.jpg", import.meta.url));
+
+type Rgb = [number, number, number];
+type Point = readonly [number, number];
 
 function normalizePdfText(value: string): string {
   return value.replace(/[–—]/g, "-").replace(/[“”]/g, '"').replace(/[‘’]/g, "'").replace(/\s+/g, " ").trim().split("").map((character) => (character.charCodeAt(0) <= 255 ? character : "?")).join("");
@@ -34,7 +35,7 @@ function fitFontSize(value: string, maxWidth: number, maxSize: number, minSize: 
   return size;
 }
 
-function pushText(commands: string[], value: string, x: number, y: number, fontSize: number, options: { bold?: boolean; color?: [number, number, number]; align?: "left" | "center" | "right" } = {}): void {
+function pushText(commands: string[], value: string, x: number, y: number, fontSize: number, options: { bold?: boolean; color?: Rgb; align?: "left" | "center" | "right" } = {}): void {
   const { bold = false, color = [0.05, 0.08, 0.16], align = "left" } = options;
   const clean = normalizePdfText(value);
   const width = estimateTextWidth(clean, fontSize, bold);
@@ -44,32 +45,70 @@ function pushText(commands: string[], value: string, x: number, y: number, fontS
   commands.push("BT", `${color.join(" ")} rg`, `/${bold ? "F2" : "F1"} ${fontSize.toFixed(1)} Tf`, `${textX.toFixed(2)} ${y.toFixed(2)} Td`, `(${escapePdfText(clean)}) Tj`, "ET");
 }
 
-function pushRect(commands: string[], x: number, y: number, width: number, height: number, options: { fill?: [number, number, number]; stroke?: [number, number, number]; lineWidth?: number }): void {
+function pushRect(commands: string[], x: number, y: number, width: number, height: number, options: { fill?: Rgb; stroke?: Rgb; lineWidth?: number }): void {
   commands.push("q");
   if (options.fill) commands.push(`${options.fill.join(" ")} rg`);
   if (options.stroke) commands.push(`${options.stroke.join(" ")} RG`, `${options.lineWidth ?? 1} w`);
   commands.push(`${x} ${y} ${width} ${height} re ${options.fill && options.stroke ? "B" : options.fill ? "f" : "S"}`, "Q");
 }
 
-function pushLine(commands: string[], x1: number, y1: number, x2: number, y2: number, color: [number, number, number], lineWidth = 1): void {
+function pushLine(commands: string[], x1: number, y1: number, x2: number, y2: number, color: Rgb, lineWidth = 1): void {
   commands.push("q", `${color.join(" ")} RG`, `${lineWidth} w`, `${x1} ${y1} m ${x2} ${y2} l S`, "Q");
 }
 
-function pushHexagon(commands: string[], centerX: number, centerY: number, radius: number, color: [number, number, number]): void {
-  const points = Array.from({ length: 6 }, (_, index) => {
-    const angle = Math.PI / 3 * index;
+function pushPolygon(commands: string[], points: Point[], options: { fill?: Rgb; stroke?: Rgb; lineWidth?: number }): void {
+  const first = points[0];
+  if (!first || points.length < 3) return;
+  commands.push("q");
+  if (options.fill) commands.push(`${options.fill.join(" ")} rg`);
+  if (options.stroke) commands.push(`${options.stroke.join(" ")} RG`, `${options.lineWidth ?? 1} w`);
+  commands.push(`${first[0].toFixed(2)} ${first[1].toFixed(2)} m`);
+  for (const [x, y] of points.slice(1)) commands.push(`${x.toFixed(2)} ${y.toFixed(2)} l`);
+  commands.push(`h ${options.fill && options.stroke ? "B" : options.fill ? "f" : "S"}`, "Q");
+}
+
+function regularPolygon(centerX: number, centerY: number, radius: number, sides: number, rotation = 0): Point[] {
+  return Array.from({ length: sides }, (_, index) => {
+    const angle = rotation + (Math.PI * 2 * index) / sides;
     return [centerX + Math.cos(angle) * radius, centerY + Math.sin(angle) * radius] as const;
   });
-  const firstPoint = points[0];
-  if (!firstPoint) return;
-  commands.push("q", `${color.join(" ")} RG`, "0.55 w", `${firstPoint[0].toFixed(2)} ${firstPoint[1].toFixed(2)} m`);
-  for (const [x, y] of points.slice(1)) commands.push(`${x.toFixed(2)} ${y.toFixed(2)} l`);
-  commands.push("h S", "Q");
+}
+
+function pushHexagon(commands: string[], centerX: number, centerY: number, radius: number, color: Rgb): void {
+  pushPolygon(commands, regularPolygon(centerX, centerY, radius, 6), { stroke: color, lineWidth: 0.55 });
+}
+
+function pushBrandIsotype(commands: string[], x: number, y: number, size: number): void {
+  commands.push("% CERTICHAIN_VECTOR_ISOTYPE");
+  const blue: Rgb = [0.05, 0.46, 0.98];
+  const blueDeep: Rgb = [0.02, 0.25, 0.78];
+  const violet: Rgb = [0.49, 0.23, 0.93];
+  const violetLight: Rgb = [0.65, 0.38, 1];
+  const cyan: Rgb = [0.08, 0.9, 0.86];
+  const navy: Rgb = [0.025, 0.05, 0.13];
+  const p = (px: number, py: number): Point => [x + px * size, y + py * size] as const;
+
+  pushPolygon(commands, [
+    p(0.05, 0.25), p(0.42, 0.03), p(0.60, 0.14), p(0.34, 0.30),
+    p(0.34, 0.70), p(0.60, 0.86), p(0.42, 0.97), p(0.05, 0.75),
+  ], { fill: blue, stroke: [0.25, 0.76, 1], lineWidth: 0.8 });
+  pushPolygon(commands, [p(0.05, 0.25), p(0.17, 0.32), p(0.17, 0.68), p(0.05, 0.75)], { fill: blueDeep });
+
+  pushPolygon(commands, [
+    p(0.95, 0.25), p(0.58, 0.03), p(0.40, 0.14), p(0.66, 0.30),
+    p(0.66, 0.43), p(0.83, 0.33), p(0.83, 0.67), p(0.66, 0.57),
+    p(0.66, 0.70), p(0.40, 0.86), p(0.58, 0.97), p(0.95, 0.75),
+  ], { fill: violet, stroke: violetLight, lineWidth: 0.8 });
+
+  pushPolygon(commands, regularPolygon(x + size * 0.5, y + size * 0.5, size * 0.23, 6, Math.PI / 6), { fill: navy, stroke: [0.18, 0.32, 0.64], lineWidth: 0.7 });
+  pushPolygon(commands, regularPolygon(x + size * 0.5, y + size * 0.5, size * 0.145, 6, Math.PI / 6), { fill: [0.02, 0.16, 0.22], stroke: cyan, lineWidth: 1.4 });
+  pushLine(commands, x + size * 0.435, y + size * 0.50, x + size * 0.485, y + size * 0.445, cyan, 2.5);
+  pushLine(commands, x + size * 0.485, y + size * 0.445, x + size * 0.58, y + size * 0.56, cyan, 2.5);
 }
 
 function pushBlockchainPattern(commands: string[]): void {
-  const cyan: [number, number, number] = [0.82, 0.92, 0.99];
-  const violet: [number, number, number] = [0.9, 0.86, 0.99];
+  const cyan: Rgb = [0.82, 0.92, 0.99];
+  const violet: Rgb = [0.9, 0.86, 0.99];
   const nodes = [[530, 420], [570, 448], [612, 420], [653, 447], [698, 420], [742, 448], [785, 420], [548, 265], [594, 286], [640, 263], [688, 286], [734, 263], [778, 286]] as const;
   for (let index = 0; index < 6; index += 1) {
     const from = nodes[index];
@@ -81,7 +120,7 @@ function pushBlockchainPattern(commands: string[]): void {
     const to = nodes[index + 1];
     if (from && to) pushLine(commands, from[0], from[1], to[0], to[1], violet, 0.55);
   }
-  for (const [x, y] of nodes) pushRect(commands, x - 1.7, y - 1.7, 3.4, 3.4, { fill: [0.76, 0.86, 0.98] });
+  for (const [nodeX, nodeY] of nodes) pushRect(commands, nodeX - 1.7, nodeY - 1.7, 3.4, 3.4, { fill: [0.76, 0.86, 0.98] });
   pushHexagon(commands, 751, 356, 31, violet);
   pushHexagon(commands, 751, 356, 19, cyan);
   pushHexagon(commands, 566, 353, 18, cyan);
@@ -132,7 +171,7 @@ export function buildCertificatePdf(certificate: CertificatePdfInput | Certifica
   pushRect(commands, 0, 482, PAGE_WIDTH, 113.28, { fill: [0.027, 0.055, 0.14] });
   pushRect(commands, 0, 477, PAGE_WIDTH / 2, 5, { fill: [0.04, 0.47, 0.98] });
   pushRect(commands, PAGE_WIDTH / 2, 477, PAGE_WIDTH / 2, 5, { fill: [0.49, 0.23, 0.93] });
-  commands.push("q", "64 0 0 64 42 508 cm", "/Logo Do", "Q");
+  pushBrandIsotype(commands, 43, 511, 58);
   pushText(commands, "CertiChain", 116, 548, 24, { bold: true, color: [1, 1, 1] });
   pushText(commands, "Verified. Immutable. Trusted.", 116, 527, 9.5, { color: [0.55, 0.84, 0.96] });
   pushText(commands, "VERIFIABLE CREDENTIAL", PAGE_WIDTH - 50, 553, 8.5, { bold: true, color: [0.34, 0.9, 0.9], align: "right" });
@@ -185,15 +224,14 @@ export function buildCertificatePdf(certificate: CertificatePdfInput | Certifica
   pushText(commands, "Verify once. Trust anywhere.", PAGE_WIDTH - 54, 30, 8.3, { bold: true, color: [0.37, 0.19, 0.82], align: "right" });
 
   const content = `${commands.join("\n")}\n`;
-  const imageStream = BRAND_ISOTYPE.toString("latin1");
   const objects: string[] = [];
   objects[1] = "<< /Type /Catalog /Pages 2 0 R >>";
   objects[2] = "<< /Type /Pages /Kids [3 0 R] /Count 1 >>";
-  objects[3] = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PAGE_WIDTH} ${PAGE_HEIGHT}] /Resources << /Font << /F1 5 0 R /F2 6 0 R >> /XObject << /Logo 7 0 R >> >> /Contents 4 0 R >>`;
+  objects[3] = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PAGE_WIDTH} ${PAGE_HEIGHT}] /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> /Contents 4 0 R >>`;
   objects[4] = `<< /Length ${Buffer.byteLength(content, "latin1")} >>\nstream\n${content}endstream`;
   objects[5] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>";
   objects[6] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>";
-  objects[7] = `<< /Type /XObject /Subtype /Image /Width 180 /Height 180 /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${BRAND_ISOTYPE.length} >>\nstream\n${imageStream}\nendstream`;
+
   let pdf = "%PDF-1.4\n%âãÏÓ\n";
   const offsets: number[] = [0];
   for (let index = 1; index < objects.length; index += 1) {
