@@ -236,6 +236,23 @@ export function App() {
     }
   }
 
+  async function deleteCertificate(certificate: Certificate) {
+    const identifier = certificate.blockchainId ?? certificate.id;
+    const confirmed = window.confirm(
+      `¿Eliminar permanentemente el certificado "${certificate.title}" de ${certificate.studentName}?\n\nEsta acción está pensada para limpiar certificados de prueba y no se puede deshacer. ID: ${identifier}`,
+    );
+    if (!confirmed) return;
+
+    try {
+      await api(`/api/certificates/${encodeURIComponent(certificate.id)}`, { method: "DELETE" });
+      setCertificates((items) => items.filter((item) => item.id !== certificate.id));
+      setSelectedCertificate((current) => current?.id === certificate.id ? null : current);
+      setMessage("Certificado de prueba eliminado permanentemente.");
+    } catch (error) {
+      setMessage((error as Error).message);
+    }
+  }
+
   function logout() {
     sessionStorage.removeItem("certichain-token");
     setToken("");
@@ -517,6 +534,14 @@ export function App() {
                         {certificate.status !== "revoked" && (
                           <button className="danger" onClick={() => void revoke(certificate.id)}>Revocar</button>
                         )}
+                        <button
+                          className="ghost"
+                          style={{ padding: "8px 10px", color: "#fca5a5", borderColor: "rgba(239,68,68,.25)" }}
+                          title="Eliminar certificado de prueba"
+                          onClick={() => void deleteCertificate(certificate)}
+                        >
+                          <i className="fa-solid fa-trash-can" aria-hidden="true" /> Eliminar
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -584,6 +609,13 @@ export function App() {
             {selectedCertificate.status !== "revoked" && (
               <button className="danger full-width" onClick={() => void revoke(selectedCertificate.id)}>Revocar certificado</button>
             )}
+            <button
+              className="ghost full-width"
+              style={{ color: "#fca5a5", borderColor: "rgba(239,68,68,.25)" }}
+              onClick={() => void deleteCertificate(selectedCertificate)}
+            >
+              <i className="fa-solid fa-trash-can" aria-hidden="true" /> Eliminar certificado de prueba
+            </button>
           </aside>
         </div>
       )}
