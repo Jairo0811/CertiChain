@@ -22,13 +22,12 @@ describe("certificate PDF", () => {
     expect(text).toContain("SHA-256");
     expect(text).toContain("AES-256-GCM");
     expect(text).toContain("BLOCKCHAIN READY");
-    expect(text).toContain("/Logo Do");
-    expect(text).toContain("/Subtype /Image");
+    expect(text).toContain("CERTICHAIN_VECTOR_ISOTYPE");
     expect(text).toContain("%%EOF");
-    expect(pdf.length).toBeGreaterThan(12_000);
+    expect(pdf.length).toBeGreaterThan(9_000);
   });
 
-  it("embeds a complete JPEG stream for the CertiChain isotipo", () => {
+  it("uses vector branding and contains no raster image stream", () => {
     const pdf = buildCertificatePdf({
       id: "555e26b1-c13d-494a-a251-53a98707bc4e",
       studentName: "CertiChain Test Student",
@@ -38,22 +37,10 @@ describe("certificate PDF", () => {
       issuedAt: "2026-09-06",
     });
 
-    const imageObjectStart = pdf.indexOf(Buffer.from("/Subtype /Image", "latin1"));
-    expect(imageObjectStart).toBeGreaterThanOrEqual(0);
-
-    const imageHeaderEnd = pdf.indexOf(Buffer.from("stream\n", "latin1"), imageObjectStart);
-    expect(imageHeaderEnd).toBeGreaterThan(imageObjectStart);
-
-    const imageHeader = pdf.subarray(imageObjectStart, imageHeaderEnd).toString("latin1");
-    const lengthMatch = /\/Length (\d+)/.exec(imageHeader);
-    expect(lengthMatch?.[1]).toBeDefined();
-
-    const imageLength = Number(lengthMatch?.[1]);
-    const imageStart = imageHeaderEnd + Buffer.byteLength("stream\n", "latin1");
-    const image = pdf.subarray(imageStart, imageStart + imageLength);
-
-    expect(image).toHaveLength(imageLength);
-    expect(image.subarray(0, 2)).toEqual(Buffer.from([0xff, 0xd8]));
-    expect(image.subarray(-2)).toEqual(Buffer.from([0xff, 0xd9]));
+    const text = pdf.toString("latin1");
+    expect(text).toContain("CERTICHAIN_VECTOR_ISOTYPE");
+    expect(text).not.toContain("/Subtype /Image");
+    expect(text).not.toContain("/DCTDecode");
+    expect(text).not.toContain("/XObject");
   });
 });
