@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 
 type Verification = {
   valid: boolean;
@@ -46,6 +46,8 @@ export function PublicVerify() {
   const [loading, setLoading] = useState(false);
   const [hashLoading, setHashLoading] = useState(false);
   const [lookupMessage, setLookupMessage] = useState("");
+  const autoVerifyRequested = useRef(params.get("autoverify") === "1");
+  const autoVerifyStarted = useRef(false);
 
   useEffect(() => {
     const id = certificateId.trim();
@@ -88,27 +90,49 @@ export function PublicVerify() {
     };
   }, [certificateId]);
 
-  async function verify(event: FormEvent) {
-    event.preventDefault();
-    if (!hash) return;
+  async function runVerification(id: string, evidenceHash: string) {
+    if (!id || !evidenceHash) return;
 
     setLoading(true);
     try {
       const response = await fetch(
-        `${API_URL}/api/verify/${encodeURIComponent(certificateId.trim())}?hash=${encodeURIComponent(hash.trim())}`,
+        `${API_URL}/api/verify/${encodeURIComponent(id)}?hash=${encodeURIComponent(evidenceHash)}`,
       );
       const body = (await response.json()) as Verification;
       setResult(body);
 
       const next = new URL(window.location.href);
-      next.searchParams.set("id", certificateId.trim());
-      next.searchParams.set("hash", hash.trim());
+      next.searchParams.set("id", id);
+      next.searchParams.set("hash", evidenceHash);
+      next.searchParams.delete("autoverify");
       window.history.replaceState({}, "", next);
     } catch {
       setResult({ valid: false, error: "No fue posible completar la verificación." });
     } finally {
       setLoading(false);
     }
+  }
+
+  useEffect(() => {
+    const id = certificateId.trim();
+    const evidenceHash = hash.trim();
+    if (
+      !autoVerifyRequested.current ||
+      autoVerifyStarted.current ||
+      hashLoading ||
+      !id ||
+      !evidenceHash
+    ) {
+      return;
+    }
+
+    autoVerifyStarted.current = true;
+    void runVerification(id, evidenceHash);
+  }, [certificateId, hash, hashLoading]);
+
+  async function verify(event: FormEvent) {
+    event.preventDefault();
+    await runVerification(certificateId.trim(), hash.trim());
   }
 
   return (
