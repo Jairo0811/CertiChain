@@ -32,6 +32,7 @@ export interface AuditEvent {
     | "document.upload"
     | "certificate.issue"
     | "certificate.revoke"
+    | "certificate.status"
     | "certificate.delete"
     | "certificate.verify";
   entityId?: string;
