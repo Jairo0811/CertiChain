@@ -14,8 +14,8 @@ export function buildQrMatrix(value: string): boolean[][] {
 
   const setFunction = (row: number, column: number, dark: boolean) => {
     if (row < 0 || row >= SIZE || column < 0 || column >= SIZE) return;
-    modules[row][column] = dark;
-    isFunction[row][column] = true;
+    modules[row]![column] = dark;
+    isFunction[row]![column] = true;
   };
 
   const drawFinder = (centerRow: number, centerColumn: number) => {
@@ -40,8 +40,6 @@ export function buildQrMatrix(value: string): boolean[][] {
     setFunction(index, 6, index % 2 === 0);
   }
 
-  // Version 5 uses alignment centers [6, 30]. The three finder-overlapping
-  // combinations are omitted, leaving the lower-right alignment marker.
   for (let rowOffset = -2; rowOffset <= 2; rowOffset += 1) {
     for (let columnOffset = -2; columnOffset <= 2; columnOffset += 1) {
       setFunction(
@@ -69,11 +67,11 @@ export function buildQrMatrix(value: string): boolean[][] {
     for (let vertical = 0; vertical < SIZE; vertical += 1) {
       const row = upward ? SIZE - 1 - vertical : vertical;
       for (const column of [right, right - 1]) {
-        if (isFunction[row][column]) continue;
-        const bit = bitIndex < bits.length ? bits[bitIndex] : 0;
+        if (isFunction[row]![column]) continue;
+        const bit = bits[bitIndex] ?? 0;
         bitIndex += 1;
         const mask = (row + column) % 2 === 0;
-        modules[row][column] = Boolean(bit ^ Number(mask));
+        modules[row]![column] = Boolean(bit ^ Number(mask));
       }
     }
 
@@ -90,8 +88,8 @@ function encodeCodewords(data: Buffer): number[] {
     for (let index = length - 1; index >= 0; index -= 1) bits.push((value >>> index) & 1);
   };
 
-  appendBits(0b0100, 4); // Byte mode.
-  appendBits(data.length, 8); // Version 1-9 byte-mode length field.
+  appendBits(0b0100, 4);
+  appendBits(data.length, 8);
   for (const byte of data) appendBits(byte, 8);
 
   const availableBits = DATA_CODEWORDS * 8 - bits.length;
@@ -105,10 +103,10 @@ function encodeCodewords(data: Buffer): number[] {
     dataCodewords.push(value);
   }
 
-  const padding = [0xec, 0x11];
+  const padding = [0xec, 0x11] as const;
   let paddingIndex = 0;
   while (dataCodewords.length < DATA_CODEWORDS) {
-    dataCodewords.push(padding[paddingIndex % padding.length]);
+    dataCodewords.push(padding[paddingIndex % padding.length]!);
     paddingIndex += 1;
   }
 
@@ -122,8 +120,10 @@ function reedSolomonDivisor(degree: number): number[] {
 
   for (let index = 0; index < degree; index += 1) {
     for (let coefficient = 0; coefficient < degree; coefficient += 1) {
-      result[coefficient] = gfMultiply(result[coefficient], root);
-      if (coefficient + 1 < degree) result[coefficient] ^= result[coefficient + 1];
+      result[coefficient] = gfMultiply(result[coefficient] ?? 0, root);
+      if (coefficient + 1 < degree) {
+        result[coefficient] = (result[coefficient] ?? 0) ^ (result[coefficient + 1] ?? 0);
+      }
     }
     root = gfMultiply(root, 0x02);
   }
@@ -135,11 +135,11 @@ function reedSolomonRemainder(data: number[], divisor: number[]): number[] {
   const result = Array<number>(divisor.length).fill(0);
 
   for (const byte of data) {
-    const factor = byte ^ result[0];
+    const factor = byte ^ (result[0] ?? 0);
     result.shift();
     result.push(0);
     for (let index = 0; index < divisor.length; index += 1) {
-      result[index] ^= gfMultiply(divisor[index], factor);
+      result[index] = (result[index] ?? 0) ^ gfMultiply(divisor[index] ?? 0, factor);
     }
   }
 
