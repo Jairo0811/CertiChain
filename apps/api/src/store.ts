@@ -16,6 +16,7 @@ export interface Store {
   listCertificates(): Promise<CertificateRecord[]>;
   getCertificate(id: string): Promise<CertificateRecord | undefined>;
   saveCertificate(certificate: CertificateRecord): Promise<void>;
+  deleteCertificate(id: string): Promise<boolean>;
   appendAudit(event: AuditEvent): Promise<void>;
   listAudit(): Promise<AuditEvent[]>;
 }
@@ -65,6 +66,17 @@ export class JsonStore implements Store {
     if (index >= 0) this.state.certificates[index] = certificate;
     else this.state.certificates.push(certificate);
     await this.persist();
+  }
+
+  async deleteCertificate(id: string): Promise<boolean> {
+    await this.init();
+    const index = this.state.certificates.findIndex(
+      (certificate) => certificate.id === id || certificate.blockchainId === id,
+    );
+    if (index < 0) return false;
+    this.state.certificates.splice(index, 1);
+    await this.persist();
+    return true;
   }
 
   async appendAudit(event: AuditEvent): Promise<void> {
@@ -188,6 +200,15 @@ export class PostgresStore implements Store {
         certificate.revokedAt ?? null,
       ],
     );
+  }
+
+  async deleteCertificate(id: string): Promise<boolean> {
+    await this.init();
+    const result = await this.pool.query(
+      "DELETE FROM certificates WHERE id::text = $1 OR blockchain_id = $1",
+      [id],
+    );
+    return (result.rowCount ?? 0) > 0;
   }
 
   async appendAudit(event: AuditEvent): Promise<void> {
