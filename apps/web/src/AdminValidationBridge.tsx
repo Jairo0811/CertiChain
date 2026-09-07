@@ -1,5 +1,7 @@
 import { PropsWithChildren, useCallback, useEffect, useMemo, useState } from "react";
 
+type CertificateStatus = "pending" | "active" | "revoked";
+
 type Verification = {
   valid: boolean;
   certificate?: {
@@ -9,7 +11,7 @@ type Verification = {
     title: string;
     institution: string;
     issuedAt: string;
-    status: "pending" | "active" | "revoked";
+    status: CertificateStatus;
   };
   checks?: {
     existsOffChain: boolean;
@@ -32,11 +34,7 @@ type ValidationState = {
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000";
 
-function statusLabel(status?: Verification["certificate"] extends infer T
-  ? T extends { status: infer S }
-    ? S
-    : never
-  : never) {
+function statusLabel(status?: CertificateStatus) {
   if (status === "active") return "Vigente";
   if (status === "revoked") return "Revocada";
   if (status === "pending") return "Pendiente";
