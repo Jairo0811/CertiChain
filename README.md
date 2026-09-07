@@ -9,6 +9,12 @@
   <img src="https://img.shields.io/badge/Blockchain-Ethereum%20%2F%20Polygon-7C3AED?style=for-the-badge&logo=ethereum&logoColor=white" alt="Ethereum / Polygon">
 </p>
 
+<p align="center">
+  <a href="https://github.com/Jairo0811/CertiChain/actions/workflows/ci.yml">
+    <img src="https://github.com/Jairo0811/CertiChain/actions/workflows/ci.yml/badge.svg" alt="CI">
+  </a>
+</p>
+
 <p align="center"><strong>Sistema de Certificados Académicos Verificables con Evidencia Criptográfica y Blockchain</strong></p>
 
 <p align="center">Verified. Immutable. Trusted.</p>
