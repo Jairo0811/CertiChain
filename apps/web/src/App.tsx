@@ -486,7 +486,17 @@ export function App() {
                       <td>{formatDate(certificate.issuedAt)}</td>
                       <td><span className={`status ${certificate.status}`}>{statusLabel(certificate.status)}</span></td>
                       <td className="actions">
-                        <button className="icon-button" title="Ver detalle" onClick={() => setSelectedCertificate(certificate)}>◉</button>
+                        <button className="icon-button" title="Ver detalle" aria-label="Ver detalle" onClick={() => setSelectedCertificate(certificate)}>◉</button>
+                        {(certificate.documentAvailable || (certificate.status === "pending" && !certificate.blockchainId)) && (
+                          <button
+                            className="ghost"
+                            style={{ padding: "8px 10px" }}
+                            title={certificate.documentAvailable ? "Descargar certificado PDF" : "Generar y descargar PDF"}
+                            onClick={() => void downloadCertificatePdf(certificate)}
+                          >
+                            <i className="fa-solid fa-file-pdf" aria-hidden="true" /> {certificate.documentAvailable ? "PDF" : "Generar PDF"}
+                          </button>
+                        )}
                         {certificate.status !== "revoked" && (
                           <button className="danger" onClick={() => void revoke(certificate.id)}>Revocar</button>
                         )}
