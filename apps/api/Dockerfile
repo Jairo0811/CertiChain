@@ -22,7 +22,7 @@ COPY --from=build --chown=certichain:certichain /app/node_modules ./node_modules
 COPY --from=build --chown=certichain:certichain /app/apps/api/package.json ./apps/api/package.json
 COPY --from=build --chown=certichain:certichain /app/apps/api/dist ./apps/api/dist
 COPY --from=build --chown=certichain:certichain /app/apps/api/assets ./apps/api/assets
-COPY --from=build --chown=certichain:certichain /app/apps/web/public/branding/certichain-isotipo.png ./apps/web/public/branding/certichain-isotipo.png
+COPY --from=build --chown=certichain:certichain /app/apps/web/public/branding ./apps/web/public/branding
 
 USER certichain
 EXPOSE 4000
