@@ -37,7 +37,7 @@ La arquitectura sigue un enfoque **off-chain first**: los documentos completos y
 
 ## ✅ Estado actual
 
-CertiChain **v1.0.0** está cerrado como proyecto académico de portafolio y continúa recibiendo **hardening de presentación y experiencia de usuario**, sin convertirlo en un SaaS comercial ni ampliar innecesariamente el alcance académico.
+CertiChain **v1.0.0** está cerrado como proyecto académico de portafolio. El **Mobile Final Polish** queda completado y no se abren nuevas fases salvo bug real o requisito académico nuevo; la infraestructura cloud/mainnet continúa siendo opcional.
 
 ### Estado por área
 
@@ -50,7 +50,7 @@ CertiChain **v1.0.0** está cerrado como proyecto académico de portafolio y con
 | Certificate PDF v3.1 | ✅ |
 | Gestión de estados off-chain | ✅ |
 | Descarga / eliminación controlada | ✅ |
-| Aplicación móvil | ✅ Base funcional / 🎨 polish en curso |
+| Aplicación móvil | ✅ Mobile Final Polish completado |
 | QR / cámara / wallet local | ✅ |
 | PostgreSQL | ✅ |
 | Cifrado AES-256-GCM | ✅ |
@@ -70,7 +70,7 @@ CertiChain **v1.0.0** está cerrado como proyecto académico de portafolio y con
 
 ## 🆕 Hardening final Web / API / PDF — septiembre 2026
 
-La última ronda de trabajo dejó consolidado el flujo principal de CertiChain antes de continuar con el polish móvil.
+La última ronda de trabajo dejó consolidado el flujo principal de CertiChain antes del cierre móvil.
 
 ### Portal institucional
 
@@ -115,6 +115,30 @@ La última ronda de trabajo dejó consolidado el flujo principal de CertiChain a
 - ownership mediante `COPY --chown`, evitando `chown -R /app` sobre dependencias de solo lectura;
 - almacenamiento JSON de fallback con archivos temporales únicos y cola de persistencia para evitar colisiones concurrentes;
 - PostgreSQL continúa siendo la persistencia del stack Docker principal.
+
+---
+
+## 📱 Mobile Final Polish — septiembre 2026
+
+La aplicación móvil queda finalizada al mismo nivel de coherencia visual, funcional y de calidad del resto del proyecto, sin reescribir React Native / Expo ni ampliar el alcance académico.
+
+- branding oficial en header, cards, detalle, iconografía y splash;
+- tagline `Verified. Immutable. Trusted.`;
+- verificación por ID / Blockchain ID sin pedir SHA-256 manualmente;
+- recuperación automática del hash desde la API;
+- compatibilidad con QR actual `?id=<credential-id>&autoverify=1`, deep links legacy con `id + hash` e ID directo;
+- estados centralizados y explícitos: `pending`, `active`, `revoked` → **Pendiente**, **Vigente**, **Revocada**;
+- Wallet con resumen de guardadas, vigentes, pendientes y revocadas;
+- deduplicación por credential ID y revalidación que actualiza estado, hash, fecha y metadata sin crear duplicados;
+- detalle con ID, SHA-256, QR, último momento de verificación e indicadores off-chain/hash/blockchain;
+- compartir limitado a título, institución y URL de verificación;
+- scanner con permiso explicado, bloqueo de lecturas repetidas y mensajes de error legibles;
+- historial ordenado por última verificación y tratado como último estado conocido;
+- perfil con versión, privacidad por diseño, SecureStore, endpoint actual y borrado local confirmado;
+- conectividad con `/health`, timeout y errores de red sin borrar la wallet local;
+- `EXPO_PUBLIC_API_URL` y `EXPO_PUBLIC_VERIFY_URL` como configuración de entorno;
+- tests unitarios de QR, estados, share URL, deduplicación y transformación a wallet;
+- export de Expo Android incluido como build móvil del gate de CI.
 
 ---
 
@@ -167,19 +191,25 @@ Estas relaciones son académicas y cronológicas; no implican dependencia técni
 
 ### 📱 Aplicación móvil
 
-Base funcional existente:
+✅ **Mobile Final Polish completado**
 
 - React Native + Expo + TypeScript;
-- wallet local de credenciales verificadas;
 - navegación Inicio / Escanear / Historial / Perfil;
-- QR de credenciales;
+- Wallet local protegida mediante `expo-secure-store`;
+- verificación por ID / Blockchain ID;
+- SHA-256 recuperado automáticamente;
+- QR local generado desde `EXPO_PUBLIC_VERIFY_URL`;
 - escáner real con `expo-camera`;
-- detalle de credenciales;
-- copiar y compartir identificadores;
-- historial protegido mediante `expo-secure-store`;
-- icono, adaptive icon, splash y branding assets de CertiChain.
-
-**Siguiente foco:** llevar la app móvil al mismo nivel visual y de UX que el portal institucional, eliminar placeholders visuales heredados (`CC`), alinear el flujo de verificación con la recuperación automática de SHA-256 y mejorar estados, feedback y experiencia de cámara.
+- compatibilidad con QR moderno y legacy;
+- detalle con estado, ID, SHA-256, última verificación e indicadores de integridad;
+- compartir credencial sin PII innecesaria;
+- copiar ID y SHA-256 de forma separada;
+- revalidación que actualiza la entrada existente;
+- historial ordenado por última validación;
+- gestión explícita de `pending`, `active` y `revoked`;
+- manejo de API offline, timeout, 404 y respuesta inválida;
+- icono, adaptive icon, splash y branding assets oficiales de CertiChain;
+- accesibilidad y responsive hardening razonable.
 
 ### ⚙️ Backend
 
@@ -296,9 +326,10 @@ CORS_ORIGIN=http://localhost:8080
 VITE_API_URL=http://localhost:4000
 PUBLIC_VERIFY_URL=http://localhost:8080/verify
 EXPO_PUBLIC_API_URL=http://localhost:4000
+EXPO_PUBLIC_VERIFY_URL=http://localhost:8080/verify
 ```
 
-> En producción, `PUBLIC_VERIFY_URL` debe usar HTTPS, un dominio real y terminar en `/verify`.
+> En producción, `PUBLIC_VERIFY_URL` y `EXPO_PUBLIC_VERIFY_URL` deben usar HTTPS y una ruta real de verificación. El repositorio no inventa ni fija un dominio de producción.
 
 ### 2. Levantar el stack
 
@@ -327,7 +358,51 @@ Desde el monorepo:
 npm run start --workspace=@certichain/mobile
 ```
 
-Para un dispositivo físico, `EXPO_PUBLIC_API_URL` debe apuntar a una URL alcanzable desde el teléfono —por ejemplo la IP LAN del equipo que ejecuta la API— y no a `localhost` del teléfono.
+#### Expo Go en teléfono físico
+
+El teléfono y la PC deben estar en la misma red local. No uses `localhost` para la API desde el teléfono; `localhost` apuntaría al propio dispositivo.
+
+Ejemplo de configuración temporal de desarrollo:
+
+```env
+EXPO_PUBLIC_API_URL=http://192.168.1.50:4000
+EXPO_PUBLIC_VERIFY_URL=http://192.168.1.50:8080/verify
+```
+
+Sustituye `192.168.1.50` por la IP LAN real de tu PC. No se debe commitear un `.env` personal.
+
+Luego ejecuta:
+
+```bash
+npm run start --workspace=@certichain/mobile
+```
+
+Abre el QR de Expo con Expo Go y verifica que el teléfono pueda abrir `http://<IP-LAN>:4000/health` en el navegador antes de probar certificados.
+
+#### Android Emulator
+
+Usa el alias del host Android:
+
+```env
+EXPO_PUBLIC_API_URL=http://10.0.2.2:4000
+EXPO_PUBLIC_VERIFY_URL=http://10.0.2.2:8080/verify
+```
+
+Después:
+
+```bash
+npm run android --workspace=@certichain/mobile
+```
+
+#### Build de validación móvil
+
+El gate global ejecuta:
+
+```bash
+npm run build --workspace=@certichain/mobile
+```
+
+que exporta el bundle Android mediante Expo sin introducir E2E móvil complejo.
 
 ---
 
@@ -415,6 +490,10 @@ autenticación
 → pending ↔ active ↔ revoked en off-chain
 → revocación
 → eliminación de prueba
+→ QR moderno / legacy / ID directo en Mobile
+→ estados Mobile pending / active / revoked
+→ URL de compartir sin PII innecesaria
+→ deduplicación y revalidación de wallet
 ```
 
 Los contratos cuentan con pruebas de permisos, emisión, revocación e integridad.
@@ -437,7 +516,7 @@ Los contratos cuentan con pruebas de permisos, emisión, revocación e integrida
 | 7 | Testing, DevOps y despliegue | ✅ |
 | 8 | Production readiness | ✅ Base implementada |
 | Hardening Web/API/PDF 2026 | UX, branding, Certificate PDF v3.1, estados, cleanup | ✅ |
-| Mobile Final Polish | Visual parity, verificación y UX móvil | 🚧 En curso |
+| Mobile Final Polish | Visual parity, verificación y UX móvil | ✅ Finalizado |
 
 ### Extensiones opcionales de producción
 
