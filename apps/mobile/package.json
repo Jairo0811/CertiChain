@@ -15,20 +15,20 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "expo": "^54.0.0",
-    "expo-camera": "~17.0.10",
-    "expo-clipboard": "^7.0.0",
-    "expo-linking": "^8.0.0",
-    "expo-secure-store": "^15.0.0",
-    "expo-sharing": "^14.0.0",
-    "react": "19.1.0",
-    "react-native": "0.81.4",
+    "expo": "^57.0.0",
+    "expo-camera": "~57.0.5",
+    "expo-clipboard": "~57.0.2",
+    "expo-linking": "~57.0.10",
+    "expo-secure-store": "~57.0.4",
+    "expo-sharing": "~57.0.19",
+    "react": "19.2.3",
+    "react-native": "0.86.3",
     "react-native-qrcode-svg": "^6.3.21",
-    "react-native-svg": "15.12.1"
+    "react-native-svg": "15.15.4"
   },
   "devDependencies": {
     "@types/react": "^19.1.0",
-    "typescript": "^5.7.2",
+    "typescript": "~6.0.3",
     "vitest": "^2.1.9"
   }
 }

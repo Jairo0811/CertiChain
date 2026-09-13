@@ -7,11 +7,6 @@
     "scheme": "certichain",
     "userInterfaceStyle": "dark",
     "icon": "./assets/icon.png",
-    "splash": {
-      "image": "./assets/branding/certichain-logo.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#050817"
-    },
     "plugins": [
       [
         "expo-camera",
@@ -19,7 +14,17 @@
           "cameraPermission": "Permite a CertiChain usar la cámara para escanear códigos QR de certificados.",
           "recordAudioAndroid": false
         }
-      ]
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/branding/certichain-mobile-cover.png",
+          "resizeMode": "cover",
+          "backgroundColor": "#050817"
+        }
+      ],
+      "expo-secure-store",
+      "expo-sharing"
     ],
     "android": {
       "package": "com.jairomatias.certichain",

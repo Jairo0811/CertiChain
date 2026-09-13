@@ -43,3 +43,7 @@ secrets/
 # Test / temp
 .tmp/
 tmp/
+
+
+apps/api/.data/
+app.json

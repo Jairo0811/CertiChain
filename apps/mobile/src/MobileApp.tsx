@@ -622,7 +622,7 @@ const styles = StyleSheet.create({
   permissionMark: { width: 72, height: 72 },
   cameraFrame: { height: 420, maxHeight: 520, minHeight: 320, borderRadius: 20, overflow: "hidden", borderWidth: 1, borderColor: colors.borderStrong, backgroundColor: "#020617" },
   camera: { flex: 1 },
-  scanOverlay: { ...StyleSheet.absoluteFillObject, alignItems: "center", justifyContent: "center", padding: 28 },
+  scanOverlay: { ...StyleSheet.absoluteFill, alignItems: "center", justifyContent: "center", padding: 28 },
   scanBox: { width: "78%", aspectRatio: 1, borderWidth: 2, borderColor: colors.cyan, borderRadius: 20, backgroundColor: "transparent" },
   scanHint: { marginTop: 18, color: colors.white, backgroundColor: "rgba(5,8,23,0.88)", borderRadius: 999, paddingHorizontal: 13, paddingVertical: 8, fontSize: 11, fontWeight: "800", textAlign: "center" },
   historyRow: { flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: colors.surfaceRaised, borderWidth: 1, borderColor: colors.border, borderRadius: 15, padding: 12 },
