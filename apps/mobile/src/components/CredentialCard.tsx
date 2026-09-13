@@ -38,9 +38,9 @@ export function CredentialCard({
         </View>
         <StatusBadge status={credential.status} />
       </View>
-      <Text style={styles.title} numberOfLines={2}>{credential.title}</Text>
-      <Text style={styles.institution} numberOfLines={2}>{credential.institution}</Text>
-      <Text style={styles.student} numberOfLines={1}>{credential.studentName}</Text>
+     <Text style={styles.title} numberOfLines={3}>{credential.title}</Text>
+<Text style={styles.institution} numberOfLines={2}>{credential.institution}</Text>
+<Text style={styles.student} numberOfLines={2}>{credential.studentName}</Text>
       <View style={styles.footer}>
         <View style={styles.metaBlock}>
           <Text style={styles.label}>EMITIDO</Text>
