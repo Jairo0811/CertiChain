@@ -1,6 +1,12 @@
+import { createHash } from "node:crypto";
 import { config } from "./config.js";
 import { buildDemoCertificates, demoVerificationSample } from "./demoData.js";
 import { store } from "./store.js";
+
+function deterministicEventId(certificateId: string, kind: string): string {
+  const hex = createHash("sha256").update(`demo-audit:${certificateId}:${kind}`).digest("hex");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-4${hex.slice(13, 16)}-8${hex.slice(17, 20)}-${hex.slice(20, 32)}`;
+}
 
 async function main() {
   if (config.NODE_ENV === "production") {
@@ -12,6 +18,30 @@ async function main() {
 
   for (const certificate of certificates) {
     await store.saveCertificate(certificate);
+
+    // Real audit events for the seeded records (idempotent), so dashboard activity reflects them.
+    const existing = await store.listAudit({ entityId: certificate.id, limit: 10 });
+    const has = (action: string) => existing.some((event) => event.action === action);
+    if (!has("certificate.issue")) {
+      await store.appendAudit({
+        id: deterministicEventId(certificate.id, "issue"),
+        actor: certificate.issuerEmail,
+        action: "certificate.issue",
+        entityId: certificate.id,
+        timestamp: certificate.createdAt,
+        metadata: { demo: true, evidenceMode: "demo" },
+      });
+    }
+    if (certificate.revokedAt && !has("certificate.revoke")) {
+      await store.appendAudit({
+        id: deterministicEventId(certificate.id, "revoke"),
+        actor: certificate.issuerEmail,
+        action: "certificate.revoke",
+        entityId: certificate.id,
+        timestamp: certificate.revokedAt,
+        metadata: { demo: true, evidenceMode: "demo" },
+      });
+    }
   }
 
   console.log(

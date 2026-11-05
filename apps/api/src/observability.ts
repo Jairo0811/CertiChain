@@ -14,6 +14,7 @@ export function observability(req: Request, res: Response, next: NextFunction): 
     statusCounts.set(res.statusCode, (statusCounts.get(res.statusCode) ?? 0) + 1);
     if (res.statusCode >= 500) totalErrors += 1;
 
+    if (process.env.NODE_ENV === "test" && !process.env.CERTICHAIN_TEST_LOGS) return;
     const requestId = res.getHeader("x-request-id");
     console.log(JSON.stringify({
       level: res.statusCode >= 500 ? "error" : "info",
