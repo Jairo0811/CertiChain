@@ -85,4 +85,55 @@ describe("CertificateRegistry", () => {
     const result = await registry.verifyCertificate(certificateId, otherHash);
     expect(result.hashMatches).to.equal(false);
   });
+
+  it("rejects a second revocation, which the API treats as an already-synced state", async () => {
+    const { registry, issuer, student } = await deployFixture();
+    const hash = ethers.keccak256(ethers.toUtf8Bytes("certificate-pdf"));
+    const certificateId = await issueCertificate(registry, issuer, student.address, hash);
+
+    await registry.connect(issuer).revokeCertificate(certificateId);
+    await expect(registry.connect(issuer).revokeCertificate(certificateId))
+      .to.be.revertedWithCustomError(registry, "CertificateAlreadyRevoked")
+      .withArgs(certificateId);
+  });
+
+  it("only lets the issuer or an issuer admin revoke", async () => {
+    const { registry, admin, issuer, student, outsider } = await deployFixture();
+    const hash = ethers.keccak256(ethers.toUtf8Bytes("certificate-pdf"));
+    const certificateId = await issueCertificate(registry, issuer, student.address, hash);
+
+    await expect(registry.connect(outsider).revokeCertificate(certificateId)).to.be.revertedWithCustomError(
+      registry,
+      "UnauthorizedRevocation",
+    );
+    await registry.connect(admin).revokeCertificate(certificateId);
+    expect((await registry.verifyCertificate(certificateId, hash)).active).to.equal(false);
+  });
+
+  it("assigns distinct ids to repeated issuances, which is why the API never re-sends a submitted tx", async () => {
+    const { registry, issuer, student } = await deployFixture();
+    const hash = ethers.keccak256(ethers.toUtf8Bytes("certificate-pdf"));
+    const first = await issueCertificate(registry, issuer, student.address, hash);
+    const second = await issueCertificate(registry, issuer, student.address, hash);
+    expect(first).to.not.equal(second);
+  });
+
+  it("blocks issuance and revocation while paused", async () => {
+    const { registry, admin, issuer, student } = await deployFixture();
+    const hash = ethers.keccak256(ethers.toUtf8Bytes("certificate-pdf"));
+    const certificateId = await issueCertificate(registry, issuer, student.address, hash);
+
+    await registry.connect(admin).pause();
+    await expect(registry.connect(issuer).issueCertificate(student.address, hash, "ipfs://metadata")).to.be.reverted;
+    await expect(registry.connect(issuer).revokeCertificate(certificateId)).to.be.reverted;
+    await registry.connect(admin).unpause();
+    await registry.connect(issuer).revokeCertificate(certificateId);
+  });
+
+  it("reports unknown certificates as non-existent instead of reverting", async () => {
+    const { registry } = await deployFixture();
+    const result = await registry.verifyCertificate(ethers.ZeroHash, ethers.ZeroHash);
+    expect(result.exists).to.equal(false);
+    expect(result.active).to.equal(false);
+  });
 });
