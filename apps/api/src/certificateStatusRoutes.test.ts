@@ -52,10 +52,17 @@ describe("certificate status management", () => {
     expect(revoke.body.status).toBe("revoked");
     expect(revoke.body.revokedAt).toBeTruthy();
 
-    const reactivate = await request(app)
+    const reactivateWithoutReason = await request(app)
       .post(`/api/certificates/${issued.body.id}/status`)
       .set("Authorization", `Bearer ${token}`)
       .send({ status: "active" });
+    expect(reactivateWithoutReason.status).toBe(400);
+    expect(reactivateWithoutReason.body.code).toBe("validation_failed");
+
+    const reactivate = await request(app)
+      .post(`/api/certificates/${issued.body.id}/status`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({ status: "active", reason: "Revocación registrada por error en entorno demo" });
     expect(reactivate.status).toBe(200);
     expect(reactivate.body.status).toBe("active");
     expect(reactivate.body.revokedAt).toBeUndefined();
