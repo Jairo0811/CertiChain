@@ -47,3 +47,5 @@ tmp/
 
 apps/api/.data/
 app.json
+# TypeScript incremental build info
+*.tsbuildinfo
