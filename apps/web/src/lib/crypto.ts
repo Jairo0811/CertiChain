@@ -14,11 +14,13 @@ export async function sha256File(file: File): Promise<string> {
     throw new LocalFileError("Este navegador no permite calcular SHA-256 aquí. Abre el verificador mediante HTTPS.");
   }
 
-  const buffer = await readFile(file);
-  const header = new TextDecoder("latin1").decode(new Uint8Array(buffer, 0, Math.min(5, buffer.byteLength)));
+  // Copy into a Uint8Array owned by this realm: some runtimes (e.g. Node 20 under jsdom) reject an
+  // ArrayBuffer created by another realm's FileReader. In browsers this is a cheap, harmless copy.
+  const bytes = new Uint8Array(await readFile(file)).slice();
+  const header = new TextDecoder("latin1").decode(bytes.subarray(0, 5));
   if (header !== "%PDF-") throw new LocalFileError("El archivo seleccionado no es un PDF válido.");
 
-  const digest = await globalThis.crypto.subtle.digest("SHA-256", buffer);
+  const digest = await globalThis.crypto.subtle.digest("SHA-256", bytes);
   return `0x${[...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("")}`;
 }
 
