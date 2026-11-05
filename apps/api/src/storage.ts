@@ -1,5 +1,5 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes, randomUUID } from "node:crypto";
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { config } from "./config.js";
 
@@ -59,14 +59,44 @@ class StorageService {
     return true;
   }
 
+  /**
+   * Cheap capability check: is this URI managed by a storage backend that is configured here?
+   * It does NOT prove the encrypted object exists; use documentExists for that.
+   */
   canReadDocument(metadataURI: string): boolean {
-    if (metadataURI.startsWith("local-encrypted://")) return true;
-    return metadataURI.startsWith("ipfs://") && Boolean(config.IPFS_API_URL);
+    if (metadataURI.startsWith("local-encrypted://")) return isValidLocalReference(metadataURI);
+    return metadataURI.startsWith("ipfs://") && Boolean(config.IPFS_API_URL) && isValidCid(metadataURI);
+  }
+
+  /**
+   * Availability check used for the `documentAvailable` flag.
+   * - local-encrypted: the encrypted file must exist on disk.
+   * - ipfs: the URI must be a syntactically valid CID and IPFS must be configured. A network
+   *   round-trip per listed certificate would be too expensive; the download endpoint still
+   *   verifies retrieval, decryption and SHA-256 before serving the file.
+   */
+  async documentExists(metadataURI: string): Promise<boolean> {
+    if (!this.canReadDocument(metadataURI)) return false;
+    if (metadataURI.startsWith("ipfs://")) return true;
+    try {
+      await access(resolve(process.cwd(), ".data/documents", localDocumentFilename(metadataURI)));
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   get configured(): boolean {
     return this.driver === "local" || Boolean(config.IPFS_API_URL);
   }
+}
+
+function isValidLocalReference(metadataURI: string): boolean {
+  return /^[a-zA-Z0-9._-]+$/.test(metadataURI.slice("local-encrypted://".length));
+}
+
+function isValidCid(metadataURI: string): boolean {
+  return /^[a-zA-Z0-9]{20,128}$/.test(metadataURI.slice("ipfs://".length));
 }
 
 function localDocumentFilename(metadataURI: string): string {
