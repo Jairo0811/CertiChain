@@ -1,0 +1,78 @@
+/*
+ * CertiChain design tokens.
+ * Palette from the brand brief; violet is reserved for on-chain evidence so it keeps meaning.
+ */
+:root {
+  color-scheme: dark;
+
+  /* Ground and surfaces */
+  --bg: #070b1f;
+  --surface: #0f172a;
+  --surface-raised: #141e36;
+  --surface-sunken: #0a1126;
+  --line: rgba(148, 163, 184, 0.16);
+  --line-strong: rgba(148, 163, 184, 0.28);
+
+  /* Text: contrast against --surface ≥ 4.5:1 */
+  --text: #e7ecf5;
+  --text-muted: #9aa8bf;
+  --text-faint: #7d8ba3;
+
+  /* Brand */
+  --primary: #2563eb;
+  --primary-hover: #3b74f0;
+  --primary-text: #8fb3ff;
+  --secondary: #7c3aed;
+  --secondary-text: #c4a6ff;
+  --accent: #67e8f9;
+
+  /* Semantic */
+  --success: #22c55e;
+  --success-text: #6ee79a;
+  --success-soft: rgba(34, 197, 94, 0.12);
+  --warning: #f59e0b;
+  --warning-text: #fcc864;
+  --warning-soft: rgba(245, 158, 11, 0.12);
+  --danger: #ef4444;
+  --danger-text: #fda4a4;
+  --danger-soft: rgba(239, 68, 68, 0.12);
+  --info-soft: rgba(37, 99, 235, 0.14);
+
+  /* Type */
+  --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: "Source Serif 4 Variable", "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Modular scale (1.2) on a 15px base */
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-md: 0.9375rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.375rem;
+
+  /* Spacing (4px grid) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* Radii: hierarchy, not one value everywhere */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 999px;
+
+  --shadow-overlay: 0 24px 48px -12px rgba(0, 0, 0, 0.55);
+  --focus-ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
+
+  --sidebar-width: 248px;
+  --topbar-height: 64px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
