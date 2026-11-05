@@ -8,6 +8,24 @@ export interface AuthUser {
 
 export type CertificateStatus = "pending" | "active" | "revoked";
 
+/**
+ * Where the authoritative evidence of a credential lives.
+ * - on-chain: anchored in CertificateRegistry (bytes32 blockchain id).
+ * - demo: portfolio dataset with an illustrative identifier; never anchored.
+ * - off-chain: local/off-chain record only.
+ */
+export type EvidenceMode = "on-chain" | "demo" | "off-chain";
+
+/**
+ * Lifecycle of the blockchain anchoring for a credential.
+ * - not_requested: blockchain integration was not used for this credential.
+ * - submitting: persisted off-chain, transaction not yet accepted by the RPC.
+ * - submitted: transaction hash known, confirmation pending. Never re-sent.
+ * - anchored: CertificateIssued event confirmed; blockchainId stored.
+ * - failed: transaction was never accepted (no tx hash); safe to retry.
+ */
+export type ChainSyncStatus = "not_requested" | "submitting" | "submitted" | "anchored" | "failed";
+
 export interface CertificateRecord {
   id: string;
   blockchainId?: string;
@@ -22,6 +40,11 @@ export interface CertificateRecord {
   issuerEmail: string;
   createdAt: string;
   revokedAt?: string;
+  chainSyncStatus?: ChainSyncStatus;
+  chainTxHash?: string;
+  chainRevokeTxHash?: string;
+  chainError?: string;
+  updatedAt?: string;
 }
 
 export interface AuditEvent {
@@ -33,6 +56,7 @@ export interface AuditEvent {
     | "certificate.issue"
     | "certificate.revoke"
     | "certificate.status"
+    | "certificate.anchor"
     | "certificate.delete"
     | "certificate.verify";
   entityId?: string;
