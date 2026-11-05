@@ -1,4 +1,5 @@
 import { ethers, network } from "hardhat";
+import type { CertificateRegistry } from "../typechain-types/index.js";
 
 /**
  * Deploys CertificateRegistry and authorizes the API issuer signer.
@@ -20,7 +21,7 @@ async function main() {
   if (issuer && !ethers.isAddress(issuer)) throw new Error("ISSUER_ADDRESS is not a valid EVM address");
 
   const Registry = await ethers.getContractFactory("CertificateRegistry");
-  const registry = await Registry.deploy(deployer.address);
+  const registry = (await Registry.deploy(deployer.address)) as unknown as CertificateRegistry;
   await registry.waitForDeployment();
   const address = await registry.getAddress();
 

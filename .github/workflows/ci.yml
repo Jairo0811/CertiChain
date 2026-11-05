@@ -14,10 +14,33 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   quality:
     name: Quality checks
     runs-on: ubuntu-latest
+
+    # Disposable PostgreSQL for the API integration tests (store.postgres.test.ts).
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: certichain_test
+          POSTGRES_USER: certichain
+          POSTGRES_PASSWORD: certichain-ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U certichain -d certichain_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      TEST_DATABASE_URL: postgresql://certichain:certichain-ci@localhost:5432/certichain_test
 
     steps:
       - name: Checkout
@@ -35,6 +58,7 @@ jobs:
       - name: Check formatting
         run: npm run format:check
 
+      # Also compiles the contracts and generates typechain types used by the typecheck step.
       - name: Lint workspaces
         run: npm run lint
 
