@@ -1,4 +1,4 @@
-import { ReactNode, useId } from "react";
+import { type ReactNode, useId } from "react";
 
 export interface FieldControlProps {
   id: string;

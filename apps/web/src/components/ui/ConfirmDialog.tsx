@@ -1,4 +1,4 @@
-import { FormEvent, ReactNode, useState } from "react";
+import { type FormEvent, type ReactNode, useState } from "react";
 import { Dialog } from "./Dialog";
 import { Field } from "./Field";
 

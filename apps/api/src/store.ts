@@ -3,7 +3,7 @@ import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { Pool } from "pg";
 import { config } from "./config.js";
-import { AuditEvent, CertificateRecord, CertificateStatus } from "./domain.js";
+import { type AuditEvent, type CertificateRecord, type CertificateStatus } from "./domain.js";
 import { migrations } from "./migrations.js";
 
 interface PersistedState {

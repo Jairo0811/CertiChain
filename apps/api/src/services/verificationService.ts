@@ -2,7 +2,7 @@ import type { BlockchainVerificationResult } from "../blockchain.js";
 import { evidenceMode, statusManagedByBlockchain } from "../certificateEvidence.js";
 import type { CertificateStatus, EvidenceMode } from "../domain.js";
 import { maskPersonName } from "../security.js";
-import { audit, ServiceContext } from "./context.js";
+import { audit, type ServiceContext } from "./context.js";
 
 /**
  * Explicit verification outcome. Clients must branch on this instead of the legacy `valid` flag.

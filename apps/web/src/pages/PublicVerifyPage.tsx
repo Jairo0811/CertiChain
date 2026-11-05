@@ -1,5 +1,5 @@
-import { ChangeEvent, FormEvent, useCallback, useEffect, useRef, useState } from "react";
-import { HashSource, VerificationResult } from "../components/verify/VerificationResult";
+import { type ChangeEvent, type FormEvent, useCallback, useEffect, useRef, useState } from "react";
+import { type HashSource, VerificationResult } from "../components/verify/VerificationResult";
 import { Brand, Spinner } from "../components/ui/Feedback";
 import { Field } from "../components/ui/Field";
 import { Icon } from "../components/ui/Icon";

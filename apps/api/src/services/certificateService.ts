@@ -10,7 +10,7 @@ import {
 import type { CertificateRecord, CertificateStatus } from "../domain.js";
 import { conflict, HttpError, notFound } from "../http/errors.js";
 import { storageService } from "../storage.js";
-import { audit, ServiceContext, withCertificateLock } from "./context.js";
+import { audit, type ServiceContext, withCertificateLock } from "./context.js";
 
 export interface IssueInput {
   studentName: string;

@@ -10,7 +10,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "build": "expo export --platform android --output-dir dist",
-    "lint": "tsc --noEmit",
+    "lint": "eslint src App.tsx index.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests"
   },

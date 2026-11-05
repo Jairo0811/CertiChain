@@ -1,0 +1,8 @@
+node_modules
+dist
+coverage
+.expo
+blockchain/artifacts
+blockchain/cache
+blockchain/typechain-types
+package-lock.json

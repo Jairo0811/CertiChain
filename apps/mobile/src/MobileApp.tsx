@@ -58,10 +58,6 @@ function formatDate(value: string, withTime = false) {
     : new Intl.DateTimeFormat("es-DO", { day: "2-digit", month: "short", year: "numeric" }).format(date);
 }
 
-function shortHash(hash: string) {
-  return hash.length > 32 ? `${hash.slice(0, 16)}…${hash.slice(-12)}` : hash;
-}
-
 function outcomeTitle(outcome: Outcome) {
   if (outcome.verification) return verificationTitle(outcomeOf(outcome.verification));
   if (outcome.kind === "not_found") return "Credencial no encontrada";
@@ -468,6 +464,11 @@ export default function MobileApp() {
         <View style={styles.card}>
           <Text style={styles.cardEyebrow}>ENTORNO</Text>
           <Text style={styles.cardTitle}>{connectionLabel(connection)}</Text>
+          {blockchainConfigured !== null ? (
+            <Text style={styles.meta}>
+              {blockchainConfigured ? "El servidor tiene la integración blockchain configurada." : "El servidor opera en modo off-chain (sin blockchain configurada)."}
+            </Text>
+          ) : null}
           <Text style={styles.mono} numberOfLines={3}>{API_URL || "EXPO_PUBLIC_API_URL no configurada"}</Text>
           <Text style={styles.meta}>En teléfono físico usa la IP LAN de tu PC. En Android Emulator usa 10.0.2.2. Producción futura debe usar HTTPS real.</Text>
           <TouchableOpacity style={styles.secondaryButton} onPress={() => void refreshConnection()} accessibilityRole="button">

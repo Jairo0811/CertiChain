@@ -1,4 +1,4 @@
-import { FormEvent, useRef, useState } from "react";
+import { type FormEvent, useRef, useState } from "react";
 import { SyncBadge, StatusBadge } from "../components/ui/Badges";
 import { Spinner } from "../components/ui/Feedback";
 import { Field } from "../components/ui/Field";

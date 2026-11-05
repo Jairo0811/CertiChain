@@ -1,8 +1,8 @@
-import { ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import type { PortalRoute } from "../../hooks/useRoute";
 import type { SessionUser } from "../../types";
 import { Brand } from "../ui/Feedback";
-import { Icon, IconName } from "../ui/Icon";
+import { Icon, type IconName } from "../ui/Icon";
 
 const NAV: Array<{ route: PortalRoute; label: string; icon: IconName }> = [
   { route: "dashboard", label: "Resumen", icon: "dashboard" },

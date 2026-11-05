@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Icon, IconName } from "./Icon";
+import { Icon, type IconName } from "./Icon";
 
 export function Spinner({ label = "Cargando" }: { label?: string }) {
   return <span className="spinner" role="progressbar" aria-label={label} />;

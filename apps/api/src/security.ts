@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { NextFunction, Request, Response } from "express";
+import { type NextFunction, type Request, type Response } from "express";
 
 export function requestSecurity(req: Request, res: Response, next: NextFunction): void {
   const supplied = req.header("x-request-id");

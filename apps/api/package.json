@@ -10,7 +10,7 @@
     "start": "node dist/server.js",
     "demo:seed": "tsx src/demoSeed.ts",
     "demo:seed:dist": "node dist/demoSeed.js",
-    "lint": "tsc --noEmit",
+    "lint": "eslint src",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests"
   },

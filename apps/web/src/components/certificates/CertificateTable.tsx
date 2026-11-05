@@ -3,7 +3,7 @@ import { formatDate, publicId, shortHash } from "../../lib/format";
 import type { Certificate, SortField } from "../../types";
 import { ModeBadge, StatusBadge, SyncBadge } from "../ui/Badges";
 import { Icon } from "../ui/Icon";
-import { ActionMenu, MenuAction } from "../ui/Menu";
+import { ActionMenu, type MenuAction } from "../ui/Menu";
 
 const COLUMNS: Array<{ field: SortField; label: string; className?: string }> = [
   { field: "studentName", label: "Titular" },

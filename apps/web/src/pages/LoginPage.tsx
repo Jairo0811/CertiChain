@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { type FormEvent, useState } from "react";
 import { Brand } from "../components/ui/Feedback";
 import { Field } from "../components/ui/Field";
 import { Icon } from "../components/ui/Icon";

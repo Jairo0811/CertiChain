@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { deflateSync, inflateSync } from "node:zlib";
 import { config } from "./config.js";
-import { CertificateRecord } from "./domain.js";
+import { type CertificateRecord } from "./domain.js";
 import { buildQrMatrix } from "./qrCode.js";
 
 interface CertificatePdfInput {

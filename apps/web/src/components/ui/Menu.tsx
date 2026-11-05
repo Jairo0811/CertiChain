@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { Icon, IconName } from "./Icon";
+import { Icon, type IconName } from "./Icon";
 
 export interface MenuAction {
   label: string;

@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { CertificateRecord } from "./domain.js";
+import { type CertificateRecord } from "./domain.js";
 
 const students = [
   "Ana Pérez · Demo",
