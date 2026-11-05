@@ -124,12 +124,22 @@ export function CertificateDrawer({
         certificate && (
           <div className="drawer-actions">
             {canGeneratePdf(certificate) && (
-              <button type="button" className="button secondary" onClick={() => onDownload(certificate)} disabled={working === `pdf:${certificate.id}`}>
+              <button
+                type="button"
+                className="button secondary"
+                onClick={() => onDownload(certificate)}
+                disabled={working === `pdf:${certificate.id}`}
+              >
                 <Icon name="download" size={16} /> {certificate.documentAvailable ? "Descargar PDF" : "Generar PDF"}
               </button>
             )}
             {canManage && needsAnchoring(certificate) && (
-              <button type="button" className="button secondary" onClick={() => onAnchor(certificate)} disabled={working === `anchor:${certificate.id}`}>
+              <button
+                type="button"
+                className="button secondary"
+                onClick={() => onAnchor(certificate)}
+                disabled={working === `anchor:${certificate.id}`}
+              >
                 <Icon name="refresh" size={16} /> Sincronizar con blockchain
               </button>
             )}
@@ -167,8 +177,9 @@ export function CertificateDrawer({
 
           {certificate.chainSyncStatus === "failed" && (
             <p className="callout warning">
-              El anclaje no se completó{certificate.chainError ? ` (${certificate.chainError})` : ""}. La credencial sigue pendiente y no se envió
-              ninguna transacción duplicada. Usa «Sincronizar con blockchain» cuando la red esté disponible.
+              El anclaje no se completó{certificate.chainError ? ` (${certificate.chainError})` : ""}. La credencial sigue
+              pendiente y no se envió ninguna transacción duplicada. Usa «Sincronizar con blockchain» cuando la red esté
+              disponible.
             </p>
           )}
           {certificate.chainSyncStatus === "submitted" && (
@@ -178,7 +189,9 @@ export function CertificateDrawer({
           )}
 
           <section aria-labelledby="facts-title">
-            <h3 id="facts-title" className="section-title">Datos de la credencial</h3>
+            <h3 id="facts-title" className="section-title">
+              Datos de la credencial
+            </h3>
             <dl className="facts">
               <div>
                 <dt>Titular</dt>
@@ -190,7 +203,9 @@ export function CertificateDrawer({
               </div>
               <div>
                 <dt>Registrada</dt>
-                <dd>{formatDateTime(certificate.createdAt)} por {certificate.issuerEmail}</dd>
+                <dd>
+                  {formatDateTime(certificate.createdAt)} por {certificate.issuerEmail}
+                </dd>
               </div>
               {certificate.revokedAt && (
                 <div>
@@ -210,7 +225,8 @@ export function CertificateDrawer({
                   <span className="mono">{certificate.studentWallet}</span>
                   {certificate.evidenceMode !== "on-chain" && (
                     <span className="dd-note">
-                      Si no se indicó una wallet al emitir, es un identificador técnico aleatorio sin clave privada: no la controla el estudiante.
+                      Si no se indicó una wallet al emitir, es un identificador técnico aleatorio sin clave privada: no la
+                      controla el estudiante.
                     </span>
                   )}
                 </dd>
@@ -219,7 +235,9 @@ export function CertificateDrawer({
           </section>
 
           <section aria-labelledby="evidence-title">
-            <h3 id="evidence-title" className="section-title">Evidencia</h3>
+            <h3 id="evidence-title" className="section-title">
+              Evidencia
+            </h3>
             <dl className="facts">
               <div className="wide">
                 <dt>SHA-256 del PDF original</dt>
@@ -252,14 +270,21 @@ export function CertificateDrawer({
 
           <section aria-labelledby="validation-title" className="validation-section">
             <div className="section-head">
-              <h3 id="validation-title" className="section-title">Validación</h3>
-              <button type="button" className="button ghost small" onClick={() => void validate(certificate)} disabled={verifying}>
+              <h3 id="validation-title" className="section-title">
+                Validación
+              </h3>
+              <button
+                type="button"
+                className="button ghost small"
+                onClick={() => void validate(certificate)}
+                disabled={verifying}
+              >
                 <Icon name="verify" size={16} /> {verifying ? "Validando…" : verification ? "Validar de nuevo" : "Validar ahora"}
               </button>
             </div>
             <p className="muted small">
-              Ejecuta la misma consulta que un verificador externo por identificador: registro y blockchain. No compara ningún PDF; para eso
-              usa el verificador público con el archivo.
+              Ejecuta la misma consulta que un verificador externo por identificador: registro y blockchain. No compara ningún
+              PDF; para eso usa el verificador público con el archivo.
             </p>
             <div aria-live="polite">
               {verifyError && (
@@ -273,18 +298,24 @@ export function CertificateDrawer({
 
           {isAdmin && (
             <section aria-labelledby="status-manager-title" className="status-manager">
-              <h3 id="status-manager-title" className="section-title">Estado off-chain</h3>
+              <h3 id="status-manager-title" className="section-title">
+                Estado off-chain
+              </h3>
               {certificate.statusManagedByBlockchain ? (
                 <p className="muted small">
-                  <Icon name="lock" size={14} /> El estado de esta credencial lo gobierna el contrato en blockchain. Solo puede revocarse, de forma
-                  permanente.
+                  <Icon name="lock" size={14} /> El estado de esta credencial lo gobierna el contrato en blockchain. Solo puede
+                  revocarse, de forma permanente.
                 </p>
               ) : (
                 <>
                   <div className="status-form">
                     <label className="field">
                       <span className="field-label">Nuevo estado</span>
-                      <select value={statusDraft} onChange={(event) => setStatusDraft(event.target.value as CertificateStatus)} disabled={statusBusy}>
+                      <select
+                        value={statusDraft}
+                        onChange={(event) => setStatusDraft(event.target.value as CertificateStatus)}
+                        disabled={statusBusy}
+                      >
                         <option value="pending">Pendiente</option>
                         <option value="active">Vigente</option>
                         <option value="revoked">Revocada</option>
@@ -293,21 +324,28 @@ export function CertificateDrawer({
                     {leavingRevoked && (
                       <label className="field">
                         <span className="field-label">Motivo de la reactivación</span>
-                        <input value={statusReason} onChange={(event) => setStatusReason(event.target.value)} maxLength={500} placeholder="Obligatorio, mínimo 5 caracteres" />
+                        <input
+                          value={statusReason}
+                          onChange={(event) => setStatusReason(event.target.value)}
+                          maxLength={500}
+                          placeholder="Obligatorio, mínimo 5 caracteres"
+                        />
                       </label>
                     )}
                     <button
                       type="button"
                       className="button secondary"
                       onClick={() => void applyStatus()}
-                      disabled={statusBusy || statusDraft === certificate.status || (leavingRevoked && statusReason.trim().length < 5)}
+                      disabled={
+                        statusBusy || statusDraft === certificate.status || (leavingRevoked && statusReason.trim().length < 5)
+                      }
                     >
                       {statusBusy ? "Aplicando…" : "Aplicar estado"}
                     </button>
                   </div>
                   <p className="muted small">
-                    Solo para credenciales {certificate.evidenceMode === "demo" ? "demo" : "off-chain"}. Cada cambio queda en la auditoría con su autor y
-                    motivo.
+                    Solo para credenciales {certificate.evidenceMode === "demo" ? "demo" : "off-chain"}. Cada cambio queda en la
+                    auditoría con su autor y motivo.
                   </p>
                 </>
               )}
@@ -315,7 +353,9 @@ export function CertificateDrawer({
           )}
 
           <section aria-labelledby="history-title">
-            <h3 id="history-title" className="section-title">Historial de auditoría</h3>
+            <h3 id="history-title" className="section-title">
+              Historial de auditoría
+            </h3>
             {certificate.history.length === 0 ? (
               <p className="muted small">Sin eventos registrados para esta credencial.</p>
             ) : (
@@ -329,7 +369,9 @@ export function CertificateDrawer({
                       <span>
                         <strong>{ACTION_LABEL[event.action] ?? event.action}</strong>
                         <span className="muted"> por {event.actor}</span>
-                        {typeof event.metadata?.reason === "string" && <span className="timeline-note">Motivo: {event.metadata.reason}</span>}
+                        {typeof event.metadata?.reason === "string" && (
+                          <span className="timeline-note">Motivo: {event.metadata.reason}</span>
+                        )}
                       </span>
                     </li>
                   ))}
@@ -337,7 +379,8 @@ export function CertificateDrawer({
             )}
             {certificate.history.some((event) => event.action === "certificate.verify") && (
               <p className="muted small">
-                {certificate.history.filter((event) => event.action === "certificate.verify").length} verificaciones públicas recientes registradas.
+                {certificate.history.filter((event) => event.action === "certificate.verify").length} verificaciones públicas
+                recientes registradas.
               </p>
             )}
           </section>

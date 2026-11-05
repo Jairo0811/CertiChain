@@ -3,10 +3,7 @@ import { colors } from "../theme/colors";
 
 export type StatusTone = "success" | "warning" | "danger";
 
-const statusMeta: Record<
-  CertificateStatus,
-  { label: string; color: string; tone: StatusTone; description: string }
-> = {
+const statusMeta: Record<CertificateStatus, { label: string; color: string; tone: StatusTone; description: string }> = {
   active: {
     label: "Vigente",
     color: colors.green,

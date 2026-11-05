@@ -27,7 +27,10 @@ export default tseslint.config(
     languageOptions: { globals: { ...globals.node } },
     rules: {
       "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrors: "none" }],
-      "@typescript-eslint/consistent-type-imports": ["error", { fixStyle: "inline-type-imports", disallowTypeAnnotations: false }],
+      "@typescript-eslint/consistent-type-imports": [
+        "error",
+        { fixStyle: "inline-type-imports", disallowTypeAnnotations: false },
+      ],
       "@typescript-eslint/no-non-null-assertion": "off",
       eqeqeq: ["error", "always", { null: "ignore" }],
       "no-console": "off",

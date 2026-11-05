@@ -78,8 +78,7 @@ function countStatuses(certificates: CertificateRecord[]) {
 }
 
 function buildBuckets(range: DashboardRange, today: Date, certificates: CertificateRecord[]) {
-  const granularity: DashboardSummary["range"]["granularity"] =
-    range === "30" ? "day" : range === "90" ? "week" : "month";
+  const granularity: DashboardSummary["range"]["granularity"] = range === "30" ? "day" : range === "90" ? "week" : "month";
   const buckets: DashboardBucket[] = [];
   const monthLabel = new Intl.DateTimeFormat("es-DO", { month: "short", year: "2-digit", timeZone: "UTC" });
   const dayLabel = new Intl.DateTimeFormat("es-DO", { day: "2-digit", month: "short", timeZone: "UTC" });
@@ -126,7 +125,11 @@ function buildBuckets(range: DashboardRange, today: Date, certificates: Certific
   return { granularity, buckets };
 }
 
-export async function buildDashboard(context: ServiceContext, range: DashboardRange, now = new Date()): Promise<DashboardSummary> {
+export async function buildDashboard(
+  context: ServiceContext,
+  range: DashboardRange,
+  now = new Date(),
+): Promise<DashboardSummary> {
   const today = utcDay(now);
   const todayIso = isoDay(today);
   const days = range === "all" ? null : Number(range);
@@ -148,9 +151,7 @@ export async function buildDashboard(context: ServiceContext, range: DashboardRa
   }
 
   const fromTimestamp = fromDate ? fromDate.toISOString() : undefined;
-  const revocationsInRange = all.filter(
-    (item) => item.revokedAt && (!fromTimestamp || item.revokedAt >= fromTimestamp),
-  ).length;
+  const revocationsInRange = all.filter((item) => item.revokedAt && (!fromTimestamp || item.revokedAt >= fromTimestamp)).length;
 
   const institutions = new Map<string, number>();
   for (const certificate of inRange) {

@@ -28,18 +28,24 @@ describe("CertificateRegistry", () => {
     return { registry, admin, issuer, student, outsider };
   }
 
-  async function issueCertificate(registry: CertificateRegistry, issuer: Awaited<ReturnType<typeof ethers.getSigners>>[number], studentAddress: string, hash: string) {
+  async function issueCertificate(
+    registry: CertificateRegistry,
+    issuer: Awaited<ReturnType<typeof ethers.getSigners>>[number],
+    studentAddress: string,
+    hash: string,
+  ) {
     const tx = await registry.connect(issuer).issueCertificate(studentAddress, hash, "ipfs://metadata");
     const receipt = await tx.wait();
-    const event = receipt?.logs
-      .map((log) => {
-        try {
-          return registry.interface.parseLog(log);
-        } catch {
-          return null;
-        }
-      })
-      .find((log) => log?.name === "CertificateIssued") ?? null;
+    const event =
+      receipt?.logs
+        .map((log) => {
+          try {
+            return registry.interface.parseLog(log);
+          } catch {
+            return null;
+          }
+        })
+        .find((log) => log?.name === "CertificateIssued") ?? null;
 
     return requireCertificateId(event);
   }
@@ -61,9 +67,7 @@ describe("CertificateRegistry", () => {
     const { registry, outsider, student } = await deployFixture();
     const hash = ethers.keccak256(ethers.toUtf8Bytes("certificate-pdf"));
 
-    await expect(
-      registry.connect(outsider).issueCertificate(student.address, hash, "ipfs://metadata"),
-    ).to.be.reverted;
+    await expect(registry.connect(outsider).issueCertificate(student.address, hash, "ipfs://metadata")).to.be.reverted;
   });
 
   it("marks a certificate as inactive after revocation", async () => {

@@ -20,12 +20,7 @@ export function VerificationChecks({ rows, cachedAt }: { rows: CheckRow[]; cache
         <Text style={styles.cached}>Resultado guardado de la verificación del {cachedAt}. No es una comprobación actual.</Text>
       ) : null}
       {rows.map((row) => (
-        <View
-          key={row.label}
-          style={styles.row}
-          accessible
-          accessibilityLabel={`${row.label}: ${row.value}`}
-        >
+        <View key={row.label} style={styles.row} accessible accessibilityLabel={`${row.label}: ${row.value}`}>
           <View style={[styles.dot, { backgroundColor: TONE_COLOR[row.tone] }, row.tone === "skip" && styles.dotHollow]} />
           <View style={styles.text}>
             <Text style={styles.label}>{row.label}</Text>

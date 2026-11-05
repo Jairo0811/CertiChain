@@ -22,7 +22,9 @@ export function snapshotFromVerification(
     outcome: outcomeOf(verification),
     status: verification.certificate.status,
     evidenceMode: verification.evidenceMode ?? verification.certificate.evidenceMode,
-    integrity: verification.checks?.integrity ?? (hashSource === "link" ? (verification.checks?.hashMatches ? "match" : "mismatch") : "not_evaluated"),
+    integrity:
+      verification.checks?.integrity ??
+      (hashSource === "link" ? (verification.checks?.hashMatches ? "match" : "mismatch") : "not_evaluated"),
     hashSource,
     blockchainStatus: verification.checks?.blockchainStatus ?? legacyBlockchainStatus(verification),
   };
@@ -60,7 +62,9 @@ const BLOCKCHAIN_ROW: Record<BlockchainCheck, { value: string; tone: CheckTone }
  * Check rows for a result. Integrity is only "Coincide" when a hash was actually compared (legacy
  * links carry one); identifier lookups never claim document integrity.
  */
-export function checkRows(snapshot: Pick<VerificationSnapshot, "status" | "integrity" | "hashSource" | "blockchainStatus">): CheckRow[] {
+export function checkRows(
+  snapshot: Pick<VerificationSnapshot, "status" | "integrity" | "hashSource" | "blockchainStatus">,
+): CheckRow[] {
   const registry: CheckRow = {
     label: "Registro CertiChain",
     value: snapshot.status === "active" ? "Vigente" : snapshot.status === "pending" ? "Pendiente" : "Revocada",
@@ -70,9 +74,15 @@ export function checkRows(snapshot: Pick<VerificationSnapshot, "status" | "integ
     snapshot.integrity === "not_evaluated"
       ? { label: "Integridad del documento", value: "No evaluada: no se presentó ningún PDF", tone: "skip" }
       : snapshot.integrity === "match"
-        ? { label: "SHA-256 del enlace", value: "Coincide con el registrado", tone: snapshot.hashSource === "link" ? "warn" : "ok" }
+        ? {
+            label: "SHA-256 del enlace",
+            value: "Coincide con el registrado",
+            tone: snapshot.hashSource === "link" ? "warn" : "ok",
+          }
         : { label: "SHA-256 del enlace", value: "No coincide con el registrado", tone: "fail" };
-  const chain = snapshot.blockchainStatus ? BLOCKCHAIN_ROW[snapshot.blockchainStatus] : { value: "Sin información", tone: "skip" as const };
+  const chain = snapshot.blockchainStatus
+    ? BLOCKCHAIN_ROW[snapshot.blockchainStatus]
+    : { value: "Sin información", tone: "skip" as const };
   return [registry, integrity, { label: "Blockchain", ...chain }];
 }
 

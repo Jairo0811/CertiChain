@@ -22,8 +22,7 @@ export const systemService = {
 };
 
 export const dashboardService = {
-  get: (range: DashboardRange, signal?: AbortSignal) =>
-    request<DashboardSummary>(`/api/dashboard?range=${range}`, { signal }),
+  get: (range: DashboardRange, signal?: AbortSignal) => request<DashboardSummary>(`/api/dashboard?range=${range}`, { signal }),
 };
 
 export interface IssuePayload {

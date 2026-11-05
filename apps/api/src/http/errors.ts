@@ -31,8 +31,7 @@ export class HttpError extends Error {
   }
 }
 
-export const badRequest = (message: string, details?: unknown) =>
-  new HttpError(400, "validation_failed", message, details);
+export const badRequest = (message: string, details?: unknown) => new HttpError(400, "validation_failed", message, details);
 export const notFound = (message = "Certificate not found") => new HttpError(404, "not_found", message);
 export const conflict = (message: string) => new HttpError(409, "conflict", message);
 

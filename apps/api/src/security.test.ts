@@ -31,9 +31,15 @@ describe("rate limiting", () => {
     expect((await request(app).get("/api/certificates")).status).toBe(429);
 
     // Login and verification still have their full, independent budgets.
-    expect((await request(app).post("/api/auth/login").send({ email: "someone@example.com", password: "wrong-pass" })).status).toBe(401);
-    expect((await request(app).post("/api/auth/login").send({ email: "someone@example.com", password: "wrong-pass" })).status).toBe(401);
-    expect((await request(app).post("/api/auth/login").send({ email: "someone@example.com", password: "wrong-pass" })).status).toBe(429);
+    expect(
+      (await request(app).post("/api/auth/login").send({ email: "someone@example.com", password: "wrong-pass" })).status,
+    ).toBe(401);
+    expect(
+      (await request(app).post("/api/auth/login").send({ email: "someone@example.com", password: "wrong-pass" })).status,
+    ).toBe(401);
+    expect(
+      (await request(app).post("/api/auth/login").send({ email: "someone@example.com", password: "wrong-pass" })).status,
+    ).toBe(429);
 
     expect((await request(app).get("/api/verify/unknown-id")).status).toBe(404);
     expect((await request(app).get("/api/verify/unknown-id")).status).toBe(404);

@@ -113,7 +113,9 @@ export function AppShell({
             </span>
             <button type="button" className="button ghost small" onClick={onLogout} aria-label="Cerrar sesión">
               <Icon name="logout" size={16} />
-              <span className="hide-narrow" aria-hidden="true">Cerrar sesión</span>
+              <span className="hide-narrow" aria-hidden="true">
+                Cerrar sesión
+              </span>
             </button>
           </div>
         </header>

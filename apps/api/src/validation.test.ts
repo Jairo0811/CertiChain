@@ -42,7 +42,11 @@ describe("input validation and document handling", () => {
     const response = await request(app)
       .post("/api/certificates")
       .set("Authorization", `Bearer ${token}`)
-      .send({ ...validIssuePayload, studentName: "  Ana   Pérez  ", studentWallet: "0x8ba1f109551bd432803012645ac136ddd64dba72" });
+      .send({
+        ...validIssuePayload,
+        studentName: "  Ana   Pérez  ",
+        studentWallet: "0x8ba1f109551bd432803012645ac136ddd64dba72",
+      });
     expect(response.status).toBe(201);
     expect(response.body.studentName).toBe("Ana Pérez");
     expect(response.body.studentWallet).toBe("0x8ba1f109551bD432803012645Ac136ddd64DBA72");

@@ -24,10 +24,7 @@ type Health = {
 
 function configuredApiUrl(): string {
   if (!API_URL) {
-    throw new MobileApiError(
-      "unconfigured",
-      "Configura EXPO_PUBLIC_API_URL para verificar credenciales desde este dispositivo.",
-    );
+    throw new MobileApiError("unconfigured", "Configura EXPO_PUBLIC_API_URL para verificar credenciales desde este dispositivo.");
   }
   return API_URL.replace(/\/$/, "");
 }

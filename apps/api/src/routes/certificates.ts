@@ -101,7 +101,11 @@ export function certificateRoutes(context: ServiceContext): Router {
 
   router.post("/certificates/:id/revoke", authenticate, authorize("admin", "issuer"), async (req, res) => {
     const id = parseOrThrow(idSchema, req.params.id, "Invalid certificate id");
-    const body = parseOrThrow(revokeSchema, req.body && Object.keys(req.body).length ? req.body : undefined, "Invalid revocation payload");
+    const body = parseOrThrow(
+      revokeSchema,
+      req.body && Object.keys(req.body).length ? req.body : undefined,
+      "Invalid revocation payload",
+    );
     const certificate = await revokeCertificate(context, id, req.user!.email, body?.reason);
     res.json(await withDocumentAvailability(certificate));
   });

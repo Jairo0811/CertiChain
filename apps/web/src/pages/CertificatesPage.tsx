@@ -32,7 +32,10 @@ export function CertificatesPage({
 
   const list = useAsync(
     (signal) =>
-      certificateService.list({ page, pageSize: PAGE_SIZE, search: debouncedSearch, status: status || undefined, sort, direction }, signal),
+      certificateService.list(
+        { page, pageSize: PAGE_SIZE, search: debouncedSearch, status: status || undefined, sort, direction },
+        signal,
+      ),
     [page, debouncedSearch, status, sort, direction, refreshKey],
   );
 
@@ -181,7 +184,13 @@ export function CertificatesPage({
                 {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, data.total)} de {data.total}
               </span>
               <div className="pagination-controls">
-                <button type="button" className="icon-button bordered" disabled={page <= 1} onClick={() => setPage((value) => value - 1)} aria-label="Página anterior">
+                <button
+                  type="button"
+                  className="icon-button bordered"
+                  disabled={page <= 1}
+                  onClick={() => setPage((value) => value - 1)}
+                  aria-label="Página anterior"
+                >
                   <Icon name="chevronLeft" />
                 </button>
                 <span aria-current="page">

@@ -20,9 +20,10 @@ class StorageService {
     const encrypted = encrypt(input);
     const safeFilename = sanitizeFilename(filename);
 
-    const metadataURI = this.driver === "ipfs"
-      ? await uploadToIpfs(encrypted, `${safeFilename}.enc`, mimeType)
-      : await saveLocally(encrypted, `${randomUUID()}-${safeFilename}.enc`);
+    const metadataURI =
+      this.driver === "ipfs"
+        ? await uploadToIpfs(encrypted, `${safeFilename}.enc`, mimeType)
+        : await saveLocally(encrypted, `${randomUUID()}-${safeFilename}.enc`);
 
     return {
       documentHash,
@@ -163,11 +164,7 @@ async function uploadToIpfs(encrypted: Buffer, filename: string, originalMimeTyp
   ) as ArrayBuffer;
 
   const form = new FormData();
-  form.append(
-    "file",
-    new Blob([encryptedArrayBuffer], { type: "application/octet-stream" }),
-    filename,
-  );
+  form.append("file", new Blob([encryptedArrayBuffer], { type: "application/octet-stream" }), filename);
   form.append("originalContentType", originalMimeType);
 
   const headers = new Headers();
@@ -199,7 +196,10 @@ async function downloadFromIpfs(cid: string): Promise<Buffer> {
 }
 
 function sanitizeFilename(filename: string): string {
-  const normalized = filename.trim().replace(/[^a-zA-Z0-9._-]+/g, "-").slice(0, 120);
+  const normalized = filename
+    .trim()
+    .replace(/[^a-zA-Z0-9._-]+/g, "-")
+    .slice(0, 120);
   return normalized || "certificate";
 }
 

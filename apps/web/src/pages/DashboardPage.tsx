@@ -16,7 +16,9 @@ const RANGES: Array<{ key: DashboardRange; label: string }> = [
 ];
 
 function activityDetail(item: DashboardSummary["activity"][number]): string {
-  const subject = item.title ? `${item.title}${item.studentName ? `, ${item.studentName}` : ""}` : "Credencial eliminada del registro";
+  const subject = item.title
+    ? `${item.title}${item.studentName ? `, ${item.studentName}` : ""}`
+    : "Credencial eliminada del registro";
   const metadata = item.metadata ?? {};
   if (item.action === "certificate.status" && metadata.previousStatus && metadata.nextStatus) {
     const label = (value: unknown) => STATUS_LABEL[value as keyof typeof STATUS_LABEL] ?? String(value);
@@ -88,7 +90,8 @@ export function DashboardPage({ onOpenCertificate, onIssue }: { onOpenCertificat
               <span className="figure-label">Revocadas</span>
               <strong className="figure-value tone-danger">{data.period.revoked}</strong>
               <span className="figure-note">
-                {data.period.revocationsInRange} {data.period.revocationsInRange === 1 ? "revocación ejecutada" : "revocaciones ejecutadas"} en el periodo
+                {data.period.revocationsInRange}{" "}
+                {data.period.revocationsInRange === 1 ? "revocación ejecutada" : "revocaciones ejecutadas"} en el periodo
               </span>
             </div>
             <div className="figure">
@@ -101,15 +104,25 @@ export function DashboardPage({ onOpenCertificate, onIssue }: { onOpenCertificat
           <div className="dashboard-grid">
             <section className="panel chart-panel" aria-labelledby="issuance-title">
               <header className="panel-head">
-                <h3 id="issuance-title">Emisiones por {data.range.granularity === "day" ? "día" : data.range.granularity === "week" ? "semana" : "mes"}</h3>
+                <h3 id="issuance-title">
+                  Emisiones por {data.range.granularity === "day" ? "día" : data.range.granularity === "week" ? "semana" : "mes"}
+                </h3>
                 <span className="muted small">
-                  {data.range.from ? `${formatDate(data.range.from)} – ${formatDate(data.range.to)}` : `Hasta ${formatDate(data.range.to)}`}
+                  {data.range.from
+                    ? `${formatDate(data.range.from)} – ${formatDate(data.range.to)}`
+                    : `Hasta ${formatDate(data.range.to)}`}
                 </span>
               </header>
               {data.period.issued === 0 ? (
-                <EmptyState icon="dashboard" title="Sin emisiones en este periodo" action={
-                  <button type="button" className="button ghost small" onClick={() => setRange("all")}>Ver todo el historial</button>
-                }>
+                <EmptyState
+                  icon="dashboard"
+                  title="Sin emisiones en este periodo"
+                  action={
+                    <button type="button" className="button ghost small" onClick={() => setRange("all")}>
+                      Ver todo el historial
+                    </button>
+                  }
+                >
                   Ninguna credencial tiene fecha de emisión dentro del rango elegido.
                 </EmptyState>
               ) : (
@@ -124,7 +137,8 @@ export function DashboardPage({ onOpenCertificate, onIssue }: { onOpenCertificat
               <StatusDistribution active={data.period.active} pending={data.period.pending} revoked={data.period.revoked} />
               {data.period.onChain > 0 && (
                 <p className="muted small chain-note">
-                  <Icon name="chain" size={14} /> {data.period.onChain} anclada{data.period.onChain === 1 ? "" : "s"} en blockchain
+                  <Icon name="chain" size={14} /> {data.period.onChain} anclada{data.period.onChain === 1 ? "" : "s"} en
+                  blockchain
                 </p>
               )}
             </section>
@@ -146,11 +160,15 @@ export function DashboardPage({ onOpenCertificate, onIssue }: { onOpenCertificat
                 <span className="muted small">Eventos de auditoría</span>
               </header>
               {data.activity.length === 0 ? (
-                <EmptyState icon="clock" title="Sin eventos en este periodo" action={
-                  <button type="button" className="button primary small" onClick={onIssue}>
-                    <Icon name="issue" size={16} /> Emitir certificado
-                  </button>
-                }>
+                <EmptyState
+                  icon="clock"
+                  title="Sin eventos en este periodo"
+                  action={
+                    <button type="button" className="button primary small" onClick={onIssue}>
+                      <Icon name="issue" size={16} /> Emitir certificado
+                    </button>
+                  }
+                >
                   Las emisiones, revocaciones y cambios de estado aparecerán aquí con su fecha real.
                 </EmptyState>
               ) : (

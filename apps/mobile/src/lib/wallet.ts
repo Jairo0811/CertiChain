@@ -83,7 +83,5 @@ export function normalizeWallet(value: unknown): WalletCredential[] {
     normalized.push(credential);
   }
 
-  return normalized
-    .sort((a, b) => Date.parse(b.verifiedAt) - Date.parse(a.verifiedAt))
-    .slice(0, WALLET_LIMIT);
+  return normalized.sort((a, b) => Date.parse(b.verifiedAt) - Date.parse(a.verifiedAt)).slice(0, WALLET_LIMIT);
 }

@@ -10,13 +10,7 @@ const connectionCopy: Record<ConnectionState, string> = {
   unconfigured: "API sin configurar",
 };
 
-export function BrandHeader({
-  logo,
-  connection,
-}: {
-  logo: ImageSourcePropType;
-  connection: ConnectionState;
-}) {
+export function BrandHeader({ logo, connection }: { logo: ImageSourcePropType; connection: ConnectionState }) {
   return (
     <View style={styles.header}>
       <View style={styles.brandBlock}>

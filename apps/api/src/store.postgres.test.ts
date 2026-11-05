@@ -118,7 +118,10 @@ describe.skipIf(!databaseUrl)("PostgresStore (real PostgreSQL)", () => {
     const token = await login(app);
     const auth = { Authorization: `Bearer ${token}` };
 
-    const issued = await request(app).post("/api/certificates").set(auth).send({ ...validIssuePayload, studentWallet: HOLDER_WALLET });
+    const issued = await request(app)
+      .post("/api/certificates")
+      .set(auth)
+      .send({ ...validIssuePayload, studentWallet: HOLDER_WALLET });
     expect(issued.status).toBe(201);
     const stored = await store.getCertificate(issued.body.blockchainId);
     expect(stored).toMatchObject({ id: issued.body.id, chainSyncStatus: "anchored", status: "active" });

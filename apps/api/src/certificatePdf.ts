@@ -30,9 +30,7 @@ const BRAND_DISPLAY_MAX_WIDTH = 230;
 const BRAND_DISPLAY_MAX_HEIGHT = 66;
 const HEADER_BACKGROUND: readonly [number, number, number] = [7, 14, 36];
 const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
-const ORIGINAL_BRAND_PNG = readFileSync(
-  new URL("../../web/public/branding/certichain-logo.png", import.meta.url),
-);
+const ORIGINAL_BRAND_PNG = readFileSync(new URL("../../web/public/branding/certichain-logo.png", import.meta.url));
 
 function normalizePdfText(value: string): string {
   return value
@@ -47,23 +45,14 @@ function normalizePdfText(value: string): string {
 }
 
 function escapePdfText(value: string): string {
-  return normalizePdfText(value)
-    .replace(/\\/g, "\\\\")
-    .replace(/\(/g, "\\(")
-    .replace(/\)/g, "\\)");
+  return normalizePdfText(value).replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
 }
 
 function estimateTextWidth(value: string, fontSize: number, bold = false): number {
   return normalizePdfText(value).length * fontSize * (bold ? 0.56 : 0.5);
 }
 
-function fitFontSize(
-  value: string,
-  maxWidth: number,
-  maxSize: number,
-  minSize: number,
-  bold = false,
-): number {
+function fitFontSize(value: string, maxWidth: number, maxSize: number, minSize: number, bold = false): number {
   let size = maxSize;
   while (size > minSize && estimateTextWidth(value, size, bold) > maxWidth) size -= 0.5;
   return size;
@@ -111,30 +100,11 @@ function pushRect(
   if (options.stroke) {
     commands.push(`${options.stroke.join(" ")} RG`, `${options.lineWidth ?? 1} w`);
   }
-  commands.push(
-    `${x} ${y} ${width} ${height} re ${
-      options.fill && options.stroke ? "B" : options.fill ? "f" : "S"
-    }`,
-    "Q",
-  );
+  commands.push(`${x} ${y} ${width} ${height} re ${options.fill && options.stroke ? "B" : options.fill ? "f" : "S"}`, "Q");
 }
 
-function pushLine(
-  commands: string[],
-  x1: number,
-  y1: number,
-  x2: number,
-  y2: number,
-  color: Rgb,
-  lineWidth = 1,
-): void {
-  commands.push(
-    "q",
-    `${color.join(" ")} RG`,
-    `${lineWidth} w`,
-    `${x1} ${y1} m ${x2} ${y2} l S`,
-    "Q",
-  );
+function pushLine(commands: string[], x1: number, y1: number, x2: number, y2: number, color: Rgb, lineWidth = 1): void {
+  commands.push("q", `${color.join(" ")} RG`, `${lineWidth} w`, `${x1} ${y1} m ${x2} ${y2} l S`, "Q");
 }
 
 function paethPredictor(left: number, up: number, upperLeft: number): number {
@@ -213,12 +183,9 @@ function decodeOriginalBrandPng(png: Buffer): {
 
     for (let column = 0; column < stride; column += 1) {
       const raw = inflated[sourceOffset + column] ?? 0;
-      const left = column >= bytesPerPixel ? pixels[rowOffset + column - bytesPerPixel] ?? 0 : 0;
-      const up = row > 0 ? pixels[previousRowOffset + column] ?? 0 : 0;
-      const upperLeft =
-        row > 0 && column >= bytesPerPixel
-          ? pixels[previousRowOffset + column - bytesPerPixel] ?? 0
-          : 0;
+      const left = column >= bytesPerPixel ? (pixels[rowOffset + column - bytesPerPixel] ?? 0) : 0;
+      const up = row > 0 ? (pixels[previousRowOffset + column] ?? 0) : 0;
+      const upperLeft = row > 0 && column >= bytesPerPixel ? (pixels[previousRowOffset + column - bytesPerPixel] ?? 0) : 0;
 
       let value: number;
       switch (filterType) {
@@ -253,7 +220,7 @@ function decodeOriginalBrandPng(png: Buffer): {
     rgba[targetIndex] = pixels[sourceIndex] ?? 0;
     rgba[targetIndex + 1] = pixels[sourceIndex + 1] ?? 0;
     rgba[targetIndex + 2] = pixels[sourceIndex + 2] ?? 0;
-    rgba[targetIndex + 3] = colorType === 6 ? pixels[sourceIndex + 3] ?? 255 : 255;
+    rgba[targetIndex + 3] = colorType === 6 ? (pixels[sourceIndex + 3] ?? 255) : 255;
   }
 
   return { width, height, rgba };
@@ -309,10 +276,7 @@ function buildOriginalBrandRaster(): RasterBrand {
     }
   }
 
-  const displayScale = Math.min(
-    BRAND_DISPLAY_MAX_WIDTH / bounds.width,
-    BRAND_DISPLAY_MAX_HEIGHT / bounds.height,
-  );
+  const displayScale = Math.min(BRAND_DISPLAY_MAX_WIDTH / bounds.width, BRAND_DISPLAY_MAX_HEIGHT / bounds.height);
 
   return {
     width: bounds.width,
@@ -397,14 +361,8 @@ function buildPdf(commands: string[]): Buffer {
     content,
     Buffer.from("endstream", "latin1"),
   ]);
-  objects[5] = Buffer.from(
-    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>",
-    "latin1",
-  );
-  objects[6] = Buffer.from(
-    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>",
-    "latin1",
-  );
+  objects[5] = Buffer.from("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>", "latin1");
+  objects[6] = Buffer.from("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>", "latin1");
   objects[7] = Buffer.concat([
     Buffer.from(
       `<< /Type /XObject /Subtype /Image /Width ${ORIGINAL_BRAND_RASTER.width} /Height ${ORIGINAL_BRAND_RASTER.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /FlateDecode /Length ${ORIGINAL_BRAND_RASTER.data.length} >>\nstream\n`,
@@ -435,14 +393,7 @@ function buildPdf(commands: string[]): Buffer {
   for (let index = 1; index < objects.length; index += 1) {
     xrefLines.push(`${String(offsets[index]).padStart(10, "0")} 00000 n `);
   }
-  xrefLines.push(
-    "trailer",
-    `<< /Size ${objects.length} /Root 1 0 R >>`,
-    "startxref",
-    String(xrefOffset),
-    "%%EOF",
-    "",
-  );
+  xrefLines.push("trailer", `<< /Size ${objects.length} /Root 1 0 R >>`, "startxref", String(xrefOffset), "%%EOF", "");
   chunks.push(Buffer.from(xrefLines.join("\n"), "latin1"));
 
   return Buffer.concat(chunks);
@@ -494,14 +445,7 @@ export function buildCertificatePdf(certificate: CertificatePdfInput | Certifica
     bold: true,
     color: [0.035, 0.06, 0.13],
   });
-  pushText(
-    commands,
-    `Fecha de emisión · ${formatIssuedDate(certificate.issuedAt)}`,
-    56,
-    219,
-    9.5,
-    { color: [0.39, 0.45, 0.57] },
-  );
+  pushText(commands, `Fecha de emisión · ${formatIssuedDate(certificate.issuedAt)}`, 56, 219, 9.5, { color: [0.39, 0.45, 0.57] });
 
   pushRect(commands, 618, 350, 170, 90, {
     fill: [0.955, 0.968, 1],
@@ -565,14 +509,7 @@ export function buildCertificatePdf(certificate: CertificatePdfInput | Certifica
   pushQrCode(commands, verificationUrl, 690, 88, 82);
 
   pushLine(commands, 55, 50, 788, 50, [0.84, 0.87, 0.94], 0.7);
-  pushText(
-    commands,
-    "Estado actual: consultar el QR o el Verificador CertiChain.",
-    55,
-    30,
-    8.2,
-    { color: [0.36, 0.42, 0.54] },
-  );
+  pushText(commands, "Estado actual: consultar el QR o el Verificador CertiChain.", 55, 30, 8.2, { color: [0.36, 0.42, 0.54] });
   pushText(commands, "Verify once. Trust anywhere.", PAGE_WIDTH - 54, 30, 8.2, {
     bold: true,
     color: [0.37, 0.19, 0.82],

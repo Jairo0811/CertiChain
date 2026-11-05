@@ -25,7 +25,9 @@ export function evidenceMode(certificate: Pick<CertificateRecord, "blockchainId"
  * RPC is configured in the current environment. It can only move forward through on-chain
  * revocation; manual edits and reactivation are forbidden.
  */
-export function statusManagedByBlockchain(certificate: Pick<CertificateRecord, "blockchainId" | "chainSyncStatus" | "issuerEmail">): boolean {
+export function statusManagedByBlockchain(
+  certificate: Pick<CertificateRecord, "blockchainId" | "chainSyncStatus" | "issuerEmail">,
+): boolean {
   return (
     evidenceMode(certificate) === "on-chain" ||
     certificate.chainSyncStatus === "submitting" ||

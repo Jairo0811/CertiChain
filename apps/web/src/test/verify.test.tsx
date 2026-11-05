@@ -46,7 +46,10 @@ describe("public verifier", () => {
     const { calls } = mockApi({});
     render(<PublicVerifyPage />);
     await userEvent.type(screen.getByLabelText("Identificador de la credencial"), "cert-1");
-    await userEvent.upload(screen.getByLabelText(/PDF del certificado/), new File(["MZ binary"], "virus.pdf", { type: "application/pdf" }));
+    await userEvent.upload(
+      screen.getByLabelText(/PDF del certificado/),
+      new File(["MZ binary"], "virus.pdf", { type: "application/pdf" }),
+    );
     await userEvent.click(screen.getByRole("button", { name: "Verificar credencial y PDF" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("no es un PDF válido");
     expect(calls).toHaveLength(0);
@@ -83,7 +86,10 @@ describe("public verifier", () => {
     const hash = `0x${"ab".repeat(32)}`;
     window.history.replaceState({}, "", `/verify?id=DEMO-0001&hash=${hash}`);
     const { calls } = mockApi({
-      "GET /api/verify/:id": verification({ evidenceMode: "demo" }, { integrity: "match", hashSource: "verifier", hashMatches: true, blockchainStatus: "demo" }),
+      "GET /api/verify/:id": verification(
+        { evidenceMode: "demo" },
+        { integrity: "match", hashSource: "verifier", hashMatches: true, blockchainStatus: "demo" },
+      ),
     });
     render(<PublicVerifyPage />);
     expect(await screen.findByText("SHA-256 del enlace")).toBeInTheDocument();

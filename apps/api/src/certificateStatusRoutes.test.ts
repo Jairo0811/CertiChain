@@ -18,15 +18,12 @@ describe("certificate status management", () => {
     registerCertificateStatusRoutes(app);
     const token = await loginToken(app);
 
-    const issued = await request(app)
-      .post("/api/certificates")
-      .set("Authorization", `Bearer ${token}`)
-      .send({
-        studentName: "Status Demo Student",
-        title: "Status Transition Credential",
-        institution: "CertiChain Test Academy",
-        issuedAt: "2026-09-07",
-      });
+    const issued = await request(app).post("/api/certificates").set("Authorization", `Bearer ${token}`).send({
+      studentName: "Status Demo Student",
+      title: "Status Transition Credential",
+      institution: "CertiChain Test Academy",
+      issuedAt: "2026-09-07",
+    });
 
     expect(issued.status).toBe(201);
     expect(issued.body.status).toBe("pending");
@@ -78,9 +75,7 @@ describe("certificate status management", () => {
     const app = createApp();
     registerCertificateStatusRoutes(app);
 
-    const response = await request(app)
-      .post("/api/certificates/not-authorized/status")
-      .send({ status: "active" });
+    const response = await request(app).post("/api/certificates/not-authorized/status").send({ status: "active" });
 
     expect(response.status).toBe(401);
   });

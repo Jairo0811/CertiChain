@@ -32,7 +32,11 @@ export function App() {
     configureApiClient({
       getToken: () => loadSession()?.token ?? null,
       onSessionInvalid: (code) =>
-        endSession(code === "session_expired" ? "Tu sesión expiró. Inicia sesión de nuevo para continuar." : "Tu sesión ya no es válida. Inicia sesión de nuevo."),
+        endSession(
+          code === "session_expired"
+            ? "Tu sesión expiró. Inicia sesión de nuevo para continuar."
+            : "Tu sesión ya no es válida. Inicia sesión de nuevo.",
+        ),
     });
   }, [endSession]);
 
@@ -40,7 +44,10 @@ export function App() {
   useEffect(() => {
     if (!session) return;
     const remaining = Date.parse(session.expiresAt) - Date.now();
-    const timer = window.setTimeout(() => endSession("Tu sesión expiró. Inicia sesión de nuevo para continuar."), Math.max(remaining, 0));
+    const timer = window.setTimeout(
+      () => endSession("Tu sesión expiró. Inicia sesión de nuevo para continuar."),
+      Math.max(remaining, 0),
+    );
     return () => window.clearTimeout(timer);
   }, [session, endSession]);
 
@@ -86,7 +93,12 @@ export function App() {
       >
         {route === "dashboard" && <DashboardPage onOpenCertificate={openFromDashboard} onIssue={() => navigate("issue")} />}
         {route === "certificates" && (
-          <CertificatesPage user={session.user} openId={openCertificate} onOpenChange={setOpenCertificate} onIssue={() => navigate("issue")} />
+          <CertificatesPage
+            user={session.user}
+            openId={openCertificate}
+            onOpenChange={setOpenCertificate}
+            onIssue={() => navigate("issue")}
+          />
         )}
         {route === "issue" && <IssuePage onOpenCertificate={openFromDashboard} />}
       </AppShell>

@@ -14,7 +14,9 @@
   line-height: 1;
   text-decoration: none;
   white-space: nowrap;
-  transition: background-color 120ms var(--ease), border-color 120ms var(--ease);
+  transition:
+    background-color 120ms var(--ease),
+    border-color 120ms var(--ease);
 }
 .button.small {
   min-height: 32px;

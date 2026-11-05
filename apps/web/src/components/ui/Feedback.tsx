@@ -5,7 +5,17 @@ export function Spinner({ label = "Cargando" }: { label?: string }) {
   return <span className="spinner" role="progressbar" aria-label={label} />;
 }
 
-export function EmptyState({ icon = "certificates", title, children, action }: { icon?: IconName; title: string; children?: ReactNode; action?: ReactNode }) {
+export function EmptyState({
+  icon = "certificates",
+  title,
+  children,
+  action,
+}: {
+  icon?: IconName;
+  title: string;
+  children?: ReactNode;
+  action?: ReactNode;
+}) {
   return (
     <div className="empty-state">
       <span className="empty-icon">

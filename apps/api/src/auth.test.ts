@@ -7,8 +7,12 @@ import { login, testApp, validIssuePayload } from "./test/helpers.js";
 describe("authentication and authorization", () => {
   it("returns the same generic error for unknown email and wrong password", async () => {
     const { app } = testApp();
-    const unknown = await request(app).post("/api/auth/login").send({ email: "nobody@certichain.local", password: "CertiChain123!" });
-    const wrong = await request(app).post("/api/auth/login").send({ email: "admin@certichain.local", password: "not-the-password" });
+    const unknown = await request(app)
+      .post("/api/auth/login")
+      .send({ email: "nobody@certichain.local", password: "CertiChain123!" });
+    const wrong = await request(app)
+      .post("/api/auth/login")
+      .send({ email: "admin@certichain.local", password: "not-the-password" });
     expect(unknown.status).toBe(401);
     expect(wrong.status).toBe(401);
     expect(unknown.body.error).toBe(wrong.body.error);
@@ -17,7 +21,9 @@ describe("authentication and authorization", () => {
 
   it("issues a token with an explicit expiry and exposes the session", async () => {
     const { app } = testApp();
-    const response = await request(app).post("/api/auth/login").send({ email: "ADMIN@certichain.local", password: "CertiChain123!" });
+    const response = await request(app)
+      .post("/api/auth/login")
+      .send({ email: "ADMIN@certichain.local", password: "CertiChain123!" });
     expect(response.status).toBe(200);
     expect(Date.parse(response.body.expiresAt)).toBeGreaterThan(Date.now());
     expect(response.body.user).toMatchObject({ email: "admin@certichain.local", role: "admin" });

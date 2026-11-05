@@ -2,7 +2,12 @@ import type { AuditAction, BlockchainCheck, Certificate, CertificateStatus, Evid
 
 const dateFormatter = new Intl.DateTimeFormat("es-DO", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" });
 const longDateFormatter = new Intl.DateTimeFormat("es-DO", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
-const dateTimeFormatter = new Intl.DateTimeFormat("es-DO", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+const dateTimeFormatter = new Intl.DateTimeFormat("es-DO", {
+  day: "2-digit",
+  month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+});
 
 /** Academic dates (YYYY-MM-DD) are calendar dates; format them in UTC to avoid off-by-one days. */
 export function formatDate(value: string, long = false): string {
@@ -53,7 +58,10 @@ export const MODE_DESCRIPTION: Record<EvidenceMode, string> = {
   demo: "Dataset ilustrativo de portafolio. Su identificador no corresponde a ninguna transacción real.",
 };
 
-export const OUTCOME_COPY: Record<VerificationOutcome, { title: string; body: string; tone: "success" | "warning" | "danger" | "neutral" }> = {
+export const OUTCOME_COPY: Record<
+  VerificationOutcome,
+  { title: string; body: string; tone: "success" | "warning" | "danger" | "neutral" }
+> = {
   valid: {
     title: "Credencial vigente",
     body: "El registro existe y está vigente, y todas las comprobaciones realizadas fueron satisfactorias.",

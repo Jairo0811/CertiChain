@@ -1,8 +1,8 @@
 export interface AsyncState<T> {
-    data: T | undefined;
-    error: unknown;
-    loading: boolean;
-    reload: () => void;
+  data: T | undefined;
+  error: unknown;
+  loading: boolean;
+  reload: () => void;
 }
 /**
  * Runs an abortable loader whenever its dependencies change. Stale responses are discarded, so a

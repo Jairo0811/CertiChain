@@ -51,7 +51,12 @@ describe("certificate issuance", () => {
       `/verify?id=${created.id}&autoverify=1`,
     );
     const post = calls.find((call) => call.method === "POST");
-    expect(post?.body).toEqual({ studentName: "Ana Pérez", title: "Ingeniería de Software", institution: "UNAPEC", issuedAt: "2026-09-01" });
+    expect(post?.body).toEqual({
+      studentName: "Ana Pérez",
+      title: "Ingeniería de Software",
+      institution: "UNAPEC",
+      issuedAt: "2026-09-01",
+    });
   });
 
   it("requires the holder wallet in blockchain mode and maps server checksum errors to the field", async () => {
@@ -59,7 +64,14 @@ describe("certificate issuance", () => {
     mockApi({
       "GET /health": { status: "ok", persistence: "postgres", storage: "ipfs", blockchainConfigured: true },
       "POST /api/certificates": () =>
-        jsonResponse({ error: "Invalid certificate payload", code: "validation_failed", details: { fieldErrors: { studentWallet: ["bad"] } } }, 400),
+        jsonResponse(
+          {
+            error: "Invalid certificate payload",
+            code: "validation_failed",
+            details: { fieldErrors: { studentWallet: ["bad"] } },
+          },
+          400,
+        ),
     });
     renderIssue();
     expect(await screen.findByText(/Modo blockchain/)).toBeInTheDocument();

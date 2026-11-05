@@ -34,7 +34,8 @@ export function validateIssue(values: Values, walletRequired: boolean): Partial<
   else if (values.issuedAt > today()) errors.issuedAt = "La fecha de emisión no puede ser futura.";
   const wallet = values.studentWallet.trim();
   if (walletRequired && !wallet) errors.studentWallet = "En modo blockchain la wallet del titular es obligatoria.";
-  else if (wallet && !/^0x[a-fA-F0-9]{40}$/.test(wallet)) errors.studentWallet = "Debe ser una dirección EVM: 0x seguido de 40 caracteres hexadecimales.";
+  else if (wallet && !/^0x[a-fA-F0-9]{40}$/.test(wallet))
+    errors.studentWallet = "Debe ser una dirección EVM: 0x seguido de 40 caracteres hexadecimales.";
   else if (wallet && /^0x0{40}$/.test(wallet)) errors.studentWallet = "La dirección cero no puede recibir credenciales.";
   return errors;
 }
@@ -126,7 +127,8 @@ export function IssuePage({ onOpenCertificate }: { onOpenCertificate: (id: strin
   }
 
   if (issued) {
-    const pendingChain = issued.chainSyncStatus === "failed" || issued.chainSyncStatus === "submitted" || issued.chainSyncStatus === "submitting";
+    const pendingChain =
+      issued.chainSyncStatus === "failed" || issued.chainSyncStatus === "submitted" || issued.chainSyncStatus === "submitting";
     return (
       <div className="page narrow">
         <section className="panel issued-panel" aria-labelledby="issued-title" tabIndex={-1} ref={(node) => node?.focus()}>
@@ -155,8 +157,8 @@ export function IssuePage({ onOpenCertificate }: { onOpenCertificate: (id: strin
           </dl>
           {pendingChain && (
             <p className="callout warning">
-              La credencial quedó guardada como pendiente. No se reenviará ninguna transacción por su cuenta: sincronízala desde su detalle
-              cuando la red esté disponible.
+              La credencial quedó guardada como pendiente. No se reenviará ninguna transacción por su cuenta: sincronízala desde
+              su detalle cuando la red esté disponible.
             </p>
           )}
           {issued.status === "pending" && !pendingChain && (
@@ -205,13 +207,13 @@ export function IssuePage({ onOpenCertificate }: { onOpenCertificate: (id: strin
           </>
         ) : onChain ? (
           <>
-            <Icon name="chain" size={16} /> Modo blockchain: la credencial se anclará en el contrato CertificateRegistry y se activará al
-            confirmarse la transacción.
+            <Icon name="chain" size={16} /> Modo blockchain: la credencial se anclará en el contrato CertificateRegistry y se
+            activará al confirmarse la transacción.
           </>
         ) : (
           <>
-            <Icon name="database" size={16} /> Modo off-chain: la credencial se registra solo en CertiChain y queda pendiente hasta que un
-            administrador la active.
+            <Icon name="database" size={16} /> Modo off-chain: la credencial se registra solo en CertiChain y queda pendiente
+            hasta que un administrador la active.
           </>
         )}
       </div>
@@ -220,7 +222,9 @@ export function IssuePage({ onOpenCertificate }: { onOpenCertificate: (id: strin
         <fieldset disabled={busy}>
           <legend className="section-title">Titular</legend>
           <Field label="Nombre completo" error={errorFor("studentName")}>
-            {(field) => <input {...field} {...bind("studentName")} autoComplete="off" maxLength={160} placeholder="Ana María Pérez Gómez" />}
+            {(field) => (
+              <input {...field} {...bind("studentName")} autoComplete="off" maxLength={160} placeholder="Ana María Pérez Gómez" />
+            )}
           </Field>
           <Field
             label="Wallet del titular"
@@ -233,7 +237,15 @@ export function IssuePage({ onOpenCertificate }: { onOpenCertificate: (id: strin
             }
           >
             {(field) => (
-              <input {...field} {...bind("studentWallet")} autoComplete="off" spellCheck={false} className="mono" maxLength={42} placeholder="0x…" />
+              <input
+                {...field}
+                {...bind("studentWallet")}
+                autoComplete="off"
+                spellCheck={false}
+                className="mono"
+                maxLength={42}
+                placeholder="0x…"
+              />
             )}
           </Field>
         </fieldset>
@@ -241,11 +253,21 @@ export function IssuePage({ onOpenCertificate }: { onOpenCertificate: (id: strin
         <fieldset disabled={busy}>
           <legend className="section-title">Credencial</legend>
           <Field label="Título académico" error={errorFor("title")}>
-            {(field) => <input {...field} {...bind("title")} autoComplete="off" maxLength={200} placeholder="Ingeniería de Software" />}
+            {(field) => (
+              <input {...field} {...bind("title")} autoComplete="off" maxLength={200} placeholder="Ingeniería de Software" />
+            )}
           </Field>
           <div className="field-grid">
             <Field label="Institución emisora" error={errorFor("institution")}>
-              {(field) => <input {...field} {...bind("institution")} autoComplete="organization" maxLength={200} placeholder="Universidad APEC (UNAPEC)" />}
+              {(field) => (
+                <input
+                  {...field}
+                  {...bind("institution")}
+                  autoComplete="organization"
+                  maxLength={200}
+                  placeholder="Universidad APEC (UNAPEC)"
+                />
+              )}
             </Field>
             <Field label="Fecha de emisión" error={errorFor("issuedAt")}>
               {(field) => <input {...field} {...bind("issuedAt")} type="date" max={today()} />}

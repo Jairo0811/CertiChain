@@ -4,7 +4,13 @@ import type { CertificateRecord } from "./domain.js";
 import { buildDashboard } from "./services/dashboardService.js";
 import { fakeRegistry, isolatedStore, login, testApp, validIssuePayload } from "./test/helpers.js";
 
-function record(id: string, issuedAt: string, status: CertificateRecord["status"], institution = "UNAPEC", revokedAt?: string): CertificateRecord {
+function record(
+  id: string,
+  issuedAt: string,
+  status: CertificateRecord["status"],
+  institution = "UNAPEC",
+  revokedAt?: string,
+): CertificateRecord {
   return {
     id,
     studentName: `Student ${id}`,
@@ -74,7 +80,10 @@ describe("dashboard aggregation", () => {
     const { app } = testApp();
     const token = await login(app);
     const auth = { Authorization: `Bearer ${token}` };
-    const { body } = await request(app).post("/api/certificates").set(auth).send({ ...validIssuePayload, issuedAt: new Date().toISOString().slice(0, 10) });
+    const { body } = await request(app)
+      .post("/api/certificates")
+      .set(auth)
+      .send({ ...validIssuePayload, issuedAt: new Date().toISOString().slice(0, 10) });
     await request(app).post(`/api/certificates/${body.id}/revoke`).set(auth);
 
     const dashboard = await request(app).get("/api/dashboard?range=30").set(auth);

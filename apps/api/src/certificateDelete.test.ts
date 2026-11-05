@@ -16,23 +16,18 @@ describe("certificate cleanup", () => {
     const app = createApp();
     const token = await loginToken();
 
-    const issued = await request(app)
-      .post("/api/certificates")
-      .set("Authorization", `Bearer ${token}`)
-      .send({
-        studentName: "Cleanup Test Student",
-        title: "Temporary Test Credential",
-        institution: "CertiChain Test Academy",
-        issuedAt: "2026-09-07",
-      });
+    const issued = await request(app).post("/api/certificates").set("Authorization", `Bearer ${token}`).send({
+      studentName: "Cleanup Test Student",
+      title: "Temporary Test Credential",
+      institution: "CertiChain Test Academy",
+      issuedAt: "2026-09-07",
+    });
 
     expect(issued.status).toBe(201);
     expect(issued.body.status).toBe("pending");
     expect(issued.body.documentAvailable).toBe(true);
 
-    const removed = await request(app)
-      .delete(`/api/certificates/${issued.body.id}`)
-      .set("Authorization", `Bearer ${token}`);
+    const removed = await request(app).delete(`/api/certificates/${issued.body.id}`).set("Authorization", `Bearer ${token}`);
 
     expect(removed.status).toBe(200);
     expect(removed.body).toMatchObject({

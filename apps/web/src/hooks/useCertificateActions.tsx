@@ -64,11 +64,17 @@ export function useCertificateActions(onChanged: (certificate?: Certificate, rem
       if (pending.kind === "revoke") {
         const updated = await certificateService.revoke(pending.certificate.id, reason);
         onChanged(updated);
-        toast(updated.evidenceMode === "on-chain" ? "Credencial revocada en blockchain y en el registro." : "Credencial revocada.");
+        toast(
+          updated.evidenceMode === "on-chain" ? "Credencial revocada en blockchain y en el registro." : "Credencial revocada.",
+        );
       } else {
         const result = await certificateService.remove(pending.certificate.id);
         onChanged(undefined, pending.certificate.id);
-        toast(result.evidenceDeleted ? "Credencial de prueba y su PDF cifrado eliminados." : "Credencial de prueba eliminada del registro.");
+        toast(
+          result.evidenceDeleted
+            ? "Credencial de prueba y su PDF cifrado eliminados."
+            : "Credencial de prueba eliminada del registro.",
+        );
       }
       setPending(null);
     } catch (reason) {
@@ -82,10 +88,18 @@ export function useCertificateActions(onChanged: (certificate?: Certificate, rem
     <ConfirmDialog
       title={pending.kind === "revoke" ? "Revocar credencial" : "Eliminar credencial de prueba"}
       confirmLabel={pending.kind === "revoke" ? "Revocar credencial" : "Eliminar definitivamente"}
-      requireReason={pending.kind === "revoke" ? (pending.certificate.evidenceMode === "on-chain" ? "required" : "optional") : undefined}
+      requireReason={
+        pending.kind === "revoke" ? (pending.certificate.evidenceMode === "on-chain" ? "required" : "optional") : undefined
+      }
       reasonLabel="Motivo de la revocación"
       reasonHint="Queda registrado en la auditoría."
-      confirmWord={pending.kind === "delete" || pending.certificate.evidenceMode === "on-chain" ? (pending.kind === "delete" ? "ELIMINAR" : "REVOCAR") : undefined}
+      confirmWord={
+        pending.kind === "delete" || pending.certificate.evidenceMode === "on-chain"
+          ? pending.kind === "delete"
+            ? "ELIMINAR"
+            : "REVOCAR"
+          : undefined
+      }
       busy={busy}
       error={error}
       onCancel={() => {
@@ -101,19 +115,20 @@ export function useCertificateActions(onChanged: (certificate?: Certificate, rem
       </p>
       {pending.kind === "revoke" && pending.certificate.evidenceMode === "on-chain" && (
         <p className="callout danger">
-          Se enviará una transacción al contrato CertificateRegistry. La revocación on-chain es <strong>permanente</strong>: no podrá
-          reactivarse ni eliminarse.
+          Se enviará una transacción al contrato CertificateRegistry. La revocación on-chain es <strong>permanente</strong>: no
+          podrá reactivarse ni eliminarse.
         </p>
       )}
       {pending.kind === "revoke" && pending.certificate.evidenceMode !== "on-chain" && (
         <p className="callout warning">
-          Credencial {pending.certificate.evidenceMode === "demo" ? "demo" : "off-chain"}: la revocación solo afecta al registro de
-          CertiChain. Los verificadores la verán como revocada de inmediato.
+          Credencial {pending.certificate.evidenceMode === "demo" ? "demo" : "off-chain"}: la revocación solo afecta al registro
+          de CertiChain. Los verificadores la verán como revocada de inmediato.
         </p>
       )}
       {pending.kind === "delete" && (
         <p className="callout danger">
-          Pensado para limpiar datos de prueba. Se borra el registro {pending.certificate.documentAvailable ? "y su PDF cifrado local " : ""}
+          Pensado para limpiar datos de prueba. Se borra el registro{" "}
+          {pending.certificate.documentAvailable ? "y su PDF cifrado local " : ""}
           de forma irreversible; la auditoría conserva el evento de eliminación.
         </p>
       )}
@@ -135,7 +150,10 @@ export function canDelete(certificate: Certificate): boolean {
 }
 
 export function canGeneratePdf(certificate: Certificate): boolean {
-  return certificate.documentAvailable || (certificate.status === "pending" && !certificate.blockchainId && !certificate.statusManagedByBlockchain);
+  return (
+    certificate.documentAvailable ||
+    (certificate.status === "pending" && !certificate.blockchainId && !certificate.statusManagedByBlockchain)
+  );
 }
 
 export function needsAnchoring(certificate: Certificate): boolean {

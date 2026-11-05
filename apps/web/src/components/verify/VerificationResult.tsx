@@ -1,4 +1,12 @@
-import { BLOCKCHAIN_CHECK_COPY, formatDate, formatDateTime, MODE_DESCRIPTION, OUTCOME_COPY, shortHash, STATUS_LABEL } from "../../lib/format";
+import {
+  BLOCKCHAIN_CHECK_COPY,
+  formatDate,
+  formatDateTime,
+  MODE_DESCRIPTION,
+  OUTCOME_COPY,
+  shortHash,
+  STATUS_LABEL,
+} from "../../lib/format";
 import type { Verification } from "../../types";
 import { ModeBadge } from "../ui/Badges";
 import { Icon } from "../ui/Icon";
@@ -31,7 +39,8 @@ export type HashSource = { kind: "file"; name: string } | { kind: "link" };
 
 export function buildChecks(result: Verification, source?: HashSource): Check[] {
   const { checks, certificate } = result;
-  const registryState: CheckState = checks.registryStatus === "active" ? "ok" : checks.registryStatus === "pending" ? "warn" : "fail";
+  const registryState: CheckState =
+    checks.registryStatus === "active" ? "ok" : checks.registryStatus === "pending" ? "warn" : "fail";
 
   const integrity: Check =
     checks.integrity === "not_evaluated"

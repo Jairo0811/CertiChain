@@ -48,7 +48,9 @@ describe("blockchain issuance consistency", () => {
 
     // RPC back online → retry anchors exactly once.
     registry.options.submit = "ok";
-    const retried = await request(app).post(`/api/certificates/${response.body.id}/anchor`).set("Authorization", `Bearer ${token}`);
+    const retried = await request(app)
+      .post(`/api/certificates/${response.body.id}/anchor`)
+      .set("Authorization", `Bearer ${token}`);
     expect(retried.status).toBe(200);
     expect(retried.body).toMatchObject({ status: "active", chainSyncStatus: "anchored" });
     expect(registry.calls.submit).toBe(2);
@@ -90,7 +92,9 @@ describe("blockchain issuance consistency", () => {
     const auth = { Authorization: `Bearer ${token}` };
     const { body } = await request(app).post("/api/certificates").set(auth).send(onChainPayload);
 
-    expect((await request(app).post(`/api/certificates/${body.id}/status`).set(auth).send({ status: "active" })).status).toBe(409);
+    expect((await request(app).post(`/api/certificates/${body.id}/status`).set(auth).send({ status: "active" })).status).toBe(
+      409,
+    );
     expect((await request(app).delete(`/api/certificates/${body.id}`).set(auth)).status).toBe(409);
     expect((await request(app).post(`/api/certificates/${body.id}/revoke`).set(auth)).status).toBe(409);
   });

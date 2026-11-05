@@ -36,7 +36,9 @@ describe("certificate listing", () => {
 
   it("searches across student, title, institution and identifiers, accent-insensitive", async () => {
     const { app, auth } = await demoApp();
-    const byStudent = await request(app).get(`/api/certificates?search=${encodeURIComponent("sofia ramirez")}`).set(auth);
+    const byStudent = await request(app)
+      .get(`/api/certificates?search=${encodeURIComponent("sofia ramirez")}`)
+      .set(auth);
     expect(byStudent.body.total).toBe(1);
     const byId = await request(app).get("/api/certificates?search=DEMO-0021").set(auth);
     expect(byId.body.total).toBe(1);

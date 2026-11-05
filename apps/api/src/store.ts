@@ -56,10 +56,7 @@ function auditLimit(query?: AuditQuery): number {
 
 /** Case and accent-insensitive normalization shared by in-memory search. */
 function normalizeSearch(value: string): string {
-  return value
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase();
+  return value.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 }
 
 export function matchesCertificateQuery(certificate: CertificateRecord, query: Pick<CertificateQuery, "search" | "status">) {
@@ -67,7 +64,9 @@ export function matchesCertificateQuery(certificate: CertificateRecord, query: P
   const term = normalizeSearch(query.search?.trim() ?? "");
   if (!term) return true;
   const haystack = normalizeSearch(
-    [certificate.studentName, certificate.title, certificate.institution, certificate.id, certificate.blockchainId ?? ""].join(" "),
+    [certificate.studentName, certificate.title, certificate.institution, certificate.id, certificate.blockchainId ?? ""].join(
+      " ",
+    ),
   );
   return haystack.includes(term);
 }
@@ -129,9 +128,7 @@ export class JsonStore implements Store {
 
   async getCertificate(id: string): Promise<CertificateRecord | undefined> {
     await this.init();
-    const found = this.state.certificates.find(
-      (certificate) => certificate.id === id || certificate.blockchainId === id,
-    );
+    const found = this.state.certificates.find((certificate) => certificate.id === id || certificate.blockchainId === id);
     return found ? { ...found } : undefined;
   }
 
@@ -146,9 +143,7 @@ export class JsonStore implements Store {
 
   async deleteCertificate(id: string): Promise<boolean> {
     await this.init();
-    const index = this.state.certificates.findIndex(
-      (certificate) => certificate.id === id || certificate.blockchainId === id,
-    );
+    const index = this.state.certificates.findIndex((certificate) => certificate.id === id || certificate.blockchainId === id);
     if (index < 0) return false;
     this.state.certificates.splice(index, 1);
     await this.persist();
@@ -300,7 +295,10 @@ export class PostgresStore implements Store {
     const column = SORT_COLUMNS[query.sort ?? "createdAt"];
     const direction = query.direction === "asc" ? "ASC" : "DESC";
 
-    const total = await this.pool.query<{ count: string }>(`SELECT COUNT(*)::text AS count FROM certificates ${whereSql}`, params);
+    const total = await this.pool.query<{ count: string }>(
+      `SELECT COUNT(*)::text AS count FROM certificates ${whereSql}`,
+      params,
+    );
     const pageParams = [...params, query.pageSize, (query.page - 1) * query.pageSize];
     const rows = await this.pool.query(
       `SELECT * FROM certificates ${whereSql}
@@ -314,9 +312,7 @@ export class PostgresStore implements Store {
 
   async getCertificate(id: string): Promise<CertificateRecord | undefined> {
     await this.init();
-    const result = await this.pool.query("SELECT * FROM certificates WHERE id::text = $1 OR blockchain_id = $1 LIMIT 1", [
-      id,
-    ]);
+    const result = await this.pool.query("SELECT * FROM certificates WHERE id::text = $1 OR blockchain_id = $1 LIMIT 1", [id]);
     return result.rows[0] ? mapCertificateRow(result.rows[0]) : undefined;
   }
 

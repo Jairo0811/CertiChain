@@ -30,10 +30,7 @@ export interface BlockchainVerificationResult {
 
 /** Result of looking up a previously submitted issuance transaction. */
 export type IssueReceiptLookup =
-  | { state: "confirmed"; certificateId: string }
-  | { state: "pending" }
-  | { state: "reverted" }
-  | { state: "not_found" };
+  { state: "confirmed"; certificateId: string } | { state: "pending" } | { state: "reverted" } | { state: "not_found" };
 
 export interface SubmittedTransaction {
   transactionHash: string;
@@ -77,9 +74,7 @@ class EthersCertificateRegistryClient implements CertificateRegistryClient {
   private readonly provider?: JsonRpcProvider;
 
   constructor() {
-    this.configured = Boolean(
-      config.BLOCKCHAIN_RPC_URL && config.CERTIFICATE_REGISTRY_ADDRESS && config.BLOCKCHAIN_PRIVATE_KEY,
-    );
+    this.configured = Boolean(config.BLOCKCHAIN_RPC_URL && config.CERTIFICATE_REGISTRY_ADDRESS && config.BLOCKCHAIN_PRIVATE_KEY);
 
     if (!this.configured) return;
 

@@ -21,7 +21,13 @@ function useWidth<T extends HTMLElement>(fallback: number) {
  * Issuance column chart. Plain SVG: three small charts don't justify a charting dependency.
  * A visually hidden table carries the same data for screen readers.
  */
-export function IssuanceChart({ series, granularity }: { series: DashboardSummary["series"]; granularity: DashboardSummary["range"]["granularity"] }) {
+export function IssuanceChart({
+  series,
+  granularity,
+}: {
+  series: DashboardSummary["series"];
+  granularity: DashboardSummary["range"]["granularity"];
+}) {
   const max = Math.max(1, ...series.map((bucket) => bucket.issued));
   const { ref, width } = useWidth<HTMLElement>(640);
   const height = width < 480 ? 160 : 200;
@@ -36,7 +42,13 @@ export function IssuanceChart({ series, granularity }: { series: DashboardSummar
 
   return (
     <figure className="chart" ref={ref}>
-      <svg width={width} height={height + 28} viewBox={`0 0 ${width} ${height + 28}`} role="img" aria-label="Emisiones por periodo">
+      <svg
+        width={width}
+        height={height + 28}
+        viewBox={`0 0 ${width} ${height + 28}`}
+        role="img"
+        aria-label="Emisiones por periodo"
+      >
         {ticks.map((tick) => {
           const y = height - (tick / max) * (height - 12);
           return (
@@ -110,7 +122,9 @@ export function StatusDistribution({ active, pending, revoked }: { active: numbe
           <span className="segment empty" style={{ width: "100%" }} />
         ) : (
           parts.map((part) =>
-            part.value ? <span key={part.key} className={`segment status-${part.key}`} style={{ width: `${(part.value / total) * 100}%` }} /> : null,
+            part.value ? (
+              <span key={part.key} className={`segment status-${part.key}`} style={{ width: `${(part.value / total) * 100}%` }} />
+            ) : null,
           )
         )}
       </div>

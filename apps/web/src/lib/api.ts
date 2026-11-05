@@ -103,7 +103,10 @@ interface RequestOptions {
 
 export async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(new DOMException("timeout", "TimeoutError")), options.timeoutMs ?? 15_000);
+  const timeout = window.setTimeout(
+    () => controller.abort(new DOMException("timeout", "TimeoutError")),
+    options.timeoutMs ?? 15_000,
+  );
   const forwardAbort = () => controller.abort(options.signal?.reason);
   options.signal?.addEventListener("abort", forwardAbort);
 
@@ -145,7 +148,13 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
     const payload = (body ?? {}) as { code?: ApiErrorCode; error?: string; details?: ApiError["details"] };
     const code: ApiErrorCode =
       payload.code ??
-      (response.status === 401 ? "unauthenticated" : response.status === 403 ? "forbidden" : response.status === 404 ? "not_found" : "unknown");
+      (response.status === 401
+        ? "unauthenticated"
+        : response.status === 403
+          ? "forbidden"
+          : response.status === 404
+            ? "not_found"
+            : "unknown");
     if (token && (code === "session_expired" || code === "unauthenticated")) onSessionInvalid(code);
     throw new ApiError(code, payload.error ?? `HTTP ${response.status}`, response.status, payload.details, body);
   }

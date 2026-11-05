@@ -22,7 +22,8 @@ export function LoginPage({ onAuthenticated, notice }: { onAuthenticated: (sessi
     : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
       ? "El correo no tiene un formato válido."
       : "";
-  const passwordError = password.length === 0 ? "Introduce tu contraseña." : password.length < 8 ? "La contraseña tiene al menos 8 caracteres." : "";
+  const passwordError =
+    password.length === 0 ? "Introduce tu contraseña." : password.length < 8 ? "La contraseña tiene al menos 8 caracteres." : "";
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -53,7 +54,8 @@ export function LoginPage({ onAuthenticated, notice }: { onAuthenticated: (sessi
           <img src="/branding/certichain-logo-960.jpg" alt="" width={960} height={640} />
         </picture>
         <p className="login-statement">
-          Emisión, revocación y verificación de credenciales académicas con evidencia SHA-256 cifrada y ancla opcional en blockchain.
+          Emisión, revocación y verificación de credenciales académicas con evidencia SHA-256 cifrada y ancla opcional en
+          blockchain.
         </p>
       </aside>
 
@@ -124,7 +126,8 @@ export function LoginPage({ onAuthenticated, notice }: { onAuthenticated: (sessi
 
           {SHOW_DEMO_HINT && (
             <p className="demo-hint">
-              Entorno de desarrollo: usa <code>admin@certichain.local</code> y la contraseña definida en <code>ADMIN_PASSWORD</code>.
+              Entorno de desarrollo: usa <code>admin@certichain.local</code> y la contraseña definida en{" "}
+              <code>ADMIN_PASSWORD</code>.
             </p>
           )}
 

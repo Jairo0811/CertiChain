@@ -64,7 +64,12 @@ describe("mobile release candidate helpers", () => {
       savedAt: "2026-09-01T10:00:00Z",
       verifiedAt: "2026-09-01T10:00:00Z",
     };
-    const next = upsertWalletCredential([existing], { ...activeCertificate, status: "revoked" }, `0x${"a".repeat(64)}`, "2026-09-03T10:00:00Z");
+    const next = upsertWalletCredential(
+      [existing],
+      { ...activeCertificate, status: "revoked" },
+      `0x${"a".repeat(64)}`,
+      "2026-09-03T10:00:00Z",
+    );
     expect(next).toHaveLength(1);
     expect(next[0]?.status).toBe("revoked");
   });

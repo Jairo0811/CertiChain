@@ -146,7 +146,10 @@ async function submitAnchoring(context: ServiceContext, certificate: Certificate
     certificate.chainSyncStatus = "failed";
     certificate.chainError = sanitizeChainError(error);
     await save(context, certificate);
-    await audit(context, actor, "certificate.anchor", certificate.id, { result: "submit_failed", reason: certificate.chainError });
+    await audit(context, actor, "certificate.anchor", certificate.id, {
+      result: "submit_failed",
+      reason: certificate.chainError,
+    });
     return { certificate, httpStatus: 202 };
   }
 

@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { clearWallet, itemKey, loadWallet, saveWallet, SECURE_STORE_VALUE_LIMIT, WALLET_INDEX_KEY, type KeyValueStore } from "./lib/secureWallet";
+import {
+  clearWallet,
+  itemKey,
+  loadWallet,
+  saveWallet,
+  SECURE_STORE_VALUE_LIMIT,
+  WALLET_INDEX_KEY,
+  type KeyValueStore,
+} from "./lib/secureWallet";
 import { checkRows, outcomeOf, snapshotFromVerification } from "./lib/snapshot";
 import { WALLET_KEY, WALLET_LIMIT, upsertWalletCredential } from "./lib/wallet";
 import type { Certificate, Verification, WalletCredential } from "./types";
@@ -59,22 +67,33 @@ describe("verification snapshots", () => {
   });
 
   it("labels a legacy link hash as a link check, not a document check", () => {
-    const legacy: Verification = { ...idOnly, checks: { ...idOnly.checks!, integrity: "match", hashSource: "verifier", hashMatches: true } };
+    const legacy: Verification = {
+      ...idOnly,
+      checks: { ...idOnly.checks!, integrity: "match", hashSource: "verifier", hashMatches: true },
+    };
     const rows = checkRows(snapshotFromVerification(legacy, "2026-11-05T10:00:00Z", "link")!);
     expect(rows[1]).toMatchObject({ label: "SHA-256 del enlace", tone: "warn" });
   });
 
   it("derives outcomes from older API responses without the outcome field", () => {
     expect(outcomeOf({ valid: false, certificate: cert(1, { status: "revoked" }) })).toBe("revoked");
-    expect(outcomeOf({ valid: false, certificate: cert(1), checks: { existsOffChain: true, hashMatches: false, blockchain: null } })).toBe(
-      "integrity_mismatch",
-    );
+    expect(
+      outcomeOf({ valid: false, certificate: cert(1), checks: { existsOffChain: true, hashMatches: false, blockchain: null } }),
+    ).toBe("integrity_mismatch");
   });
 
   it("stores the real verification result instead of reconstructing it later", () => {
-    const snapshot = snapshotFromVerification({ ...idOnly, outcome: "blockchain_unavailable", valid: false }, "2026-11-05T10:00:00Z", "none");
+    const snapshot = snapshotFromVerification(
+      { ...idOnly, outcome: "blockchain_unavailable", valid: false },
+      "2026-11-05T10:00:00Z",
+      "none",
+    );
     const wallet = upsertWalletCredential([], cert(1), `0x${"a".repeat(64)}`, "2026-11-05T10:00:00Z", snapshot);
-    expect(wallet[0]?.lastVerification).toMatchObject({ outcome: "blockchain_unavailable", valid: false, integrity: "not_evaluated" });
+    expect(wallet[0]?.lastVerification).toMatchObject({
+      outcome: "blockchain_unavailable",
+      valid: false,
+      integrity: "not_evaluated",
+    });
   });
 });
 
@@ -83,8 +102,18 @@ describe("secure wallet storage", () => {
     const store = memoryStore();
     let wallet: WalletCredential[] = [];
     for (let index = 0; index < WALLET_LIMIT + 5; index += 1) {
-      const snapshot = snapshotFromVerification({ ...idOnly, certificate: cert(index) }, new Date(Date.UTC(2026, 0, index + 1)).toISOString(), "none");
-      const next = upsertWalletCredential(wallet, cert(index), `0x${"b".repeat(64)}`, new Date(Date.UTC(2026, 0, index + 1)).toISOString(), snapshot);
+      const snapshot = snapshotFromVerification(
+        { ...idOnly, certificate: cert(index) },
+        new Date(Date.UTC(2026, 0, index + 1)).toISOString(),
+        "none",
+      );
+      const next = upsertWalletCredential(
+        wallet,
+        cert(index),
+        `0x${"b".repeat(64)}`,
+        new Date(Date.UTC(2026, 0, index + 1)).toISOString(),
+        snapshot,
+      );
       await saveWallet(store, next, wallet);
       wallet = next;
     }
@@ -99,7 +128,12 @@ describe("secure wallet storage", () => {
 
   it("migrates the v1 single-value wallet and removes the legacy key", async () => {
     const store = memoryStore();
-    const legacy = [1, 2, 3].map((index) => ({ ...cert(index), documentHash: `0x${"c".repeat(64)}`, savedAt: "2026-09-01T00:00:00Z", verifiedAt: "2026-09-02T00:00:00Z" }));
+    const legacy = [1, 2, 3].map((index) => ({
+      ...cert(index),
+      documentHash: `0x${"c".repeat(64)}`,
+      savedAt: "2026-09-01T00:00:00Z",
+      verifiedAt: "2026-09-02T00:00:00Z",
+    }));
     store.data.set(WALLET_KEY, JSON.stringify(legacy));
     const loaded = await loadWallet(store);
     expect(loaded).toHaveLength(3);

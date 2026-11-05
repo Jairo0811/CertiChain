@@ -26,7 +26,8 @@ describe("certificate management", () => {
     const first = Array.from({ length: 10 }, () => certificate());
     const second = [certificate({ studentName: "Última Persona" })];
     const { calls } = mockApi({
-      "GET /api/certificates": (url: URL) => jsonResponse(url.searchParams.get("page") === "2" ? page(second, 11, 2) : page(first, 11)),
+      "GET /api/certificates": (url: URL) =>
+        jsonResponse(url.searchParams.get("page") === "2" ? page(second, 11, 2) : page(first, 11)),
     });
     renderPage();
 
@@ -133,7 +134,8 @@ describe("certificate management", () => {
     const click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => undefined);
     const { calls } = mockApi({
       "GET /api/certificates": page([local]),
-      "GET /api/certificates/:id/pdf": () => new Response(new Blob(["%PDF-1.4"]), { status: 200, headers: { "Content-Type": "application/pdf" } }),
+      "GET /api/certificates/:id/pdf": () =>
+        new Response(new Blob(["%PDF-1.4"]), { status: 200, headers: { "Content-Type": "application/pdf" } }),
     });
     renderPage();
     await userEvent.click(await screen.findByRole("button", { name: /Más acciones/ }));
@@ -163,7 +165,15 @@ describe("certificate management", () => {
         outcome: "pending",
         evidenceMode: "off-chain",
         verifiedAt: "2026-11-05T10:00:00.000Z",
-        certificate: { id: local.id, studentName: "E*", title: local.title, institution: "UNAPEC", issuedAt: local.issuedAt, status: "pending", evidenceMode: "off-chain" },
+        certificate: {
+          id: local.id,
+          studentName: "E*",
+          title: local.title,
+          institution: "UNAPEC",
+          issuedAt: local.issuedAt,
+          status: "pending",
+          evidenceMode: "off-chain",
+        },
         checks: {
           existsOffChain: true,
           registryStatus: "pending",

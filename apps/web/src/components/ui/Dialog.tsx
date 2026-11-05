@@ -57,7 +57,9 @@ export function Dialog({
         onCloseRef.current();
       }
       if (event.key !== "Tab" || !node) return;
-      const items = [...node.querySelectorAll<HTMLElement>(FOCUSABLE)].filter((item) => item.offsetParent !== null || item === document.activeElement);
+      const items = [...node.querySelectorAll<HTMLElement>(FOCUSABLE)].filter(
+        (item) => item.offsetParent !== null || item === document.activeElement,
+      );
       if (items.length === 0) return;
       const firstItem = items[0]!;
       const lastItem = items[items.length - 1]!;
@@ -80,7 +82,10 @@ export function Dialog({
   }, []);
 
   return (
-    <div className={`overlay overlay-${variant}`} onMouseDown={(event) => event.target === event.currentTarget && dismissible && onClose()}>
+    <div
+      className={`overlay overlay-${variant}`}
+      onMouseDown={(event) => event.target === event.currentTarget && dismissible && onClose()}
+    >
       <div
         ref={ref}
         className={`surface-${variant} size-${size}`}

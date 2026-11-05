@@ -29,7 +29,9 @@ describe("login and session", () => {
   });
 
   it("shows a generic error for invalid credentials and clears the password", async () => {
-    mockApi({ "POST /api/auth/login": () => jsonResponse({ error: "Invalid email or password", code: "invalid_credentials" }, 401) });
+    mockApi({
+      "POST /api/auth/login": () => jsonResponse({ error: "Invalid email or password", code: "invalid_credentials" }, 401),
+    });
     render(<App />);
     await userEvent.type(screen.getByLabelText("Correo institucional"), "admin@certichain.local");
     await userEvent.type(screen.getByLabelText("Contraseña", { selector: "input" }), "wrong-password");

@@ -58,7 +58,11 @@ export function CertificateTable({
                 >
                   <button type="button" className="sort-button" onClick={() => onSort(column.field)}>
                     {column.label}
-                    <Icon name={active && direction === "asc" ? "sortAsc" : "sortDesc"} size={14} className={active ? "sort-icon active" : "sort-icon"} />
+                    <Icon
+                      name={active && direction === "asc" ? "sortAsc" : "sortDesc"}
+                      size={14}
+                      className={active ? "sort-icon active" : "sort-icon"}
+                    />
                   </button>
                 </th>
               );
@@ -73,9 +77,7 @@ export function CertificateTable({
         </thead>
         <tbody>
           {items.map((certificate) => {
-            const actions: MenuAction[] = [
-              { label: "Validar ahora", icon: "verify", onSelect: () => onValidate(certificate) },
-            ];
+            const actions: MenuAction[] = [{ label: "Validar ahora", icon: "verify", onSelect: () => onValidate(certificate) }];
             if (canGeneratePdf(certificate)) {
               actions.push({
                 label: certificate.documentAvailable ? "Descargar PDF" : "Generar y descargar PDF",
@@ -91,7 +93,12 @@ export function CertificateTable({
               actions.push({ label: "Revocar", icon: "revoke", tone: "danger", onSelect: () => onRevoke(certificate) });
             }
             if (isAdmin && canDelete(certificate)) {
-              actions.push({ label: "Eliminar (datos de prueba)", icon: "trash", tone: "danger", onSelect: () => onDelete(certificate) });
+              actions.push({
+                label: "Eliminar (datos de prueba)",
+                icon: "trash",
+                tone: "danger",
+                onSelect: () => onDelete(certificate),
+              });
             }
 
             return (
@@ -119,7 +126,11 @@ export function CertificateTable({
                 <td className="col-actions">
                   <div className="row-actions">
                     <button type="button" className="button ghost small" onClick={() => onOpen(certificate)}>
-                      Ver detalle<span className="visually-hidden"> de {certificate.title}, {certificate.studentName}</span>
+                      Ver detalle
+                      <span className="visually-hidden">
+                        {" "}
+                        de {certificate.title}, {certificate.studentName}
+                      </span>
                     </button>
                     <ActionMenu label={`Más acciones para ${certificate.title}, ${certificate.studentName}`} actions={actions} />
                   </div>

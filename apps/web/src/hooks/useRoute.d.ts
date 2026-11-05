@@ -6,7 +6,7 @@
 export type PortalRoute = "dashboard" | "certificates" | "issue";
 export declare function routeFromPath(pathname: string): PortalRoute;
 export declare function useRoute(): {
-    route: PortalRoute;
-    navigate: (next: PortalRoute) => void;
-    href: (next: PortalRoute) => string;
+  route: PortalRoute;
+  navigate: (next: PortalRoute) => void;
+  href: (next: PortalRoute) => string;
 };

@@ -140,7 +140,9 @@ export function PublicVerifyPage() {
               <Icon name="chain" />
               <div>
                 <strong>Ancla en blockchain</strong>
-                <p>Si la credencial fue anclada, consulta el contrato. Las credenciales demo u off-chain se indican como tales.</p>
+                <p>
+                  Si la credencial fue anclada, consulta el contrato. Las credenciales demo u off-chain se indican como tales.
+                </p>
               </div>
             </li>
           </ul>
@@ -180,7 +182,13 @@ export function PublicVerifyPage() {
                 </div>
               ) : (
                 <label className="dropzone">
-                  <input ref={fileInput} type="file" accept="application/pdf,.pdf" onChange={onFile} aria-labelledby="pdf-label" />
+                  <input
+                    ref={fileInput}
+                    type="file"
+                    accept="application/pdf,.pdf"
+                    onChange={onFile}
+                    aria-labelledby="pdf-label"
+                  />
                   <Icon name="upload" />
                   <span>
                     <strong>Seleccionar PDF</strong>
