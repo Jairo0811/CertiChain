@@ -18,11 +18,15 @@ const schema = z
   .object({
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
     PORT: z.coerce.number().int().positive().max(65535).default(4000),
+    // Express "trust proxy" setting. Leave empty when the API is reached directly;
+    // use "1" (or a subnet list) when it runs behind a single reverse proxy such as the bundled nginx.
+    TRUST_PROXY: optionalString,
     CORS_ORIGIN: z.string().min(1).default("http://localhost:5173"),
     PUBLIC_VERIFY_URL: z.string().url().max(200).default("http://localhost:8080/verify"),
     JWT_SECRET: z.string().min(16).default(DEVELOPMENT_JWT_SECRET),
     ADMIN_EMAIL: z.string().email().default("admin@certichain.local"),
     ADMIN_PASSWORD: z.string().min(8).default(DEVELOPMENT_ADMIN_PASSWORD),
+    JWT_TTL_MINUTES: z.coerce.number().int().min(5).max(24 * 60).default(480),
     DATABASE_URL: optionalUrl,
     CERTICHAIN_DATA_FILE: z.string().min(1).default(".data/certichain.json"),
     BLOCKCHAIN_RPC_URL: optionalUrl,
@@ -65,11 +69,19 @@ const schema = z
       });
     }
 
-    if (value.ADMIN_PASSWORD === DEVELOPMENT_ADMIN_PASSWORD) {
+    if (value.JWT_SECRET.length < 32) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["JWT_SECRET"],
+        message: "Production JWT secret must contain at least 32 characters",
+      });
+    }
+
+    if (value.ADMIN_PASSWORD === DEVELOPMENT_ADMIN_PASSWORD || value.ADMIN_PASSWORD.length < 12) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["ADMIN_PASSWORD"],
-        message: "Production requires a unique admin password",
+        message: "Production requires a unique admin password of at least 12 characters",
       });
     }
 
@@ -140,4 +152,10 @@ const schema = z
     }
   });
 
-export const config = schema.parse(process.env);
+export type AppConfig = z.infer<typeof schema>;
+
+export function parseConfig(env: NodeJS.ProcessEnv): AppConfig {
+  return schema.parse(env);
+}
+
+export const config = parseConfig(process.env);
