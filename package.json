@@ -2,7 +2,7 @@
   "name": "certichain",
   "version": "1.0.0",
   "private": true,
-  "description": "Plataforma para emisión, protección, compartición y verificación de certificados académicos mediante blockchain.",
+  "description": "Plataforma para emisi\u00f3n, protecci\u00f3n, compartici\u00f3n y verificaci\u00f3n de certificados acad\u00e9micos mediante blockchain.",
   "license": "MIT",
   "workspaces": [
     "apps/*",
@@ -11,15 +11,21 @@
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
-    "format:check": "prettier --check package.json tsconfig.base.json .github/workflows/ci.yml",
-    "format": "prettier --write package.json tsconfig.base.json .github/workflows/ci.yml",
+    "format:check": "prettier --check \"apps/*/src/**/*.{ts,tsx,css}\" \"apps/web/vite.config.ts\" \"apps/web/vitest.config.ts\" \"blockchain/{scripts,test}/**/*.ts\" \"blockchain/hardhat.config.ts\" \"eslint.config.mjs\" package.json tsconfig.base.json \".github/workflows/*.yml\"",
+    "format": "prettier --write \"apps/*/src/**/*.{ts,tsx,css}\" \"apps/web/vite.config.ts\" \"apps/web/vitest.config.ts\" \"blockchain/{scripts,test}/**/*.ts\" \"blockchain/hardhat.config.ts\" \"eslint.config.mjs\" package.json tsconfig.base.json \".github/workflows/*.yml\"",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
-    "ci": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run build"
+    "ci": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run build",
+    "lint:root": "eslint ."
   },
   "devDependencies": {
-    "prettier": "^3.3.3"
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "globals": "^15.15.0",
+    "prettier": "^3.3.3",
+    "typescript-eslint": "^8.72.1"
   },
   "engines": {
     "node": ">=20.0.0",

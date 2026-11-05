@@ -7,10 +7,7 @@ export function StatusBadge({ status }: { status: CertificateStatus }) {
   const tone = statusTone(status);
   return (
     <View
-      style={[
-        styles.badge,
-        tone === "success" ? styles.success : tone === "warning" ? styles.warning : styles.danger,
-      ]}
+      style={[styles.badge, tone === "success" ? styles.success : tone === "warning" ? styles.warning : styles.danger]}
       accessible
       accessibilityLabel={`${statusLabel(status)}. ${statusDescription(status)}`}
     >

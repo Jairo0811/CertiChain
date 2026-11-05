@@ -4,19 +4,16 @@ import { parseCredentialReference, statusLabel, verificationVerdict } from "./ve
 describe("mobile verification helpers", () => {
   it("parses the current public verifier QR without requiring a hash", () => {
     expect(
-      parseCredentialReference(
-        "https://certichain.example/verify?id=555e26b1-c13d-494a-a251-53a98707bc4e&autoverify=1",
-      ),
+      parseCredentialReference("https://certichain.example/verify?id=555e26b1-c13d-494a-a251-53a98707bc4e&autoverify=1"),
     ).toEqual({ id: "555e26b1-c13d-494a-a251-53a98707bc4e", hash: undefined });
   });
 
   it("keeps compatibility with legacy deep links that include a hash", () => {
     const hash = `0x${"ab".repeat(32)}`;
-    expect(
-      parseCredentialReference(
-        `certichain://verify?id=DEMO-0021&hash=${encodeURIComponent(hash)}`,
-      ),
-    ).toEqual({ id: "DEMO-0021", hash });
+    expect(parseCredentialReference(`certichain://verify?id=DEMO-0021&hash=${encodeURIComponent(hash)}`)).toEqual({
+      id: "DEMO-0021",
+      hash,
+    });
   });
 
   it("accepts a raw certificate id", () => {

@@ -61,15 +61,12 @@ describe("CertiChain API", () => {
     const app = createApp();
     const token = await loginToken();
 
-    const issued = await request(app)
-      .post("/api/certificates")
-      .set("Authorization", `Bearer ${token}`)
-      .send({
-        studentName: "María José Pérez",
-        title: "Fundamentos de Seguridad de Software",
-        institution: "Universidad APEC (UNAPEC)",
-        issuedAt: "2026-09-06",
-      });
+    const issued = await request(app).post("/api/certificates").set("Authorization", `Bearer ${token}`).send({
+      studentName: "María José Pérez",
+      title: "Fundamentos de Seguridad de Software",
+      institution: "Universidad APEC (UNAPEC)",
+      issuedAt: "2026-09-06",
+    });
 
     expect(issued.status).toBe(201);
     expect(issued.body.status).toBe("pending");
@@ -122,15 +119,11 @@ describe("CertiChain API", () => {
     expect(issued.status).toBe(201);
     expect(issued.body.status).toBe("pending");
 
-    const listed = await request(app)
-      .get("/api/certificates")
-      .set("Authorization", `Bearer ${token}`);
+    const listed = await request(app).get("/api/certificates").set("Authorization", `Bearer ${token}`);
     expect(listed.status).toBe(200);
     expect(listed.body.items.some((item: { id: string }) => item.id === issued.body.id)).toBe(true);
 
-    const revoked = await request(app)
-      .post(`/api/certificates/${issued.body.id}/revoke`)
-      .set("Authorization", `Bearer ${token}`);
+    const revoked = await request(app).post(`/api/certificates/${issued.body.id}/revoke`).set("Authorization", `Bearer ${token}`);
     expect(revoked.status).toBe(200);
     expect(revoked.body.status).toBe("revoked");
 

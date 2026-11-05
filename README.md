@@ -58,7 +58,8 @@ CertiChain **v1.0.0** está cerrado como proyecto académico de portafolio. El *
 | Portal institucional | ✅ Hardened |
 | Verificador público | ✅ |
 | Certificate PDF v3.1 | ✅ |
-| Gestión de estados off-chain | ✅ |
+| Gestión de estados off-chain | ✅ Transiciones auditadas |
+| Consistencia blockchain ↔ base de datos | ✅ Persist-first + reconciliación |
 | Descarga / eliminación controlada | ✅ |
 | Aplicación móvil | ✅ Mobile Final Polish completado |
 | QR / cámara / wallet local | ✅ |
@@ -67,7 +68,8 @@ CertiChain **v1.0.0** está cerrado como proyecto académico de portafolio. El *
 | Adaptador IPFS | ✅ |
 | Docker / Docker Compose | ✅ |
 | `package-lock.json` / `npm ci` | ✅ |
-| CI / CodeQL | ✅ |
+| CI / CodeQL | ✅ + PostgreSQL real en CI |
+| Pruebas automatizadas | ✅ API 64 · Web 33 · Mobile 17 · Contratos 9 |
 | Métricas / readiness / logging | ✅ |
 | Backup / restore | ✅ |
 | Deploy automatizado del contrato | ✅ Preparado |
@@ -78,6 +80,36 @@ CertiChain **v1.0.0** está cerrado como proyecto académico de portafolio. El *
 
 ---
 
+## 🔧 Modernización técnica — noviembre 2026
+
+Auditoría completa del monorepo y modernización incremental sobre la misma arquitectura (React 19 + Vite, Express 5, PostgreSQL, Expo, Hardhat). El detalle de hallazgos, evidencias y validaciones está en [`docs/AUDIT-2026-11.md`](docs/AUDIT-2026-11.md).
+
+### Correcciones críticas
+
+- **Verificación honesta**: la consulta por ID ya no reenvía el hash del propio registro (comprobación circular). El verificador distingue registro, integridad del documento y ancla blockchain, y puede comparar un **PDF local** calculando su SHA-256 en el navegador (el archivo no se sube).
+- **Consistencia blockchain**: emisión *persist-first* con `chainSyncStatus` y hash de transacción; reconciliación idempotente (`POST /api/certificates/:id/anchor`) que nunca reenvía una transacción enviada.
+- **Modos de evidencia** `on-chain`, `off-chain` y `demo`: el dataset de portafolio ya no se confunde con credenciales ancladas; las ancladas no pueden revocarse solo off-chain, borrarse ni reactivarse.
+- **Rate limiting** con políticas aisladas y `TRUST_PROXY` explícito (antes un login podía quedar bloqueado por tráfico general y `X-Forwarded-For` permitía evadir el límite).
+- **Emisión on-chain desde el portal**: campo *Wallet del titular* con validación EIP-55; el identificador técnico off-chain se rotula como tal (no es una wallet del estudiante).
+- **Despliegue del contrato** autoriza el emisor de la API (`ISSUER_ADDRESS`).
+
+### Portal y verificador
+
+- sistema de diseño con tokens, tipografías locales (IBM Plex Sans/Mono, Source Serif 4) e iconos SVG accesibles;
+- dashboard con filtros **30 / 90 / 365 días / todo** que afectan cifras, gráficos y actividad (por fecha de emisión; revocaciones por su fecha real; actividad desde auditoría);
+- certificados con búsqueda, filtro, ordenamiento y paginación **en servidor**, menú de acciones por fila, drawer de detalle con historial de auditoría y confirmaciones explícitas;
+- formularios accesibles, diálogos con gestión de foco, sin scroll horizontal desde 320 px;
+- API en el mismo origen (nginx/Vite proxifican `/api`) y CSP estricta.
+
+### Backend, datos y móvil
+
+- `app.ts` separado en rutas, servicios y capa HTTP con errores uniformes (`code`, `requestId`);
+- JWT HS256 con `iss`/`aud`/`sub`, claims validados y expiración distinguible;
+- migraciones PostgreSQL versionadas (adoptan bases existentes sin pérdida de datos);
+- móvil: el detalle muestra el **resultado real guardado** de la última verificación (rotulado como caché) y la wallet usa una entrada de SecureStore por credencial.
+
+---
+
 ## 🆕 Hardening final Web / API / PDF — septiembre 2026
 
 La última ronda de trabajo dejó consolidado el flujo principal de CertiChain antes del cierre móvil.
@@ -85,7 +117,7 @@ La última ronda de trabajo dejó consolidado el flujo principal de CertiChain a
 ### Portal institucional
 
 - branding oficial de CertiChain en login, sidebar y favicon;
-- iconografía Font Awesome;
+- iconografía Font Awesome *(sustituida en noviembre 2026 por iconos SVG locales)*;
 - dashboard con métricas, actividad y estados reales;
 - emisión con **Wallet técnica, PDF, Metadata URI y SHA-256 generados automáticamente**;
 - listado con búsqueda, filtros y paginación;
@@ -100,7 +132,7 @@ La última ronda de trabajo dejó consolidado el flujo principal de CertiChain a
 
 - funciona sin autenticación;
 - búsqueda por ID / Blockchain ID;
-- recuperación automática del SHA-256 registrado;
+- recuperación automática del SHA-256 registrado *(retirado en noviembre 2026: reenviar el hash del registro no demostraba nada; ver arriba)*;
 - soporte de `?id=<credential>&autoverify=1`;
 - resultado con estado, integridad off-chain, coincidencia SHA-256 y disponibilidad blockchain;
 - privacidad por diseño mediante enmascarado del nombre del estudiante.
@@ -135,7 +167,7 @@ La aplicación móvil queda finalizada al mismo nivel de coherencia visual, func
 - branding oficial en header, cards, detalle, iconografía y splash;
 - tagline `Verified. Immutable. Trusted.`;
 - verificación por ID / Blockchain ID sin pedir SHA-256 manualmente;
-- recuperación automática del hash desde la API;
+- recuperación automática del hash desde la API *(desde noviembre 2026 solo como valor de referencia, no como comprobación)*;
 - compatibilidad con QR actual `?id=<credential-id>&autoverify=1`, deep links legacy con `id + hash` e ID directo;
 - estados centralizados y explícitos: `pending`, `active`, `revoked` → **Pendiente**, **Vigente**, **Revocada**;
 - Wallet con resumen de guardadas, vigentes, pendientes y revocadas;
@@ -220,12 +252,12 @@ CertiChain forma parte de la evolución académica y técnica de proyectos prese
 
 ### 🖥️ Portal institucional
 
-- autenticación administrativa;
-- dashboard con métricas y actividad reciente;
-- emisión automática de evidencia PDF;
-- listado, búsqueda, filtros y paginación;
-- detalle de credenciales;
-- validación criptográfica in-place;
+- autenticación administrativa con expiración de sesión;
+- dashboard con filtros de periodo reales, gráficos y actividad desde auditoría;
+- emisión automática de evidencia PDF, con wallet del titular en modo blockchain;
+- listado con búsqueda, filtros, ordenamiento y paginación en servidor;
+- detalle de credenciales con historial de auditoría;
+- validación in-place por identificador (registro + blockchain);
 - gestión de estado local/off-chain;
 - descarga del PDF;
 - revocación;
@@ -240,11 +272,11 @@ CertiChain forma parte de la evolución académica y técnica de proyectos prese
 - navegación Inicio / Escanear / Historial / Perfil;
 - Wallet local protegida mediante `expo-secure-store`;
 - verificación por ID / Blockchain ID;
-- SHA-256 recuperado automáticamente;
+- verificación por ID sin reenviar el hash del registro; el SHA-256 registrado se guarda como referencia;
 - QR local generado desde `EXPO_PUBLIC_VERIFY_URL`;
 - escáner real con `expo-camera`;
 - compatibilidad con QR moderno y legacy;
-- detalle con estado, ID, SHA-256, última verificación e indicadores de integridad;
+- detalle con estado, ID, SHA-256 de referencia y el resultado real de la última verificación, rotulado como caché;
 - compartir credencial sin PII innecesaria;
 - copiar ID y SHA-256 de forma separada;
 - revalidación que actualiza la entrada existente;
@@ -257,10 +289,12 @@ CertiChain forma parte de la evolución académica y técnica de proyectos prese
 ### ⚙️ Backend
 
 - Node.js + Express + TypeScript;
-- JWT y RBAC;
+- JWT (HS256, claims validados) y RBAC por operación;
 - emisión, revocación, verificación, cambio de estado local y auditoría;
 - Zod;
-- rate limiting y headers defensivos;
+- rate limiting por política y headers defensivos;
+- emisión persist-first con reconciliación blockchain idempotente;
+- migraciones PostgreSQL versionadas y paginación en servidor;
 - PostgreSQL con `DATABASE_URL`;
 - JSON únicamente como fallback local/test;
 - almacenamiento de documentos cifrados;
@@ -399,7 +433,8 @@ Para desarrollo local configura al menos:
 JWT_SECRET=replace-this-with-a-long-local-secret
 ADMIN_PASSWORD=CertiChain2026!Local
 CORS_ORIGIN=http://localhost:8080
-VITE_API_URL=http://localhost:4000
+# Vacío = mismo origen: nginx (Docker) y Vite (desarrollo) proxifican /api
+VITE_API_URL=
 PUBLIC_VERIFY_URL=http://localhost:8080/verify
 EXPO_PUBLIC_API_URL=http://localhost:4000
 EXPO_PUBLIC_VERIFY_URL=http://localhost:8080/verify
@@ -416,8 +451,33 @@ docker compose up -d --build
 Servicios:
 
 - PostgreSQL;
-- API: `http://localhost:4000`;
-- Web: `http://localhost:8080`.
+- API: `http://localhost:4000` (expuesta para Expo y depuración);
+- Web: `http://localhost:8080`, que sirve también `/api` y `/health` mediante el proxy de nginx.
+
+Para el dataset de portafolio:
+
+```bash
+docker compose exec api node apps/api/dist/demoSeed.js
+```
+
+### Desarrollo sin Docker
+
+```bash
+npm ci
+npm run dev -w @certichain/api     # http://localhost:4000 (persistencia JSON local)
+npm run dev -w @certichain/web     # http://localhost:5173, proxy de /api hacia :4000
+```
+
+#### Blockchain local (opcional)
+
+```bash
+npx hardhat node --config blockchain/hardhat.config.ts            # terminal 1
+npm run deploy -w @certichain/blockchain -- --network localhost     # autoriza el emisor
+# Luego exporta en la API: BLOCKCHAIN_RPC_URL=http://127.0.0.1:8545,
+# CERTIFICATE_REGISTRY_ADDRESS=<dirección impresa> y BLOCKCHAIN_PRIVATE_KEY=<cuenta #0 del nodo local>
+```
+
+Las claves del nodo Hardhat son públicas y solo válidas en ese nodo local; nunca deben usarse en redes reales.
 
 ### 3. Health / readiness
 
@@ -547,11 +607,11 @@ Las solicitudes generan logs estructurados con request ID, método, ruta, códig
 CI utiliza `package-lock.json` + `npm ci` y exige:
 
 ```text
-format
-lint
-type-check
-tests
-build
+format      Prettier sobre todo el código fuente
+lint        ESLint (typescript-eslint + React hooks) y compilación de contratos
+type-check  TypeScript estricto en todos los workspaces
+tests       API 64 (incluye PostgreSQL 16 real) · Web 33 · Mobile 17 · Contratos 9
+build       API, web y export Android de Expo
 CodeQL
 ```
 
@@ -570,11 +630,18 @@ autenticación
 → estados Mobile pending / active / revoked
 → URL de compartir sin PII innecesaria
 → deduplicación y revalidación de wallet
+→ rate limiting aislado y X-Forwarded-For no confiable
+→ JWT expirado / falsificado / sin firma / con rol inválido
+→ emisión persist-first, RPC caído y reconciliación sin duplicados
+→ resultados de verificación: vigente, pendiente, revocada, documento alterado, blockchain inaccesible
+→ dashboard por rango, paginación y búsqueda en servidor
+→ portal: login, expiración de sesión, confirmaciones, descarga PDF, verificación de PDF local
+→ wallet móvil: límite de SecureStore y migración v1 → v2
 ```
 
 Los contratos cuentan con pruebas de permisos, emisión, revocación e integridad.
 
-> El reporte global de `npm audit` del monorepo debe analizarse por workspace antes de aplicar upgrades; no se recomienda `npm audit fix --force` sin revisar impacto sobre Expo/Hardhat y dependencias transitivas.
+> El reporte global de `npm audit` del monorepo debe analizarse por workspace antes de aplicar upgrades; no se recomienda `npm audit fix --force` sin revisar impacto sobre Expo/Hardhat y dependencias transitivas. En noviembre 2026 se aplicaron solo correcciones compatibles (0 avisos críticos en producción); los restantes requieren cambios mayores y están documentados en [`docs/AUDIT-2026-11.md`](docs/AUDIT-2026-11.md).
 
 ---
 
@@ -593,6 +660,7 @@ Los contratos cuentan con pruebas de permisos, emisión, revocación e integrida
 | 8 | Production readiness | ✅ Base implementada |
 | Hardening Web/API/PDF 2026 | UX, branding, Certificate PDF v3.1, estados, cleanup | ✅ |
 | Mobile Final Polish | Visual parity, verificación y UX móvil | ✅ Finalizado |
+| Modernización técnica nov 2026 | Auditoría, seguridad, consistencia blockchain, rediseño, pruebas | ✅ |
 
 ### Extensiones opcionales de producción
 
@@ -616,6 +684,8 @@ Consulta [`docs/portfolio-readiness.md`](docs/portfolio-readiness.md), [`docs/pr
 - documentos se cifran antes de storage/IPFS;
 - cambios administrativos sensibles quedan auditados;
 - una credencial blockchain-bound no puede borrarse ni cambiar de estado manualmente de forma incompatible con la cadena;
+- la verificación nunca afirma autenticidad on-chain si la blockchain no fue consultada con éxito;
+- los PDF presentados al verificador se analizan en el navegador; solo viaja su SHA-256;
 - wallets de despliegue deben usar mínimo privilegio y fondos limitados;
 - antes de Polygon Mainnet se requiere revisión independiente del smart contract.
 

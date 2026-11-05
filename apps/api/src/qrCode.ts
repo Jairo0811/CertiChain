@@ -22,11 +22,7 @@ export function buildQrMatrix(value: string): boolean[][] {
     for (let rowOffset = -4; rowOffset <= 4; rowOffset += 1) {
       for (let columnOffset = -4; columnOffset <= 4; columnOffset += 1) {
         const distance = Math.max(Math.abs(rowOffset), Math.abs(columnOffset));
-        setFunction(
-          centerRow + rowOffset,
-          centerColumn + columnOffset,
-          distance !== 2 && distance !== 4,
-        );
+        setFunction(centerRow + rowOffset, centerColumn + columnOffset, distance !== 2 && distance !== 4);
       }
     }
   };
@@ -42,20 +38,14 @@ export function buildQrMatrix(value: string): boolean[][] {
 
   for (let rowOffset = -2; rowOffset <= 2; rowOffset += 1) {
     for (let columnOffset = -2; columnOffset <= 2; columnOffset += 1) {
-      setFunction(
-        30 + rowOffset,
-        30 + columnOffset,
-        Math.max(Math.abs(rowOffset), Math.abs(columnOffset)) !== 1,
-      );
+      setFunction(30 + rowOffset, 30 + columnOffset, Math.max(Math.abs(rowOffset), Math.abs(columnOffset)) !== 1);
     }
   }
 
   drawFormatBits(setFunction);
 
   const codewords = encodeCodewords(data);
-  const bits = codewords.flatMap((codeword) =>
-    Array.from({ length: 8 }, (_, index) => (codeword >>> (7 - index)) & 1),
-  );
+  const bits = codewords.flatMap((codeword) => Array.from({ length: 8 }, (_, index) => (codeword >>> (7 - index)) & 1));
 
   let bitIndex = 0;
   let right = SIZE - 1;

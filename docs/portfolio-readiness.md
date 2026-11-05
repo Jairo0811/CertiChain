@@ -61,10 +61,11 @@ La ejecución se bloquea cuando `NODE_ENV=production` para evitar que datos fict
 4. Opcionalmente ejecutar `docker compose exec api node apps/api/dist/demoSeed.js` para poblar el showcase visual.
 5. Iniciar sesión en el portal institucional.
 6. Consultar el dashboard y el listado institucional.
-7. Verificar públicamente una credencial vigente mediante ID + SHA-256.
+7. Verificar públicamente una credencial vigente por ID (o abriendo su QR) y, opcionalmente, comparar el PDF descargado: el verificador calcula su SHA-256 en el navegador.
 8. Escanear o importar la credencial desde la aplicación móvil.
 9. Revocar una credencial desde el portal.
 10. Repetir la verificación y observar el cambio de estado.
+11. Opcional: levantar un nodo Hardhat local, desplegar el contrato (`npm run deploy -w @certichain/blockchain -- --network localhost`) y repetir el flujo en modo on-chain, incluida la caída del RPC y la reconciliación (`Sincronizar con blockchain`).
 
 El flujo puede demostrarse sin blockchain externa configurada. En ese modo la plataforma utiliza su comportamiento degradado/off-chain de desarrollo. La integración real con Polygon se mantiene como capacidad preparada, no como requisito de presentación académica.
 
@@ -77,6 +78,9 @@ El flujo puede demostrarse sin blockchain externa configurada. En ese modo la pl
 - Las claves privadas no se almacenan en clientes web/móvil ni en Git.
 - Producción aplica validaciones estrictas para impedir configuraciones inseguras.
 - La verificación pública minimiza datos personales.
+- La verificación separa registro, integridad documental y ancla blockchain, y nunca afirma autenticidad on-chain sin consultar el contrato.
+- La emisión on-chain persiste antes de enviar la transacción y se reconcilia sin duplicados.
+- El dataset demo se rotula como tal y nunca se presenta como anclado.
 - Se aplican RBAC, rate limiting, headers defensivos y auditoría.
 - El dataset de portafolio se bloquea explícitamente en producción.
 
@@ -92,7 +96,9 @@ El repositorio incluye:
 - Docker Compose local y de producción;
 - scripts operativos;
 - documentación de arquitectura, seguridad y production readiness;
-- pruebas de API y smart contracts;
+- pruebas de API (incluida PostgreSQL real), portal web, móvil y smart contracts (123 en total);
+- ESLint y Prettier en todo el código fuente;
+- informe de auditoría técnica (`docs/AUDIT-2026-11.md`);
 - lockfile reproducible;
 - dataset demo determinista para showcases sin utilizar PII real.
 
@@ -110,6 +116,10 @@ No se consideran pendientes de esta versión:
 - procesar datos o certificados académicos reales.
 
 Estas actividades solo tendrían sentido si CertiChain se convierte posteriormente en un producto o servicio operativo.
+
+## Modernización noviembre 2026
+
+La revisión técnica de noviembre 2026 conservó la arquitectura, la historia académica y las funcionalidades existentes, y corrigió defectos reales de seguridad, consistencia y semántica de verificación. Ver `docs/AUDIT-2026-11.md`.
 
 ## Criterio de cierre
 

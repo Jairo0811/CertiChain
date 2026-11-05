@@ -1,6 +1,6 @@
 import "@nomicfoundation/hardhat-toolbox";
 import "dotenv/config";
-import { HardhatUserConfig } from "hardhat/config";
+import { type HardhatUserConfig } from "hardhat/config";
 
 const deployerKey = process.env.BLOCKCHAIN_PRIVATE_KEY ?? "";
 const accounts = deployerKey ? [deployerKey] : [];

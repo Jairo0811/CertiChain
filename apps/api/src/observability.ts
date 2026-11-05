@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { type NextFunction, type Request, type Response } from "express";
 
 const startedAt = Date.now();
 let totalRequests = 0;
@@ -14,16 +14,19 @@ export function observability(req: Request, res: Response, next: NextFunction): 
     statusCounts.set(res.statusCode, (statusCounts.get(res.statusCode) ?? 0) + 1);
     if (res.statusCode >= 500) totalErrors += 1;
 
+    if (process.env.NODE_ENV === "test" && !process.env.CERTICHAIN_TEST_LOGS) return;
     const requestId = res.getHeader("x-request-id");
-    console.log(JSON.stringify({
-      level: res.statusCode >= 500 ? "error" : "info",
-      event: "http_request",
-      requestId,
-      method: req.method,
-      path: req.path,
-      statusCode: res.statusCode,
-      durationMs: Math.round(durationMs * 100) / 100,
-    }));
+    console.log(
+      JSON.stringify({
+        level: res.statusCode >= 500 ? "error" : "info",
+        event: "http_request",
+        requestId,
+        method: req.method,
+        path: req.path,
+        statusCode: res.statusCode,
+        durationMs: Math.round(durationMs * 100) / 100,
+      }),
+    );
   });
 
   next();

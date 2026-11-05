@@ -47,3 +47,8 @@ tmp/
 
 apps/api/.data/
 app.json
+# TypeScript incremental build info
+*.tsbuildinfo
+
+# Compiled output must never land next to TypeScript sources
+apps/*/src/**/*.js

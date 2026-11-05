@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { CertificateRecord } from "./domain.js";
+import { type CertificateRecord } from "./domain.js";
 
 const students = [
   "Ana Pérez · Demo",
@@ -55,11 +55,7 @@ const titles = [
   "Integración de Aplicaciones",
 ] as const;
 
-const institutions = [
-  "Universidad Demo del Caribe",
-  "Instituto Tecnológico Demo",
-  "Academia CertiChain Demo",
-] as const;
+const institutions = ["Universidad Demo del Caribe", "Instituto Tecnológico Demo", "Academia CertiChain Demo"] as const;
 
 function sha256(value: string): string {
   return createHash("sha256").update(value).digest("hex");

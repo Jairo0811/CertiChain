@@ -9,6 +9,7 @@ services:
     environment:
       NODE_ENV: production
       CORS_ORIGIN: ${CORS_ORIGIN:?CORS_ORIGIN is required in production}
+      PUBLIC_VERIFY_URL: ${PUBLIC_VERIFY_URL:?PUBLIC_VERIFY_URL is required in production}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required in production}
       ADMIN_EMAIL: ${ADMIN_EMAIL:?ADMIN_EMAIL is required in production}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ADMIN_PASSWORD is required in production}
@@ -25,4 +26,6 @@ services:
   web:
     build:
       args:
-        VITE_API_URL: ${VITE_API_URL:?VITE_API_URL is required in production}
+        # Optional: leave empty to serve the API on the same origin through nginx.
+        VITE_API_URL: ${VITE_API_URL:-}
+        VITE_DEMO_MODE: "false"

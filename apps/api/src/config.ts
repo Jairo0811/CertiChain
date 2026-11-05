@@ -4,47 +4,56 @@ import { z } from "zod";
 const DEVELOPMENT_JWT_SECRET = "change-me-development-secret";
 const DEVELOPMENT_ADMIN_PASSWORD = "CertiChain123!";
 
-const optionalUrl = z.preprocess(
-  (value) => (value === "" || value == null ? undefined : value),
-  z.string().url().optional(),
-);
+const optionalUrl = z.preprocess((value) => (value === "" || value == null ? undefined : value), z.string().url().optional());
 
-const optionalString = z.preprocess(
-  (value) => (value === "" || value == null ? undefined : value),
-  z.string().optional(),
-);
+const optionalString = z.preprocess((value) => (value === "" || value == null ? undefined : value), z.string().optional());
 
 const schema = z
   .object({
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
     PORT: z.coerce.number().int().positive().max(65535).default(4000),
+    // Express "trust proxy" setting. Leave empty when the API is reached directly;
+    // use "1" (or a subnet list) when it runs behind a single reverse proxy such as the bundled nginx.
+    TRUST_PROXY: optionalString,
     CORS_ORIGIN: z.string().min(1).default("http://localhost:5173"),
     PUBLIC_VERIFY_URL: z.string().url().max(200).default("http://localhost:8080/verify"),
     JWT_SECRET: z.string().min(16).default(DEVELOPMENT_JWT_SECRET),
     ADMIN_EMAIL: z.string().email().default("admin@certichain.local"),
     ADMIN_PASSWORD: z.string().min(8).default(DEVELOPMENT_ADMIN_PASSWORD),
+    JWT_TTL_MINUTES: z.coerce
+      .number()
+      .int()
+      .min(5)
+      .max(24 * 60)
+      .default(480),
     DATABASE_URL: optionalUrl,
     CERTICHAIN_DATA_FILE: z.string().min(1).default(".data/certichain.json"),
     BLOCKCHAIN_RPC_URL: optionalUrl,
     CERTIFICATE_REGISTRY_ADDRESS: z.preprocess(
       (value) => (value === "" || value == null ? undefined : value),
-      z.string().regex(/^0x[a-fA-F0-9]{40}$/).optional(),
+      z
+        .string()
+        .regex(/^0x[a-fA-F0-9]{40}$/)
+        .optional(),
     ),
     BLOCKCHAIN_PRIVATE_KEY: z.preprocess(
       (value) => (value === "" || value == null ? undefined : value),
-      z.string().regex(/^0x[a-fA-F0-9]{64}$/).optional(),
+      z
+        .string()
+        .regex(/^0x[a-fA-F0-9]{64}$/)
+        .optional(),
     ),
     STORAGE_DRIVER: z.enum(["local", "ipfs"]).default("local"),
     DOCUMENT_ENCRYPTION_KEY: z.preprocess(
       (value) => (value === "" || value == null ? undefined : value),
-      z.string().regex(/^[a-fA-F0-9]{64}$/).optional(),
+      z
+        .string()
+        .regex(/^[a-fA-F0-9]{64}$/)
+        .optional(),
     ),
     IPFS_API_URL: optionalUrl,
     IPFS_API_TOKEN: optionalString,
-    METRICS_TOKEN: z.preprocess(
-      (value) => (value === "" || value == null ? undefined : value),
-      z.string().min(16).optional(),
-    ),
+    METRICS_TOKEN: z.preprocess((value) => (value === "" || value == null ? undefined : value), z.string().min(16).optional()),
   })
   .superRefine((value, ctx) => {
     if (value.STORAGE_DRIVER === "ipfs" && !value.IPFS_API_URL) {
@@ -65,11 +74,19 @@ const schema = z
       });
     }
 
-    if (value.ADMIN_PASSWORD === DEVELOPMENT_ADMIN_PASSWORD) {
+    if (value.JWT_SECRET.length < 32) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["JWT_SECRET"],
+        message: "Production JWT secret must contain at least 32 characters",
+      });
+    }
+
+    if (value.ADMIN_PASSWORD === DEVELOPMENT_ADMIN_PASSWORD || value.ADMIN_PASSWORD.length < 12) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["ADMIN_PASSWORD"],
-        message: "Production requires a unique admin password",
+        message: "Production requires a unique admin password of at least 12 characters",
       });
     }
 
@@ -117,11 +134,7 @@ const schema = z
         value.CERTIFICATE_REGISTRY_ADDRESS,
         "Production requires a deployed CertificateRegistry address",
       ],
-      [
-        "BLOCKCHAIN_PRIVATE_KEY",
-        value.BLOCKCHAIN_PRIVATE_KEY,
-        "Production requires a dedicated issuer signer key",
-      ],
+      ["BLOCKCHAIN_PRIVATE_KEY", value.BLOCKCHAIN_PRIVATE_KEY, "Production requires a dedicated issuer signer key"],
       ["METRICS_TOKEN", value.METRICS_TOKEN, "Production requires protected metrics access"],
     ];
 
@@ -140,4 +153,10 @@ const schema = z
     }
   });
 
-export const config = schema.parse(process.env);
+export type AppConfig = z.infer<typeof schema>;
+
+export function parseConfig(env: NodeJS.ProcessEnv): AppConfig {
+  return schema.parse(env);
+}
+
+export const config = parseConfig(process.env);

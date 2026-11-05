@@ -6,7 +6,7 @@
   "scripts": {
     "build": "hardhat compile",
     "deploy": "hardhat run scripts/deploy.ts",
-    "lint": "hardhat compile",
+    "lint": "hardhat compile && eslint scripts test hardhat.config.ts",
     "typecheck": "tsc --noEmit",
     "test": "hardhat test"
   },

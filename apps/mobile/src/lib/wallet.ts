@@ -1,4 +1,4 @@
-import type { Certificate, WalletCredential } from "../types";
+import type { Certificate, VerificationSnapshot, WalletCredential } from "../types";
 
 export const WALLET_KEY = "certichain-wallet-v1";
 export const WALLET_LIMIT = 20;
@@ -12,12 +12,20 @@ export function verificationToWalletCredential(
   documentHash: string,
   verifiedAt: string,
   existing?: WalletCredential,
+  snapshot?: VerificationSnapshot,
 ): WalletCredential {
   return {
-    ...certificate,
-    documentHash,
+    id: certificate.id,
+    blockchainId: certificate.blockchainId,
+    studentName: certificate.studentName,
+    title: certificate.title,
+    institution: certificate.institution,
+    issuedAt: certificate.issuedAt,
+    status: certificate.status,
+    documentHash: documentHash || existing?.documentHash || "",
     savedAt: existing?.savedAt ?? verifiedAt,
     verifiedAt,
+    ...(snapshot ? { lastVerification: snapshot } : {}),
   };
 }
 
@@ -26,10 +34,11 @@ export function upsertWalletCredential(
   certificate: Certificate,
   documentHash: string,
   verifiedAt: string,
+  snapshot?: VerificationSnapshot,
 ): WalletCredential[] {
   const id = credentialId(certificate);
   const existing = wallet.find((item) => credentialId(item) === id);
-  const credential = verificationToWalletCredential(certificate, documentHash, verifiedAt, existing);
+  const credential = verificationToWalletCredential(certificate, documentHash, verifiedAt, existing, snapshot);
 
   return [credential, ...wallet.filter((item) => credentialId(item) !== id)]
     .sort((a, b) => Date.parse(b.verifiedAt) - Date.parse(a.verifiedAt))
@@ -57,17 +66,22 @@ export function normalizeWallet(value: unknown): WalletCredential[] {
       continue;
     }
 
-    const credential = {
+    const snapshot = candidate.lastVerification;
+    const validSnapshot =
+      snapshot && typeof snapshot === "object" && typeof snapshot.verifiedAt === "string" && typeof snapshot.outcome === "string"
+        ? snapshot
+        : undefined;
+    const credential: WalletCredential = {
       ...(candidate as WalletCredential),
-      savedAt: typeof candidate.savedAt === "string" ? candidate.savedAt : candidate.verifiedAt,
+      savedAt: typeof candidate.savedAt === "string" ? candidate.savedAt : candidate.verifiedAt!,
+      lastVerification: validSnapshot,
     };
+    if (!validSnapshot) delete credential.lastVerification;
     const id = credentialId(credential);
     if (seen.has(id)) continue;
     seen.add(id);
     normalized.push(credential);
   }
 
-  return normalized
-    .sort((a, b) => Date.parse(b.verifiedAt) - Date.parse(a.verifiedAt))
-    .slice(0, WALLET_LIMIT);
+  return normalized.sort((a, b) => Date.parse(b.verifiedAt) - Date.parse(a.verifiedAt)).slice(0, WALLET_LIMIT);
 }
