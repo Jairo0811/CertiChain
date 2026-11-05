@@ -25,10 +25,13 @@ import Svg, { Circle, Path, Rect } from "react-native-svg";
 import { BrandHeader } from "./components/BrandHeader";
 import { CredentialCard } from "./components/CredentialCard";
 import { StatusBadge } from "./components/StatusBadge";
+import { VerificationChecks } from "./components/VerificationChecks";
 import { API_URL, MobileApiError, PUBLIC_VERIFY_URL, checkApiConnection, verifyCredential } from "./lib/api";
 import { buildShareMessage, buildVerificationUrl, parseCredentialReference } from "./lib/qr";
-import { statusDescription, verificationVerdict } from "./lib/status";
-import { WALLET_KEY, credentialId, normalizeWallet, upsertWalletCredential } from "./lib/wallet";
+import { clearWallet, loadWallet, saveWallet } from "./lib/secureWallet";
+import { checkRows, outcomeOf, outcomeTitle as verificationTitle, outcomeTone, snapshotFromVerification } from "./lib/snapshot";
+import { statusDescription } from "./lib/status";
+import { credentialId, upsertWalletCredential } from "./lib/wallet";
 import { colors } from "./theme/colors";
 import type { ConnectionState, Verification, WalletCredential } from "./types";
 
@@ -40,12 +43,10 @@ const APP_VERSION = "1.0.0";
 
 type Tab = "wallet" | "scan" | "history" | "profile";
 type TabIconName = "home" | "scan" | "history" | "profile";
-type OutcomeKind = "valid" | "pending" | "revoked" | "not_verified" | "not_found" | "error";
-
 type Outcome = {
-  kind: OutcomeKind;
+  kind: "result" | "not_found" | "error";
   verification?: Verification;
-  documentHash?: string;
+  hashSource?: "link" | "none";
   message?: string;
 };
 
@@ -61,21 +62,17 @@ function shortHash(hash: string) {
   return hash.length > 32 ? `${hash.slice(0, 16)}…${hash.slice(-12)}` : hash;
 }
 
-function outcomeFromVerification(verification: Verification): OutcomeKind {
-  if (verification.certificate?.status === "revoked") return "revoked";
-  if (verification.certificate?.status === "pending") return "pending";
-  if (verification.valid && verification.certificate?.status === "active") return "valid";
-  return "not_verified";
+function outcomeTitle(outcome: Outcome) {
+  if (outcome.verification) return verificationTitle(outcomeOf(outcome.verification));
+  if (outcome.kind === "not_found") return "Credencial no encontrada";
+  return "No fue posible verificar";
 }
 
-function outcomeTitle(outcome: Outcome) {
-  if (outcome.verification) {
-    return verificationVerdict(outcome.verification.valid, outcome.verification.certificate?.status);
-  }
-  if (outcome.kind === "not_found") return "Credencial no encontrada";
-  if (outcome.kind === "error") return "No fue posible verificar";
-  return "Credencial no verificada";
-}
+const secureStore = {
+  getItemAsync: (key: string) => SecureStore.getItemAsync(key),
+  setItemAsync: (key: string, value: string) => SecureStore.setItemAsync(key, value),
+  deleteItemAsync: (key: string) => SecureStore.deleteItemAsync(key),
+};
 
 function connectionLabel(state: ConnectionState) {
   if (state === "connected") return "Conectado";
@@ -123,14 +120,9 @@ export default function MobileApp() {
   );
 
   useEffect(() => {
-    void SecureStore.getItemAsync(WALLET_KEY).then((value) => {
-      if (!value) return;
-      try {
-        setWallet(normalizeWallet(JSON.parse(value) as unknown));
-      } catch {
-        setWallet([]);
-      }
-    });
+    void loadWallet(secureStore)
+      .then(setWallet)
+      .catch(() => setWallet([]));
     void refreshConnection();
   }, []);
 
@@ -141,9 +133,13 @@ export default function MobileApp() {
     setBlockchainConfigured(result.blockchainConfigured);
   }
 
-  async function persistWallet(next: WalletCredential[]) {
+  async function persistWallet(next: WalletCredential[], previous: WalletCredential[]) {
     setWallet(next);
-    await SecureStore.setItemAsync(WALLET_KEY, JSON.stringify(next));
+    try {
+      await saveWallet(secureStore, next, previous);
+    } catch {
+      Alert.alert("No se pudo guardar", "La verificación se completó, pero este dispositivo no pudo guardar la credencial de forma segura.");
+    }
   }
 
   async function verify(id = certificateId, suppliedHash?: string) {
@@ -158,9 +154,9 @@ export default function MobileApp() {
     try {
       const result = await verifyCredential(normalizedId, suppliedHash);
       const nextOutcome: Outcome = {
-        kind: outcomeFromVerification(result.verification),
+        kind: "result",
         verification: result.verification,
-        documentHash: result.documentHash,
+        hashSource: result.hashSource,
       };
       setCertificateId(normalizedId);
       setOutcome(nextOutcome);
@@ -168,8 +164,9 @@ export default function MobileApp() {
 
       if (result.verification.certificate) {
         const verifiedAt = new Date().toISOString();
-        const nextWallet = upsertWalletCredential(wallet, result.verification.certificate, result.documentHash, verifiedAt);
-        await persistWallet(nextWallet);
+        const snapshot = snapshotFromVerification(result.verification, verifiedAt, result.hashSource);
+        const nextWallet = upsertWalletCredential(wallet, result.verification.certificate, result.documentHash, verifiedAt, snapshot);
+        await persistWallet(nextWallet, wallet);
         const updated = nextWallet.find((item) => credentialId(item) === credentialId(result.verification.certificate!));
         setSelected((current) => current && updated && credentialId(current) === credentialId(updated) ? updated : current);
       }
@@ -233,7 +230,7 @@ export default function MobileApp() {
           text: "Eliminar",
           style: "destructive",
           onPress: () => {
-            void SecureStore.deleteItemAsync(WALLET_KEY).then(() => {
+            void clearWallet(secureStore, wallet).then(() => {
               setWallet([]);
               setSelected(null);
               setOutcome(null);
@@ -244,34 +241,16 @@ export default function MobileApp() {
     );
   }
 
-  function renderChecks(verification: Verification, documentHash?: string) {
-    const blockchain = verification.checks?.blockchain;
-    const items = [
-      { label: "Registro off-chain", value: verification.checks?.existsOffChain ? "Confirmado" : "No confirmado", ok: Boolean(verification.checks?.existsOffChain) },
-      { label: "Hash SHA-256", value: verification.checks?.hashMatches ? "Coincide" : "No coincide", ok: Boolean(verification.checks?.hashMatches) },
-      { label: "Blockchain", value: blockchain ? "Consultada" : blockchainConfigured === false ? "No configurada" : "No disponible", ok: Boolean(blockchain) },
-    ];
-
-    return (
-      <View style={styles.checkList} accessibilityRole="summary">
-        {items.map((item) => (
-          <View key={item.label} style={styles.checkRow}>
-            <View style={[styles.checkDot, item.ok ? styles.checkDotOk : styles.checkDotNeutral]} />
-            <View style={styles.flexOne}>
-              <Text style={styles.checkLabel}>{item.label}</Text>
-              <Text style={styles.checkValue}>{item.value}</Text>
-            </View>
-          </View>
-        ))}
-        {documentHash ? <Text style={styles.hashText}>{shortHash(documentHash)}</Text> : null}
-      </View>
-    );
+  function renderChecks(verification: Verification, hashSource: "link" | "none" = "none") {
+    const snapshot = snapshotFromVerification(verification, new Date().toISOString(), hashSource);
+    if (!snapshot) return null;
+    return <VerificationChecks rows={checkRows(snapshot)} />;
   }
 
   function renderOutcome() {
     if (!outcome) return null;
     const certificate = outcome.verification?.certificate;
-    const tone = outcome.kind === "valid" ? "success" : outcome.kind === "pending" ? "warning" : "danger";
+    const tone = outcome.verification ? outcomeTone(outcomeOf(outcome.verification)) : "danger";
     return (
       <View
         style={[styles.outcomeCard, tone === "success" ? styles.outcomeSuccess : tone === "warning" ? styles.outcomeWarning : styles.outcomeDanger]}
@@ -281,9 +260,9 @@ export default function MobileApp() {
         <Text style={styles.eyebrow}>RESULTADO</Text>
         <Text style={styles.outcomeTitle}>{outcomeTitle(outcome)}</Text>
         {certificate ? <StatusBadge status={certificate.status} /> : null}
-        {certificate ? <Text style={styles.body}>{certificate.title} · {certificate.institution}</Text> : null}
+        {certificate ? <Text style={styles.body}>{certificate.title}, {certificate.institution}</Text> : null}
         {certificate?.status ? <Text style={styles.meta}>{statusDescription(certificate.status)}</Text> : null}
-        {outcome.verification ? renderChecks(outcome.verification, outcome.documentHash) : null}
+        {outcome.verification ? renderChecks(outcome.verification, outcome.hashSource) : null}
         {outcome.message ? <Text style={styles.errorText}>{outcome.message}</Text> : null}
         {outcome.kind === "error" ? (
           <TouchableOpacity style={styles.secondaryButton} onPress={() => void verify()} accessibilityRole="button">
@@ -318,18 +297,27 @@ export default function MobileApp() {
             <DetailRow label="Fecha de emisión" value={formatDate(credential.issuedAt)} />
             <DetailRow label="Estado actual" value={statusDescription(credential.status)} />
             <DetailRow label="ID / Blockchain ID" value={credentialId(credential)} mono />
-            <DetailRow label="SHA-256" value={credential.documentHash} mono />
+            {credential.documentHash ? <DetailRow label="SHA-256 registrado (referencia)" value={credential.documentHash} mono /> : null}
             <DetailRow label="Última verificación" value={formatDate(credential.verifiedAt, true)} />
           </View>
-          {renderChecks({ valid: credential.status === "active", certificate: credential, checks: { existsOffChain: true, hashMatches: true, blockchain: null } }, credential.documentHash)}
+          {credential.lastVerification ? (
+            <VerificationChecks
+              rows={checkRows(credential.lastVerification)}
+              cachedAt={formatDate(credential.lastVerification.verifiedAt, true)}
+            />
+          ) : (
+            <Text style={styles.meta}>
+              No hay un resultado de verificación guardado para esta credencial. Valídala ahora para conocer su estado actual.
+            </Text>
+          )}
           <TouchableOpacity style={styles.primaryButton} onPress={() => void verify(credentialId(credential))} disabled={loading} accessibilityRole="button">
             <Text style={styles.primaryButtonText}>{loading ? "Validando…" : "Validar estado ahora"}</Text>
           </TouchableOpacity>
           <View style={styles.actionGrid}>
             <ActionButton label="Compartir credencial" onPress={() => void shareCredential(credential)} />
             <ActionButton label="Copiar ID" onPress={() => void copyId(credential)} />
-            <ActionButton label="Copiar SHA-256" onPress={() => void copyHash(credential)} />
-            {(url.startsWith("http://") || url.startsWith("https://")) ? <ActionButton label="Abrir verificador" onPress={() => void openPublicVerifier(credential)} /> : null}
+            {credential.documentHash ? <ActionButton label="Copiar SHA-256" onPress={() => void copyHash(credential)} /> : null}
+            {(url.startsWith("http://") || url.startsWith("https://")) ? <ActionButton label="Comprobar PDF en el verificador" onPress={() => void openPublicVerifier(credential)} /> : null}
           </View>
         </View>
       </View>
@@ -343,7 +331,7 @@ export default function MobileApp() {
         <View style={styles.hero}>
           <Text style={styles.eyebrow}>CERTICHAIN MOBILE WALLET</Text>
           <Text style={styles.heroTitle}>Credenciales verificables, claras y bajo tu control.</Text>
-          <Text style={styles.body}>Valida por ID o escanea el QR. El SHA-256 se recupera automáticamente desde CertiChain.</Text>
+          <Text style={styles.body}>Valida por ID o escanea el QR. CertiChain consulta el registro institucional y, si existe, el ancla en blockchain.</Text>
         </View>
         <View style={styles.statsGrid}>
           <Stat value={stats.total} label="Guardadas" />

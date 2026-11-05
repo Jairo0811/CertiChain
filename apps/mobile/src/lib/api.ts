@@ -74,28 +74,35 @@ function isVerification(value: unknown): value is Verification {
   return typeof candidate.valid === "boolean";
 }
 
+/**
+ * Verifies a credential.
+ * - Identifier only (current QR codes): registry + blockchain status. No document hash is sent,
+ *   because replaying the registry's own hash back to it would prove nothing.
+ * - Legacy deep links carrying `hash`: that hash is compared and labelled as coming from the link.
+ * The registered SHA-256 is then fetched separately, only as a reference value for the wallet.
+ */
 export async function verifyCredential(
   id: string,
   suppliedHash?: string,
-): Promise<{ verification: Verification; documentHash: string }> {
-  let documentHash = suppliedHash?.trim() ?? "";
+): Promise<{ verification: Verification; documentHash: string; hashSource: "link" | "none" }> {
+  const linkHash = suppliedHash?.trim();
+  const hashSource = linkHash && isHash(linkHash) ? "link" : "none";
+  const query = hashSource === "link" ? `?hash=${encodeURIComponent(linkHash!)}` : "";
 
-  if (!documentHash) {
-    const evidence = await requestJson<EvidenceLookup>(`/api/verify/${encodeURIComponent(id)}/evidence`);
-    if (!isHash(evidence.documentHash)) {
-      throw new MobileApiError("invalid_response", "La evidencia SHA-256 recibida no es válida.");
-    }
-    documentHash = evidence.documentHash;
-  }
-
-  const verification = await requestJson<Verification>(
-    `/api/verify/${encodeURIComponent(id)}?hash=${encodeURIComponent(documentHash)}`,
-  );
+  const verification = await requestJson<Verification>(`/api/verify/${encodeURIComponent(id)}${query}`);
   if (!isVerification(verification)) {
     throw new MobileApiError("invalid_response", "El resultado de verificación recibido no es válido.");
   }
 
-  return { verification, documentHash };
+  let documentHash = "";
+  try {
+    const evidence = await requestJson<EvidenceLookup>(`/api/verify/${encodeURIComponent(id)}/evidence`);
+    if (isHash(evidence.documentHash)) documentHash = evidence.documentHash;
+  } catch {
+    // Reference value only; the verification result above stands on its own.
+  }
+
+  return { verification, documentHash, hashSource };
 }
 
 export async function checkApiConnection(): Promise<{
