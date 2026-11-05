@@ -2,6 +2,66 @@
 
 Todos los cambios relevantes de CertiChain se documentan en este archivo.
 
+## Modernización técnica - 2026-11-05
+
+Auditoría y modernización incremental en `feature/portfolio-modernization`. Detalle completo en `docs/AUDIT-2026-11.md`.
+
+### Seguridad
+
+- Rate limiting con contadores aislados por política (general, login, verificación), barrido y tope de memoria; `X-Forwarded-For` solo se respeta con `TRUST_PROXY`.
+- JWT HS256 con `iss`, `aud`, `sub`, claims validados con Zod, `session_expired` y `JWT_TTL_MINUTES`.
+- Comparación de credenciales en tiempo constante y error genérico `invalid_credentials`.
+- Errores uniformes `{ error, code, requestId }` sin detalles internos; correlation id validado.
+- Validación estricta: wallets EIP-55, fechas no futuras, payloads sin campos extra, `/api/documents` solo PDF real.
+- CSP estricta en nginx; sin CDNs de terceros.
+
+### Blockchain y consistencia
+
+- Emisión *persist-first* con `chainSyncStatus`, `chainTxHash` y `chainError`; activación tras confirmación.
+- `POST /api/certificates/:id/anchor`: reconciliación idempotente por recibo o evento; nunca reenvía una transacción enviada.
+- Modos de evidencia `on-chain`, `off-chain` y `demo`. Las credenciales ancladas no se revocan solo off-chain, no se borran y no se reactivan.
+- Revocación on-chain primero, con sincronización si ya estaba revocada en el contrato y bloqueo por certificado contra revocaciones concurrentes.
+- `scripts/deploy.ts` concede `ISSUER_ROLE` al emisor de la API (`ISSUER_ADDRESS`). Contrato sin cambios.
+
+### Verificación
+
+- `GET /api/verify/:id` sin hash consulta estado sin afirmar integridad documental; con `?hash=` compara un SHA-256 aportado por el verificador.
+- Respuesta con `outcome`, `evidenceMode`, `checks.integrity`, `checks.blockchainStatus` y `checks.statusManagedByBlockchain`; `valid` se mantiene por compatibilidad.
+- RPC caído o no configurado → `blockchain_unavailable` / `blockchain_not_configured` en lugar de HTTP 500.
+- Verificador público con comprobación opcional de PDF local mediante Web Crypto.
+
+### API y persistencia
+
+- `app.ts` separado en `http/`, `routes/` y `services/`; `createApp()` acepta store y registry inyectables y monta las rutas de estado.
+- `GET /api/dashboard?range=30|90|365|all`, `GET /api/certificates/:id` con historial, `GET /api/auth/session`, paginación y búsqueda en `GET /api/certificates`.
+- Migraciones PostgreSQL versionadas (`schema_migrations`, advisory lock) que adoptan esquemas existentes; índices nuevos; auditoría acotada.
+- `documentAvailable` comprueba la existencia real del documento.
+- Transiciones off-chain auditadas; reactivar una credencial revocada exige motivo.
+
+### Portal web
+
+- Rediseño con sistema de tokens, tipografías locales e iconos SVG; logo e isotipo originales preservados (derivados optimizados).
+- Arquitectura en `pages/`, `components/`, `hooks/`, `services/`, `lib/`, `types/`; cliente HTTP central.
+- Dashboard con filtros reales, gráficos SVG y actividad desde auditoría.
+- Certificados con paginación en servidor, ordenamiento, menú de acciones, drawer con historial y confirmaciones explícitas.
+- Emisión con wallet del titular en modo blockchain, prevención de doble envío y estado de sincronización.
+- Sustitución de la intercepción de `window.open` por validación explícita.
+- Accesibilidad: etiquetas explícitas, foco gestionado en diálogos, regiones vivas, navegación por teclado, sin scroll horizontal.
+- API en el mismo origen (proxy en Vite y nginx).
+
+### Mobile
+
+- El detalle muestra el resultado real de la última verificación, rotulado como caché; ya no reconstruye comprobaciones.
+- Verificación por ID sin reenviar el hash del registro; hashes de enlaces legacy rotulados como tales.
+- Wallet SecureStore v2 (una entrada por credencial) con migración desde v1.
+
+### Calidad y DevOps
+
+- Pruebas: API 64 (6 con PostgreSQL real), web 33, mobile 17, contratos 9.
+- ESLint (typescript-eslint, React hooks) y Prettier en todo el código; `--passWithNoTests` eliminado.
+- CI con servicio PostgreSQL 16; `npm audit fix` sin `--force` (0 avisos críticos en producción).
+- Build de la API sin archivos de prueba; build web sin emitir JS junto a los fuentes.
+
 ## Mobile Final Polish - 2026-09-07
 
 ### Branding y UX

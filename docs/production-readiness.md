@@ -13,7 +13,7 @@ CertiChain se considera **finalizado como proyecto académico de portafolio de U
 - aplicación móvil con wallet local, QR e historial;
 - API con autenticación, RBAC, rate limiting, headers defensivos y auditoría;
 - PostgreSQL como persistencia de producción, con fallback JSON únicamente para desarrollo/test sin `DATABASE_URL`;
-- creación automática de esquema SQL e índices necesarios;
+- migraciones SQL versionadas (`schema_migrations`, advisory lock) que adoptan esquemas existentes sin recrear tablas *(noviembre 2026; antes: creación de esquema dentro de `init()`)*;
 - cifrado de documentos con AES-256-GCM antes de persistirlos;
 - almacenamiento local cifrado para desarrollo;
 - adaptador IPFS para un despliegue productivo opcional;
@@ -27,7 +27,10 @@ CertiChain se considera **finalizado como proyecto académico de portafolio de U
 - workflow manual de despliegue de `CertificateRegistry` a Sepolia, Polygon Amoy o Polygon PoS;
 - workflow de releases versionadas;
 - CodeQL para JavaScript/TypeScript;
-- pruebas de ciclo de vida de certificados: autenticación → emisión → listado → revocación → verificación.
+- pruebas de ciclo de vida de certificados: autenticación → emisión → listado → revocación → verificación;
+- emisión blockchain *persist-first* con reconciliación idempotente y estados de sincronización (noviembre 2026);
+- pruebas de integración con PostgreSQL real en CI (noviembre 2026);
+- CSP estricta, API en el mismo origen vía nginx y `TRUST_PROXY` explícito (noviembre 2026).
 
 ## Cierre académico / portafolio
 
@@ -57,6 +60,8 @@ La API rechaza `NODE_ENV=production` si no se han configurado correctamente:
 - `JWT_SECRET` exclusivo;
 - `ADMIN_PASSWORD` exclusivo;
 - `CORS_ORIGIN` HTTPS/no-localhost;
+- `PUBLIC_VERIFY_URL` HTTPS terminado en `/verify`;
+- `JWT_SECRET` de al menos 32 caracteres y `ADMIN_PASSWORD` de al menos 12 (noviembre 2026);
 - `BLOCKCHAIN_RPC_URL`;
 - `CERTIFICATE_REGISTRY_ADDRESS`;
 - `BLOCKCHAIN_PRIVATE_KEY`;
@@ -66,6 +71,15 @@ La API rechaza `NODE_ENV=production` si no se han configurado correctamente:
 - `METRICS_TOKEN`.
 
 Esto evita iniciar accidentalmente una instancia real con persistencia temporal, claves bootstrap o almacenamiento inseguro.
+
+### Pendiente antes de un despliegue con varias réplicas
+
+- rate limiting y bloqueos por certificado en almacén compartido (p. ej. Redis) en lugar de memoria;
+- bloqueo a nivel de base de datos (`SELECT … FOR UPDATE`) para mutaciones concurrentes de una misma credencial;
+- tarea periódica que llame a la reconciliación de anclajes `submitted`/`failed`;
+- política de retención de eventos `certificate.verify`;
+- directorio de usuarios con contraseñas hasheadas en lugar del administrador bootstrap;
+- actualizaciones mayores pendientes (Zod 4, cadena de Expo CLI) tras evaluar compatibilidad.
 
 ## Arquitectura objetivo para producción
 
