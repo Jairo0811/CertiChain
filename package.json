@@ -11,13 +11,14 @@
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
-    "format:check": "prettier --check \"apps/*/src/**/*.{ts,tsx,css}\" \"apps/web/vite.config.ts\" \"apps/web/vitest.config.ts\" \"blockchain/{scripts,test}/**/*.ts\" \"blockchain/hardhat.config.ts\" \"eslint.config.mjs\" package.json tsconfig.base.json \".github/workflows/*.yml\"",
-    "format": "prettier --write \"apps/*/src/**/*.{ts,tsx,css}\" \"apps/web/vite.config.ts\" \"apps/web/vitest.config.ts\" \"blockchain/{scripts,test}/**/*.ts\" \"blockchain/hardhat.config.ts\" \"eslint.config.mjs\" package.json tsconfig.base.json \".github/workflows/*.yml\"",
+    "format:check": "prettier --check \"apps/*/src/**/*.{ts,tsx,css}\" \"apps/web/vite.config.ts\" \"apps/web/vitest.config.ts\" \"apps/web/playwright.config.ts\" \"apps/web/e2e/**/*.ts\" \"blockchain/{scripts,test}/**/*.ts\" \"blockchain/hardhat.config.ts\" \"eslint.config.mjs\" package.json tsconfig.base.json \".github/workflows/*.yml\"",
+    "format": "prettier --write \"apps/*/src/**/*.{ts,tsx,css}\" \"apps/web/vite.config.ts\" \"apps/web/vitest.config.ts\" \"apps/web/playwright.config.ts\" \"apps/web/e2e/**/*.ts\" \"blockchain/{scripts,test}/**/*.ts\" \"blockchain/hardhat.config.ts\" \"eslint.config.mjs\" package.json tsconfig.base.json \".github/workflows/*.yml\"",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "ci": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run build",
-    "lint:root": "eslint ."
+    "lint:root": "eslint .",
+    "test:e2e": "npm run test:e2e -w @certichain/web"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
