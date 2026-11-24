@@ -164,6 +164,15 @@ apps/web/src
 ├── hooks/                 useAsync, useRoute, useCertificateActions
 ├── services/ lib/ types/  cliente HTTP, formato, Web Crypto, contratos compartidos
 └── styles/                tokens y hojas por capa
+
+apps/web/e2e                 Playwright: portal y verificador contra una API real aislada
+
+apps/mobile/src
+├── MobileApp.tsx          navegación por pestañas y coordinación
+├── screens/               Wallet, CredentialDetail, Scanner, History, Profile
+├── hooks/                 useWallet (SecureStore), useConnection, useVerifier
+├── components/ theme/     componentes y estilos compartidos
+└── lib/                   API, QR, snapshot de verificación, wallet v2
 ```
 
 ## Evolución prevista
