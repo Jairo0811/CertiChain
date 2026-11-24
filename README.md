@@ -69,7 +69,7 @@ CertiChain **v1.0.0** está cerrado como proyecto académico de portafolio. El *
 | Docker / Docker Compose | ✅ |
 | `package-lock.json` / `npm ci` | ✅ |
 | CI / CodeQL | ✅ + PostgreSQL real en CI |
-| Pruebas automatizadas | ✅ API 64 · Web 33 · Mobile 17 · Contratos 9 |
+| Pruebas automatizadas | ✅ API 64 · Web 33 · Mobile 17 · Contratos 9 · E2E 9 |
 | Métricas / readiness / logging | ✅ |
 | Backup / restore | ✅ |
 | Deploy automatizado del contrato | ✅ Preparado |
@@ -460,6 +460,13 @@ Para el dataset de portafolio:
 docker compose exec api node apps/api/dist/demoSeed.js
 ```
 
+### Pruebas end-to-end
+
+```bash
+npx playwright install chromium          # una sola vez
+npm run test:e2e                         # levanta una API aislada con datos demo y el portal
+```
+
 ### Desarrollo sin Docker
 
 ```bash
@@ -611,6 +618,7 @@ format      Prettier sobre todo el código fuente
 lint        ESLint (typescript-eslint + React hooks) y compilación de contratos
 type-check  TypeScript estricto en todos los workspaces
 tests       API 64 (incluye PostgreSQL 16 real) · Web 33 · Mobile 17 · Contratos 9
+e2e         Playwright (9 flujos) contra una API real aislada
 build       API, web y export Android de Expo
 CodeQL
 ```

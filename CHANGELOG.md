@@ -2,6 +2,12 @@
 
 Todos los cambios relevantes de CertiChain se documentan en este archivo.
 
+## Pruebas E2E y refactor móvil - 2026-11-24
+
+- Suite E2E con Playwright (9 pruebas) contra una API real aislada: login, sesión rechazada, filtros del dashboard, búsqueda y paginación, validación desde el detalle, revocación con confirmación, layout móvil y el flujo completo emitir → descargar PDF → verificarlo localmente (incluido un PDF alterado y la comprobación de que ningún documento llega al servidor). Nuevo job `End-to-end (Playwright)` en CI.
+- `MobileApp.tsx` (882 → 137 líneas) dividido en pantallas (`screens/`), hooks (`useWallet`, `useConnection`, `useVerifier`), componentes y estilos compartidos, sin cambios de comportamiento ni de textos.
+- El script de pruebas móvil ya no pasa sin pruebas (`--passWithNoTests` eliminado).
+
 ## Modernización técnica - 2026-11-05
 
 Auditoría y modernización incremental en `feature/portfolio-modernization`. Detalle completo en `docs/AUDIT-2026-11.md`.

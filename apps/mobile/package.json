@@ -12,7 +12,7 @@
     "build": "expo export --platform android --output-dir dist",
     "lint": "eslint src App.tsx index.ts",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run"
   },
   "dependencies": {
     "expo": "^57.0.0",

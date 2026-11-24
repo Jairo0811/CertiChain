@@ -8,9 +8,10 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "lint": "eslint src vite.config.ts",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "lint": "eslint src e2e vite.config.ts playwright.config.ts",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p e2e/tsconfig.json",
+    "test": "vitest run",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@fontsource-variable/source-serif-4": "^5.3.1",
@@ -23,6 +24,7 @@
     "vite": "^6.0.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.3",
